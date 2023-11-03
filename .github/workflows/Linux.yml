@@ -29,6 +29,7 @@ jobs:
       - name: Install Haxe compiler
         run: |
           sudo apt-get install haxe
+          haxelib install utest
           haxe
           haxe --version
 
@@ -43,3 +44,5 @@ jobs:
         run: |
           cd HaxeLisp/src
           haxe --interp --main Main
+          echo "====="
+          haxe --interp --main MainTest
