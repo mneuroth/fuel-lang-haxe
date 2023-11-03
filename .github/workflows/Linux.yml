@@ -43,7 +43,7 @@ jobs:
       # Test the project
       - name: Text the project
         run: |
-          cd HaxeLisp
+          cd HaxeLisp/src
           ls -lrt
           haxe --interp --main Main
           ls -lrt
