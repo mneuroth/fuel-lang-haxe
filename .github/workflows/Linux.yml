@@ -29,6 +29,7 @@ jobs:
       - name: Install Haxe compiler
         run: |
           sudo apt-get install haxe
+          haxelib setup
           haxelib install utest
           haxe
           haxe --version
