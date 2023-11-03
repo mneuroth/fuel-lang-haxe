@@ -36,11 +36,14 @@ jobs:
       - name: Compile the project
         run: |
           cd HaxeLisp
+          ls -lrt
           haxe build.hxml
           ls -lrt
 
       # Test the project
       - name: Text the project
         run: |
-          pwd
+          cd HaxeLisp
+          ls -lrt
           haxe --interp --main Main
+          ls -lrt
