@@ -1,0 +1,16 @@
+--class-path src
+--main Main
+
+--each
+
+--interp
+
+--next
+
+--js bin/main.js
+--cmd node bin/main.js
+
+--next
+
+--neko main.n
+--cmd neko main.n
