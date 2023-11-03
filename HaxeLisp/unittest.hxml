@@ -1,0 +1,7 @@
+--class-path src
+--main MainTest
+
+--each
+
+--interp
+--library utest

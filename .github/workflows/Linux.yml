@@ -43,6 +43,9 @@ jobs:
       # Test the project
       - name: Test the project
         run: |
+          # use this command:
+          # haxe unittest.hxml
+          # or this:
           cd HaxeLisp/src
           haxe --interp --main Main
           echo "====="
