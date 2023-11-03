@@ -4,9 +4,9 @@ import utest.ui.Report;
 
 class MainTest {
     static function main() {
-      var runner = utest.Runner();
+      var runner = new Runner();
       runner.addCase(new LispTokenTest());
-      utest.ui.Report.create(runner);
+      Report.create(runner);
       runner.run();
     }
   }

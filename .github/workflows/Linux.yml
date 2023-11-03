@@ -46,4 +46,4 @@ jobs:
           cd HaxeLisp/src
           haxe --interp --main Main
           echo "====="
-          haxe --interp --main MainTest
+          haxe --interp --library utest --main MainTest
