@@ -1,7 +1,7 @@
 ﻿/*
  * FUEL(isp) is a fast usable embeddable lisp interpreter.
  *
- * Copyright (c) 2016 Michael Neuroth
+ * Copyright (c) 2023 Michael Neuroth
  *
  * Permission is hereby granted, free of charge, to any person obtaining 
  * a copy of this software and associated documentation files (the "Software"), 
@@ -25,6 +25,8 @@
 
 package;
 
+import haxe.Exception;
+
 //enum Results {
 //    ParseResult(ok:Bool, value:Float);
 //}
@@ -39,7 +41,8 @@ class NumParserReturn<T> {
     }
 }
 
-function TryParseInt(val:String):NumParserReturn<Int> {
+/*
+function TryParseIntOld(val:String):NumParserReturn<Int> {
     var result = Std.parseInt(val);
     if(result == null) {
         return new NumParserReturn(false, null);
@@ -47,13 +50,39 @@ function TryParseInt(val:String):NumParserReturn<Int> {
     return new NumParserReturn(true, result);
 }
 
-function TryParseFloat(val:String):NumParserReturn<Float> {
+function TryParseFloatOld(val:String):NumParserReturn<Float> {
     var result = Std.parseFloat(val);
     if(Math.isNaN(result)) {
         return new NumParserReturn(false, null);
     }
     return new NumParserReturn(true, result);
 }
+*/
+
+function TryParseInt(val:String):NumParserReturn<Int> {
+    try {
+        var result = haxe.Json.parse(val);
+        if(Type.typeof(result) == TInt) {
+            return new NumParserReturn(true, result);
+        }
+    } catch(e:Exception) {
+        //trace(e);
+    }
+    return new NumParserReturn(false, null);
+}
+
+function TryParseFloat(val:String):NumParserReturn<Float> {
+    try {
+        var result = haxe.Json.parse(val);
+        if(Type.typeof(result) == TFloat) {
+            return new NumParserReturn(true, result);
+        }
+    } catch(e:Exception) {
+        //trace(e);
+    }
+    return new NumParserReturn(false, null);
+}
+
 
 /// <summary>
 /// Type for lisp tokens.
@@ -207,19 +236,16 @@ function TryParseFloat(val:String):NumParserReturn<Float> {
         {
             Type = LispTokenType.ListEnd;
         }
-        else if ((tempResultFloat = TryParseFloat(text)).ok)
-        {
-// TODO -> konsumiert auch Int Werte !!!         
-// TODO -> konsumiert auch fehlerhafte Tokens wie: 1.23asdf
-// ggf. Loesung: verwende -> haxe.Json.parse()   
-// TODO: CallByRef Klasse anlegen, via Templates, liefert einen Typ zurück
-            Type = LispTokenType.Double;
-            Value = tempResultFloat.value;
-        }
         else if ((tempResultInt = TryParseInt(text)).ok)
         {
             Type = LispTokenType.Int;
             Value = tempResultInt.value;
+        }
+        else if ((tempResultFloat = TryParseFloat(text)).ok)
+        {
+// TODO: CallByRef Klasse anlegen, via Templates, liefert einen Typ zurück
+            Type = LispTokenType.Double;
+            Value = tempResultFloat.value;
         }
         else if (text == "true" || text == "#t")
         {
