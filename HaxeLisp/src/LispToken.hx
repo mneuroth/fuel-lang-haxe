@@ -279,16 +279,14 @@ function TryParseFloat(val:String):NumParserReturn<Float> {
     /// </summary>
     /// <returns>
     /// A <see cref="System.String" /> that represents this instance.
-    /// </returns>
-/*    
-    public override function ToString():String
+    /// </returns>   
+    public /*override*/ function ToString():String
     {
         if (Type == LispTokenType.Nil)
         {
             return Nil;
         }
-        return Value.ToString();
+        return Value/*.ToString()*/;
     }
-*/
 }
 
