@@ -59,9 +59,9 @@ class LispException extends haxe.Exception {
     /// <param name="code">The code.</param>
     /// <param name="offset">The position offset (decorated code).</param>
     /// <returns>Container with tokens</returns>
-    public static function Tokenize(code:String, offset:Int = 0):haxe.ds.List<LispToken>    // IEnumerable<LispToken>
+    public static function Tokenize(code:String, offset:Int = 0):Array<LispToken>    // IEnumerable<LispToken>
     {
-        var tokens = new haxe.ds.List<LispToken>();
+        var tokens = new Array<LispToken>();
         var currentToken = ""; //string.Empty;
         var currentTokenStartPos = 0;
         var lineCount = 1;
@@ -71,7 +71,7 @@ class LispException extends haxe.Exception {
 
         /*Action<string, int, int>*/var addToken = function(currentTok, pos, line) //=>
         {
-            tokens.add(new LispToken(currentTok, currentTokenStartPos - offset, pos - offset, line));
+            tokens.push(new LispToken(currentTok, currentTokenStartPos - offset, pos - offset, line));
             isInSymbol = false;
             isInString = false;
             currentToken = ""; //string.Empty;
