@@ -62,7 +62,7 @@ function TryParseFloatOld(val:String):NumParserReturn<Float> {
 function TryParseInt(val:String):NumParserReturn<Int> {
     try {
         var result = haxe.Json.parse(val);
-        if(Type.typeof(result) == TInt) {
+        if(result is Int) {  // Type.typeof(result) == TInt
             return new NumParserReturn(true, result);
         }
     } catch(e:Exception) {
@@ -74,7 +74,7 @@ function TryParseInt(val:String):NumParserReturn<Int> {
 function TryParseFloat(val:String):NumParserReturn<Float> {
     try {
         var result = haxe.Json.parse(val);
-        if(Type.typeof(result) == TFloat) {
+        if(result is Float) {  // Type.typeof(result) == TFloat
             return new NumParserReturn(true, result);
         }
     } catch(e:Exception) {

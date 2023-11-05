@@ -40,7 +40,7 @@ class TupleReturn<T1,T2> {
 }
 
 class LispException extends haxe.Exception {
-    public function new(text:String) {
+    public function new(text:String, token:LispToken=null, moduleName:String="") {
         super(text);
     }
 }

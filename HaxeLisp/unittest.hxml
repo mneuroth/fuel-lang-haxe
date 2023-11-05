@@ -6,3 +6,9 @@
 
 --interp
 --library utest
+
+#--next
+
+#--js bin/maintest.js
+#--library utest
+#--cmd node bin/maintest.js

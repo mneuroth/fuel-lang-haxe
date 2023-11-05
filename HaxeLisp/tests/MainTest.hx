@@ -7,6 +7,7 @@ class MainTest {
       var runner = new Runner();
       runner.addCase(new LispTokenTest());
       runner.addCase(new LispTokenizerTest());
+      runner.addCase(new LispParserTest());
       Report.create(runner);
       runner.run();
     }
