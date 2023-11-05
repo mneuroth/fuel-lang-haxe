@@ -23,11 +23,13 @@
  * 
  * */
 
- package;
+package;
 
- import haxe.Exception;
+import haxe.Exception;
 
- class LispException extends haxe.Exception {
+import LispToken.LispToken;
+
+class LispException extends haxe.Exception {
     public function new(text:String, token:LispToken=null, moduleName:String="") {
         super(text);
     }

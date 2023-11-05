@@ -25,20 +25,28 @@
 
 import LispException.LispException;
 
+class Ref<T> {
+    public var value:T;
+
+    public function new(val:T) {
+        value = val;
+    }
+}
+
 class ArrayExtender {
-    static public function First(arr:Array<Dynamic>) {
+    static public function First(arr:Array<Dynamic>):Dynamic {
         if (arr.length == 0) {
             throw new LispException("Array<Dynamic> has no elements!");
         }
         return arr[0];
     }
-    static public function Last(arr:Array<Dynamic>) {
+    static public function Last(arr:Array<Dynamic>):Dynamic {
         if (arr.length == 0) {
             throw new LispException("Array<Dynamic> has no elements!");
         }
         return arr[arr.length - 1];
     }
-    static public function FirstOrDefault(arr:Array<Dynamic>) {
+    static public function FirstOrDefault(arr:Array<Dynamic>):Dynamic {
         if (arr.length == 0) {
             return null;
         }
@@ -46,5 +54,16 @@ class ArrayExtender {
     }
     static public function Add(arr:Array<Dynamic>, item:Dynamic) {
         arr.push(item);
+    }
+}
+
+class MapExtender {
+    static public function TryGetValue(map:Map<String,Dynamic>, name:String, value:Ref<Dynamic>):Bool {
+        if (map.exists(name)) {
+            var val = map.get(name);
+            value.value = val;
+            return true;
+        }
+        return false;
     }
 }
