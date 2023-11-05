@@ -23,6 +23,8 @@
  * 
  * */
 
+ package;
+
 /* public*/ enum LispType
 {
     Undefined;
@@ -93,10 +95,17 @@ function TypeOf(obj:Dynamic):LispType
 class LispVariant {
     public var Type:LispType;
     public var Value:Dynamic;
+    public var IsUnQuoted:LispUnQuoteModus;
+    public var CachedFunction:LispVariant;
 
-    public function new(type:LispType, /*object*/ value:Dynamic) {
+    public function new(type:LispType, /*object*/ value:Dynamic, unQuoted:LispUnQuoteModus = LispUnQuoteModus.None) {
         this.Type = type;
         this.Value = value;
+        this.IsUnQuoted = unQuoted;
+    }
+    public static function forValue(value:Dynamic):LispVariant {
+        var newObj = new LispVariant(TypeOf(value), value);
+        return newObj;
     }
     public static function forToken(token:LispToken, /*object*/ unQuoted:LispUnQuoteModus=None):LispVariant {
         var newObj = new LispVariant(TypeOf(token.Value), token.Value);

@@ -8,6 +8,7 @@ class MainTest {
       runner.addCase(new LispTokenTest());
       runner.addCase(new LispTokenizerTest());
       runner.addCase(new LispParserTest());
+      runner.addCase(new LispVariantTest());
       Report.create(runner);
       runner.run();
     }
