@@ -105,6 +105,9 @@ class LispVariant {
     }
     public static function forValue(value:Dynamic):LispVariant {
         var newObj = new LispVariant(TypeOf(value), value);
+        if (value == null) {
+            newObj.Type = LispType.Nil;
+        }
         return newObj;
     }
     public static function forToken(token:LispToken, /*object*/ unQuoted:LispUnQuoteModus=None):LispVariant {

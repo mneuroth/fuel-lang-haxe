@@ -15,8 +15,8 @@ class LispVariantTest extends utest.Test {
         var value = LispVariant.LispVariant.forValue(false);
         Assert.equals(LispVariant.LispType.Bool, value.Type);
         Assert.equals(false, value.Value);
-        //var value = LispVariant.LispVariant.forValue(null);
-        //Assert.equals(LispVariant.LispType.Nil, value.Type);
-        //Assert.equals(null, value.Value);
+        var value = LispVariant.LispVariant.forValue(null);
+        Assert.equals(LispVariant.LispType.Nil, value.Type);
+        Assert.equals(null, value.Value);
     }
 }
