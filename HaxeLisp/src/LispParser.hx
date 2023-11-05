@@ -23,11 +23,12 @@
  * 
  * */
 
- import LispTokenizer.TupleReturn;
- import LispVariant.LispVariant;
- import LispVariant.LispType;
+import LispTokenizer.TupleReturn;
+import LispVariant.LispVariant;
+import LispVariant.LispType;
+import LispException.LispException;
 
- using LispUtils;
+using LispUtils;
 
 class LispEnvironment {
     public /*const*/static var Quote = "quote";
@@ -102,7 +103,7 @@ class LispEnvironment {
                 {
                     if (isToplevel && i+1<tokens.length && !OnlyCommentTokensFrom(tokens, i+1))
                     {
-                        throw new LispTokenizer.LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
+                        throw new LispException(BracketsOutOfBalanceOrUnexpectedScriptCode, token, moduleName);
                     }
                     parseResult = current;
                     return new TupleReturn<Int,Dynamic>(i, parseResult);
@@ -159,7 +160,7 @@ class LispEnvironment {
                 }
                 if (current == null)
                 {
-                    throw new LispTokenizer.LispException(UnexpectedToken, token, moduleName);
+                    throw new LispException(UnexpectedToken, token, moduleName);
                 }
                 current.Add(LispVariant.forToken(token));
             }
@@ -169,7 +170,7 @@ class LispEnvironment {
         if (isToplevel && tokens.length>0)
         {
             var token = tokens.Last();
-            throw new LispTokenizer.LispException(BracketsOutOfBalance, token, moduleName);
+            throw new LispException(BracketsOutOfBalance, token, moduleName);
         }
 
         parseResult = current;

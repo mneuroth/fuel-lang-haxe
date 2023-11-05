@@ -25,7 +25,7 @@
 
 package;
 
-import haxe.Exception;
+import LispException.LispException;
 
 using StringTools;
 using LispUtils;
@@ -37,12 +37,6 @@ class TupleReturn<T1,T2> {
     public function new(_value1:T1, _value2:T2) {
         value1 = _value1;
         value2 = _value2;
-    }
-}
-
-class LispException extends haxe.Exception {
-    public function new(text:String, token:LispToken=null, moduleName:String="") {
-        super(text);
     }
 }
 

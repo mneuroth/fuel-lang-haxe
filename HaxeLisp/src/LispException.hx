@@ -23,28 +23,12 @@
  * 
  * */
 
-import LispException.LispException;
+ package;
 
-class ArrayExtender {
-    static public function First(arr:Array<Dynamic>) {
-        if (arr.length == 0) {
-            throw new LispException("Array<Dynamic> has no elements!");
-        }
-        return arr[0];
-    }
-    static public function Last(arr:Array<Dynamic>) {
-        if (arr.length == 0) {
-            throw new LispException("Array<Dynamic> has no elements!");
-        }
-        return arr[arr.length - 1];
-    }
-    static public function FirstOrDefault(arr:Array<Dynamic>) {
-        if (arr.length == 0) {
-            return null;
-        }
-        return arr[0];
-    }
-    static public function Add(arr:Array<Dynamic>, item:Dynamic) {
-        arr.push(item);
+ import haxe.Exception;
+
+ class LispException extends haxe.Exception {
+    public function new(text:String, token:LispToken=null, moduleName:String="") {
+        super(text);
     }
 }
