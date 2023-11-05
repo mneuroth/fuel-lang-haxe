@@ -28,6 +28,7 @@ package;
 import haxe.Exception;
 
 using StringTools;
+using LispUtils;
 
 class TupleReturn<T1,T2> {
     public var value1: T1;
@@ -71,7 +72,7 @@ class LispException extends haxe.Exception {
 
         /*Action<string, int, int>*/var addToken = function(currentTok, pos, line) //=>
         {
-            tokens.push(new LispToken(currentTok, currentTokenStartPos - offset, pos - offset, line));
+            tokens.Add(new LispToken(currentTok, currentTokenStartPos - offset, pos - offset, line));
             isInSymbol = false;
             isInString = false;
             currentToken = ""; //string.Empty;

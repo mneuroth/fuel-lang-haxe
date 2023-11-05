@@ -27,6 +27,8 @@
  import LispVariant.LispVariant;
  import LispVariant.LispType;
 
+ using LispUtils;
+
 class LispEnvironment {
     public /*const*/static var Quote = "quote";
     public /*const*/static var Quasiquote = "quasiquote";
@@ -65,9 +67,7 @@ class LispEnvironment {
             moduleName = scope.ModuleName;
         }
 
-        trace(tokens);
         var parseResult = ParseTokens(moduleName, tokens, 0, /*ref parseResult,*/ /*isToplevel:*/ true);
-        trace(parseResult);
 
         return parseResult.value2;
     }
@@ -87,17 +87,15 @@ class LispEnvironment {
             if (token.Type == LispToken.LispTokenType.ListStart)
             {
                 current = new Array<Dynamic>();  //object
-                trace("OPEN", current);
                 listStack.add(current);
             }
             else if (token.Type == LispToken.LispTokenType.ListEnd)
             {
                 var temp = current;
                 listStack.pop();
-                trace("CLOSE", temp);
                 if (!listStack.isEmpty())
                 {
-                    listStack.first().push(temp);
+                    listStack.first().Add(temp);
                     current = listStack.first();
                 }
                 else
@@ -113,34 +111,34 @@ class LispEnvironment {
             else if (token.Type == LispToken.LispTokenType.Quote || token.Type == LispToken.LispTokenType.QuasiQuote)
             {
                 var quote = new Array<Dynamic>();  //object
-                quote.push(new LispVariant(Symbol, token.Type == LispToken.LispTokenType.Quote ? LispEnvironment.Quote : LispEnvironment.Quasiquote));
+                quote.Add(new LispVariant(Symbol, token.Type == LispToken.LispTokenType.Quote ? LispEnvironment.Quote : LispEnvironment.Quasiquote));
 
                 var quotedList:Dynamic = null;  //object
                 var temp = ParseTokens(moduleName, tokens, i + 1, /*ref quotedList,*/ /*isToplevel:*/ false);
                 i = temp.value1;
                 quotedList = temp.value2;
-                quote.push(quotedList);
+                quote.Add(quotedList);
 
                 if (current != null)
                 {
-                    current.push(quote);                        
+                    current.Add(quote);                        
                 }
             }
             else if (token.Type == LispToken.LispTokenType.UnQuote || token.Type == LispToken.LispTokenType.UnQuoteSplicing)
             {
                 var unquote = new Array<Dynamic>();  //object
                 //LispUnQuoteModus unquotedModus = token.Type == LispToken.LispTokenType.UnQuote ? LispUnQuoteModus.UnQuote : LispUnQuoteModus.UnQuoteSplicing;
-                unquote.push(new LispVariant(LispType.Symbol, token.Type == LispToken.LispTokenType.UnQuote ? LispEnvironment.UnQuote : LispEnvironment.UnQuoteSplicing));
+                unquote.Add(new LispVariant(LispType.Symbol, token.Type == LispToken.LispTokenType.UnQuote ? LispEnvironment.UnQuote : LispEnvironment.UnQuoteSplicing));
 
                 var quotedList:Dynamic = null;  //object
                 var temp = ParseTokens(moduleName, tokens, i + 1, /*ref quotedList,*/ /*isToplevel:*/ false);
                 i = temp.value1;
                 quotedList = temp.value2;
-                unquote.push(quotedList);
+                unquote.Add(quotedList);
 
                 if (current != null)
                 {
-                    current.push(unquote);
+                    current.Add(unquote);
                 }
                 else
                 {
@@ -163,15 +161,14 @@ class LispEnvironment {
                 {
                     throw new LispTokenizer.LispException(UnexpectedToken, token, moduleName);
                 }
-                trace("TOK", token, token.Value, token.Type, Type.typeof(token));
-                current.push(LispVariant.forToken(token));
+                current.Add(LispVariant.forToken(token));
             }
             i++;
         }
 
         if (isToplevel && tokens.length>0)
         {
-            var token = tokens[tokens.length-1]; //.Last();
+            var token = tokens.Last();
             throw new LispTokenizer.LispException(BracketsOutOfBalance, token, moduleName);
         }
 
