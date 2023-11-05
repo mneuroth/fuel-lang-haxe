@@ -98,6 +98,8 @@ class LispVariant {
     public var IsUnQuoted:LispUnQuoteModus;
     public var CachedFunction:LispVariant;
 
+    public var IsFunction:Bool; //TODO !!!
+
     public function new(type:LispType, /*object*/ value:Dynamic, unQuoted:LispUnQuoteModus = LispUnQuoteModus.None) {
         this.Type = type;
         this.Value = value;

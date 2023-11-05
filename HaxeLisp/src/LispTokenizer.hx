@@ -30,16 +30,6 @@ import LispException.LispException;
 using StringTools;
 using LispUtils;
 
-class TupleReturn<T1,T2> {
-    public var value1:T1;
-    public var value2:T2;
-
-    public function new(_value1:T1, _value2:T2) {
-        value1 = _value1;
-        value2 = _value2;
-    }
-}
-
 /// <summary>
 /// The FUEL lisp tokenizer
 /// </summary>

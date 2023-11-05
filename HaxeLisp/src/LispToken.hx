@@ -27,10 +27,13 @@ package;
 
 import haxe.Exception;
 
+import LispUtils.TupleReturn;
+
 //enum Results {
 //    ParseResult(ok:Bool, value:Float);
 //}
 
+/*
 class NumParserReturn<T> {
     public var ok: Bool;
     public var value: T;
@@ -41,7 +44,6 @@ class NumParserReturn<T> {
     }
 }
 
-/*
 function TryParseIntOld(val:String):NumParserReturn<Int> {
     var result = Std.parseInt(val);
     if(result == null) {
@@ -59,28 +61,28 @@ function TryParseFloatOld(val:String):NumParserReturn<Float> {
 }
 */
 
-function TryParseInt(val:String):NumParserReturn<Int> {
+function TryParseInt(val:String):TupleReturn<Bool,Int> {
     try {
         var result = haxe.Json.parse(val);
         if(result is Int) {  // Type.typeof(result) == TInt
-            return new NumParserReturn(true, result);
+            return new TupleReturn<Bool,Int>(true, result);
         }
     } catch(e:Exception) {
         //trace(e);
     }
-    return new NumParserReturn(false, null);
+    return new TupleReturn<Bool,Int>(false, null);
 }
 
-function TryParseFloat(val:String):NumParserReturn<Float> {
+function TryParseFloat(val:String):TupleReturn<Bool,Float> {
     try {
         var result = haxe.Json.parse(val);
         if(result is Float) {  // Type.typeof(result) == TFloat
-            return new NumParserReturn(true, result);
+            return new TupleReturn<Bool,Float>(true, result);
         }
     } catch(e:Exception) {
         //trace(e);
     }
-    return new NumParserReturn(false, null);
+    return new TupleReturn<Bool,Float>(false, null);
 }
 
 
@@ -199,8 +201,8 @@ function TryParseFloat(val:String):NumParserReturn<Float> {
     /// <param name="lineNo">The line no.</param>
     public function new(text:String, start:Int, stop:Int, lineNo:Int)
     {
-        var tempResultFloat:NumParserReturn<Float>;
-        var tempResultInt:NumParserReturn<Int>;
+        var tempResultFloat:TupleReturn<Bool,Float>;
+        var tempResultInt:TupleReturn<Bool,Int>;
 
         StartPos = start;
         StopPos = stop;
@@ -236,16 +238,16 @@ function TryParseFloat(val:String):NumParserReturn<Float> {
         {
             Type = LispTokenType.ListEnd;
         }
-        else if ((tempResultInt = TryParseInt(text)).ok)
+        else if ((tempResultInt = TryParseInt(text)).value1/*ok*/)
         {
             Type = LispTokenType.Int;
-            Value = tempResultInt.value;
+            Value = tempResultInt.value2;
         }
-        else if ((tempResultFloat = TryParseFloat(text)).ok)
+        else if ((tempResultFloat = TryParseFloat(text)).value1/*ok*/)
         {
 // TODO: CallByRef Klasse anlegen, via Templates, liefert einen Typ zurück
             Type = LispTokenType.Double;
-            Value = tempResultFloat.value;
+            Value = tempResultFloat.value2;
         }
         else if (text == "true" || text == "#t")
         {
