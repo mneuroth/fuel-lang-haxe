@@ -35,6 +35,94 @@ class LispEnvironment {
     public /*const*/static var Quasiquote = "quasiquote";
     public /*const*/static var UnQuote = "_unquote";
     public /*const*/static var UnQuoteSplicing = "_unquotesplicing";
+
+    public /*const*/static var MetaTag = "###";
+
+    public /*const*/static var Macros = MetaTag + "macros" + MetaTag;
+    public /*const*/static var Modules = MetaTag + "modules" + MetaTag;
+
+    public static function IsInModules(funcName:String, scope:LispScope):Bool
+    {
+        var value:Ref<Dynamic> = new Ref<Dynamic>(null);  //object
+        return FindFunctionInModules(funcName, scope, /*out*/ value);
+    }
+
+    public static function GetFunctionInModules(funcName:String, scope:LispScope):Dynamic  //object
+    {
+        var result:Ref<Dynamic> = new Ref<Dynamic>(null);  //object
+        FindFunctionInModules(funcName, scope, /*out*/ result);
+        return result;         
+    }
+
+    public static function IsMacro(funcName:Dynamic, scope:LispScope):Bool
+    {
+        return ExistsItem(funcName, scope, Macros);
+    }
+
+    public static function GetMacro(funcName:Dynamic, scope:LispScope):Dynamic  //object
+    {
+        return QueryItem(funcName, scope, Macros);
+    }
+
+    public static function IsExpression(item:Dynamic):Bool
+    {
+        return (item is LispVariant && (cast(item, LispVariant)).IsList) ||
+               (item is Array/*<Dynamic>*/);  //IEnumerable<object>
+    }
+
+    public static function GetExpression(item:Dynamic):Array<Dynamic>  //IEnumerable<object>
+    {
+        if (item is LispVariant && (cast(item, LispVariant)).IsList)
+        {
+            return (cast(item, LispVariant)).ListValue;
+        }
+        if (item is Array/*<Dynamic>*/)  //IEnumerable<object>
+        {
+            return cast(item, Array<Dynamic>);  //IEnumerable<object>
+        }
+        return new Array<Dynamic>() [ item ];  // List<object>
+    }
+
+    private static function QueryItem(funcName:Dynamic, scope:LispScope, key:String):Dynamic  //object
+    {
+        var val:Ref<Dynamic> = new Ref<Dynamic>(null);
+        var val2:Ref<Dynamic> = new Ref<Dynamic>(null);
+        if (scope != null &&
+            scope.TryGetValue(key, /*out*/ val) &&
+            (cast(val, LispScope)).TryGetValue(funcName.ToString(), /*out*/ val2))
+        {
+            return val2.value;
+        }
+        return null;
+    }
+
+    private static function ExistsItem(funcName:Dynamic, scope:LispScope, key:String):Bool
+    {
+        var val:Ref<Dynamic> = new Ref<Dynamic>(null);  //object
+        if (scope != null &&
+            scope.TryGetValue(key, /*out*/ val))
+        {
+            return (/*(LispScope)*/cast(val.value, LispScope)).ContainsKey(funcName.ToString());
+        }
+        return false;
+    }
+
+    private static function FindFunctionInModules(funcName:String, scope:LispScope, /*out object*/ foundValue:Ref<Dynamic>):Bool
+    {
+        foundValue.value = null;
+        var importedModules = /*(LispScope)*/cast(scope.GlobalScope.get(Modules), LispScope);
+        for (/*KeyValuePair<string, object>*/ kv in importedModules)
+        {
+            var module = /*(LispScope)*/kv.Value;
+            var val:Dynamic = new Ref<Dynamic>(null);  //object
+            if (module.TryGetValue(funcName, /*out*/ val))
+            {
+                foundValue.value = val;
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 /// <summary>
