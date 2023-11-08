@@ -30,7 +30,8 @@ using LispVariant.LispUnQuoteModus;
 using LispUtils.ArrayExtender;
 using LispUtils.MapExtender;
 using LispUtils.Ref;
-using LispParser.LispEnvironment;
+using LispParser;
+using LispEnvironment;
 
 // TODO
 class LispMacroRuntimeEvaluate {
@@ -143,7 +144,7 @@ class LispBreakpointPosition {
         if (LispEnvironment.IsMacro(astAsList.First(), scope.GlobalScope))
         {
             // check the macro modus: evaluate or expand or lambda
-            var _macro = LispParser.LispEnvironment.GetMacro(astAsList.First(), scope.GlobalScope);
+            var _macro = LispEnvironment.GetMacro(astAsList.First(), scope.GlobalScope);
 
             // evaluate macro at run time:
             if (_macro is LispMacroRuntimeEvaluate)
