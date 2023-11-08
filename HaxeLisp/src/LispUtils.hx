@@ -65,10 +65,25 @@ class ArrayExtender {
     static public function Add(arr:Array<Dynamic>, item:Dynamic) {
         arr.push(item);
     }
+    static public function ToList(arr:Array<Dynamic>):Array<Dynamic> {
+        return arr;
+    }
+    static public function Skip(arr:Array<Dynamic>, index:Int):Array<Dynamic> {
+// TODO -> remove first element
+        return arr;
+    }
+    static public function AddRange(arr:Array<Dynamic>, other:Array<Dynamic>):Array<Dynamic> {
+// TODO -> remove first element
+        return arr;
+    }
+    static public function CopyTo(arr:Array<Dynamic>, other:Array<Dynamic>, index:Int):Array<Dynamic> {
+// TODO -> remove first element
+        return arr;
+    }
 }
 
 class MapExtender {
-    static public function TryGetValue(map:Map<String,Dynamic>, name:String, value:Ref<Dynamic>):Bool {
+    static public function TryGetValue(map:haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/, name:String, value:Ref<Dynamic>):Bool {
         if (map.exists(name)) {
             var val = map.get(name);
             value.value = val;
@@ -76,4 +91,65 @@ class MapExtender {
         }
         return false;
     }
+}
+
+class LispExceptionExtender {
+    static public function AddTokenInfos(exc:LispException, token:LispToken) {
+// TODO        
+    }
+}
+/*
+function CompareToT<T>(val1:T, val2:T):Int {
+    if(val1 == val2) {
+        return 0;
+    }
+    if(val1 < val2) {
+        return -1;        
+    }
+    if(val1 > val2) {
+        return 1;        
+    }
+    return 0;
+}
+*/
+function CompareToInt(val1:Int, val2:Int):Int {
+    if(val1 == val2) {
+        return 0;
+    }
+    if(val1 < val2) {
+        return -1;        
+    }
+    if(val1 > val2) {
+        return 1;        
+    }
+    return 0;
+}
+
+function CompareToFloat(val1:Float, val2:Float):Int {
+    //if(val1 == val2) {
+    //    return 0;
+    //}
+    if(val1 < val2) {
+        return -1;        
+    }
+    if(val1 > val2) {
+        return 1;        
+    }
+    return 0;
+}
+
+function StringCompare(val1:String, val2:String):Int {
+    // <0   val1 < val2
+    // ==0  val1 == val2
+    // >0   val1 > val2
+    //if(val1 == val2) {
+    //    return 0;
+    //}
+    if(val1 < val2) {
+        return -1;        
+    }
+    if(val1 > val2) {
+        return 1;        
+    }
+    return 0;
 }

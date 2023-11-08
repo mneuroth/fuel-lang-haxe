@@ -23,7 +23,19 @@
  * 
  * */
 
- package;
+package;
+
+using LispUtils;
+
+class LispFunctionWrapper {
+    public var IsSpecialForm:Bool;
+
+    //public Func<object[], LispScope, LispVariant> Function { get; private set; }
+    public var Function:Dynamic;
+
+    public function new() {        
+    }    
+}
 
 /* public*/ enum LispType
 {
@@ -40,6 +52,36 @@
     //Array;
     LValue;
     Error;
+}
+
+function ToStringT(Type:LispType):String {
+    switch(Type) {
+        case Undefined:
+            return "Undefined";
+        case Nil:
+            return "Nil";
+        case Bool:
+            return "Bool";
+        case Int:
+            return "Int";
+        case Double:
+            return "Double";
+        case String:
+            return "String";
+        case List:
+            return "List";
+        case Function:
+            return "Function";
+        case Symbol:
+            return "Symbol";
+        case NativeObject:
+            return "NativeObject";
+        //case Array:
+        case LValue:
+            return "LValue";
+        case Error:
+            return "Error";
+    }
 }
 
 /*public*/ enum LispUnQuoteModus
@@ -75,12 +117,10 @@ function TypeOf(obj:Dynamic):LispType
     //{
     //    return LispType.List;
     //}
-/*    
     if (obj is LispFunctionWrapper)
     {
         return LispType.Function;
     }
-*/    
     if (obj is LispVariant)
     {
         return obj.Type;
@@ -93,14 +133,17 @@ function TypeOf(obj:Dynamic):LispType
 }
 
 class LispVariant {
-    public var Type:LispType;
-    public var Value:Dynamic;
-    public var IsUnQuoted:LispUnQuoteModus;
+    public static var Tolerance:Float = 1e-8;
+
     public var CachedFunction:LispVariant;
 
-    public var IsFunction:Bool; //TODO !!!
+    public var IsUnQuoted:LispUnQuoteModus;
+    public var Value:Dynamic;
+    public var Type:LispType;    
 
-    public function new(type:LispType, /*object*/ value:Dynamic, unQuoted:LispUnQuoteModus = LispUnQuoteModus.None) {
+    public var Token:LispToken; //TODO?
+
+    public function new(type:LispType, /*object*/ value:Dynamic = null, unQuoted:LispUnQuoteModus = LispUnQuoteModus.None) {
         this.Type = type;
         this.Value = value;
         this.IsUnQuoted = unQuoted;
@@ -123,6 +166,335 @@ class LispVariant {
             newObj.Type = LispType.Symbol;
         }
         return newObj;
+    }
+
+    public var TypeString(get, null):String;    
+    function get_TypeString() {
+        if (Type == LispType.NativeObject)
+        {
+// TODO -> implement later            
+//            if (NativeObjectValue is Dictionary<object, object>)
+//            {
+//                return "NativeDictionary";
+//            }
+            return Type+"<"+Value.GetType()+">";                    
+        }
+        return ToStringT(Type);
+    }
+
+    public var IsNil(get, null):Bool;
+    function get_IsNil() { return Type == LispType.Nil; }
+
+    public var IsError(get, null):Bool;
+    function get_IsError() { return Type == LispType.Error; }
+
+    public var IsUndefined(get, null):Bool;
+    function get_IsUndefined() { return Type == LispType.Undefined; }
+
+    public var IsString(get, null):Bool;
+    function get_IsString() { return Type == LispType.String; }
+
+    public var IsDouble(get, null):Bool;
+    function get_IsDouble() { return Type == LispType.Double; }
+
+    public var IsInt(get, null):Bool;
+    function get_IsInt() { return Type == LispType.Int; }
+
+    public var IsNumber(get, null):Bool;
+    function get_IsNumber() { return IsInt || IsDouble; }
+
+    public var IsBool(get, null):Bool;
+    function get_IsBool() { return Type == LispType.Bool; }
+
+    public var IsList(get, null):Bool;
+    function get_IsList() { return Type == LispType.List || Type == LispType.Nil; }
+
+    public var IsFunction(get, null):Bool;
+    function get_IsFunction() { return Type == LispType.Function; }
+
+    public var IsSymbol(get, null):Bool;
+    function get_IsSymbol() { return Type == LispType.Symbol; }
+
+    public var IsNativeObject(get, null):Bool;
+    function get_IsNativeObject() { return Type == LispType.NativeObject; }
+
+    public var IsLValue(get, null):Bool;
+    function get_IsLValue() { return Type == LispType.LValue; }
+
+    /// <summary>
+    /// Creates a new value representing an error.
+    /// </summary>
+    /// <param name="errorMessage">The error message.</param>
+    /// <returns>The value</returns>
+    public static function CreateErrorValue(errorMessage:String):LispVariant
+    {
+        return new LispVariant(LispType.Error, errorMessage);
+    }
+
+    /// <summary>
+    /// Gets the LispType for the object.
+    /// </summary>
+    /// <param name="obj">The object to determin the type for.</param>
+    /// <returns>The LispType</returns>
+    public static function GetTypeFor(obj:Dynamic):LispType
+    {
+        if(obj is Int)
+        {
+            return LispType.Int;
+        }
+        if (obj is Float)
+        {
+            return LispType.Double;
+        }
+        if (obj is Bool)
+        {
+            return LispType.Bool;
+        }
+        if (obj is String)
+        {
+            return LispType.String;
+        }
+        if (obj is Array)
+        {
+            return LispType.List;
+        }
+        return LispType.Undefined;
+    }
+
+    /// <summary>
+    /// Compares to other object.
+    /// </summary>
+    /// <param name="other">The other.</param>
+    /// <returns></returns>
+    public function CompareTo(other:Dynamic):Int
+    {
+        if (other is LispVariant)
+        {
+            var otherVariant = cast(other, LispVariant);
+            if (IsNumber && otherVariant.IsNumber)
+            {
+                if (IsDouble || otherVariant.IsDouble)
+                {
+                    return LispUtils.CompareToFloat(ToDouble(), otherVariant.ToDouble());
+                }
+                return LispUtils.CompareToInt(IntValue, otherVariant.IntValue);
+            }
+            // all other types will be compared like a string
+            return LispUtils.StringCompare(StringValue, otherVariant.StringValue);  //string.Compare(StringValue, otherVariant.StringValue, StringComparison.Ordinal);
+        }            
+        return CompareTo(LispVariant.forValue(other));
+    }
+
+    public var FunctionValue(get, null):LispFunctionWrapper;
+    function get_FunctionValue() {
+        if (Type != LispType.Function)
+        {
+            throw CreateInvalidCastException("function", "not found");
+        }
+        return cast(Value, LispFunctionWrapper);
+    }
+
+    public var ListValue(get, null):Array<Dynamic>;  //IEnumerable<object>
+    function get_ListValue() {
+        // Nil is an empty list () !
+        if (Type == LispType.Nil)
+        {
+            return new Array<Dynamic>();  //List<object>();
+        }
+        if (Type == LispType.NativeObject && NativeObjectValue is /*IEnumerable<object>*/Array)
+        {
+            return cast(NativeObjectValue, Array<Dynamic>);  //(IEnumerable<object>)
+        }
+        if (Type != LispType.List)
+        {
+            throw CreateInvalidCastException("list");
+        }
+        return cast(Value, Array<Dynamic>);  //((IEnumerable)Value).Cast<object>();
+    }
+
+    public var ListRef(get, null):Array<Dynamic>;  //List<object>
+    function get_ListRef() {
+        // Nil is an empty list () !
+        if (Type == LispType.Nil)
+        {
+            return new Array<Dynamic>();  //List<object>();
+        }
+        if (Type == LispType.NativeObject && NativeObjectValue is /*IEnumerable<object>*/Array)
+        {
+            return cast(NativeObjectValue, Array<Dynamic>);  //(List<object>)
+        }
+        if (Type != LispType.List)
+        {
+            throw CreateInvalidCastException("list");
+        }
+        return cast(Value, Array<Dynamic>);  //List<object>
+    }
+
+    public var DoubleValue(get, null):Float;
+    function get_DoubleValue() {
+        if (Type != LispType.Double)
+        {
+            throw CreateInvalidCastException("double");
+        }
+        return cast(Value, Float);
+    }
+    
+    public var IntValue(get, null):Int;
+    function get_IntValue() {
+        if (Type != LispType.Int)
+        {
+            throw CreateInvalidCastException("int");
+        }
+        return cast(Value, Int);
+    }    
+
+    public var BoolValue(get, null):Bool;
+    function get_BoolValue() {
+        if (Type != LispType.Bool)
+        {
+            throw CreateInvalidCastException("bool");
+        }
+        return cast(Value, Bool);
+    }
+
+    public var NativeObjectValue(get, null):Dynamic;
+    function get_NativeObjectValue() {
+        if (Type != LispType.NativeObject && Type != LispType.Nil)
+        {
+            throw CreateInvalidCastException("native object");
+        }
+        return Value;
+    }
+
+    public function ToBool():Bool
+    {
+        if (IsBool)
+        {
+            return BoolValue;
+        }
+        if (IsInt)
+        {
+            return IntValue != 0;
+        }
+        if (IsDouble)
+        {
+            return Math.abs(DoubleValue) > Tolerance;
+        }
+        throw CreateInvalidCastException("bool", CanNotConvertTo(TypeString, "bool"));
+    }
+
+    public function ToInt():Int
+    {
+        if (IsBool)
+        {
+            return BoolValue ? 1 : 0;
+        }
+        if (IsInt)
+        {
+            return IntValue;
+        }
+        if (IsDouble)
+        {
+            return Std.int(DoubleValue);
+        }
+        if (IsString)
+        {
+            return Std.parseInt(StringValue); //Convert.ToInt32(StringValue, CultureInfo.InvariantCulture);
+        }
+        throw CreateInvalidCastException("int", CanNotConvertTo(TypeString, "int"));
+    }
+    
+    public function ToDouble():Float
+    {
+        if (IsBool)
+        {
+            return BoolValue ? 1.0 : 0.0;
+        }
+        if (IsInt)
+        {
+            return IntValue;
+        }
+        if (IsDouble)
+        {
+            return DoubleValue;
+        }
+        if (IsString)
+        {
+            return Std.parseFloat(StringValue); //Convert.ToDouble(StringValue, CultureInfo.InvariantCulture);
+        }
+        throw CreateInvalidCastException("double", CanNotConvertTo(TypeString, "double"));
+    }
+
+    public var StringValue(get, null):String;
+    public function get_StringValue() {
+        return Std.string(Value);
+    }
+
+    public function ToString():String
+    {
+        if (IsSymbol)
+        {
+            return Value.ToString();
+        }
+        if (IsString)
+        {
+            return StringValue;
+        }
+        if (IsInt)
+        {
+            return Std.string(IntValue);  //.ToString(CultureInfo.InvariantCulture);
+        }
+        if (IsDouble)
+        {
+            return Std.string(DoubleValue);  //.ToString(CultureInfo.InvariantCulture);
+        }
+        if (IsBool)
+        {
+            return BoolValue ? "#t" : "#f";
+        }
+        if (IsNil)
+        {
+            return LispToken.Nil;
+        }
+/* TODO        
+        if (IsList)
+        {
+            return ExpandContainerToString(ListValue);
+        }
+        if (IsFunction)
+        {
+            return "function " + (FunctionValue.Signature != null ? FunctionValue.Signature : "<unknown>");
+        }
+        if (IsNativeObject)
+        {
+            return NativeObjectStringRepresentation;
+        }
+*/        
+        if (IsUndefined)
+        {
+            return "<undefined>";
+        }
+        if (IsError)
+        {
+            return "Error: " + Value;
+        }
+        return "?";
+    }
+
+    public function SymbolCompare(other:Dynamic) {
+// TODO --> implement !        
+        return false;
+    }
+
+    private function CreateInvalidCastException(name:String, msg:String = "no"):haxe.Exception
+    {
+        var exception = new LispException("Invalid cast for $msg, value=$StringValue $name");
+        exception.AddTokenInfos(Token);
+        return exception;
+    }
+
+    private static function CanNotConvertTo(type:String, val:String) {
+        return "can not convert $type to $val";
     }
 }
 
