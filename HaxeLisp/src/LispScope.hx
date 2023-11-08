@@ -30,14 +30,17 @@ using LispUtils.Ref;
 using LispEnvironment;
 
 class TextWriter {
-
     public function new() {        
     }
 
     public function WriteLine(text:String, ?a1, ?a2, ?a3) {
         trace(text);
     }
+}
 
+class TextReader {
+    public function new() {
+    }
 }
  
 class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
@@ -47,15 +50,39 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
 
     public var Tracing:Bool;
 
-    public var Output:TextWriter = new TextWriter();
+    public var ClosureChain:LispScope;
 
-    public var GlobalScope:LispScope;   // TODO
-    public var ClosureChain:LispScope;  // TODO
+    public var ModuleName:String;
 
-    public var CurrentToken:LispToken;  // TODO
+    public var CurrentToken:LispToken;
+
+    public var Name:String;
+
+    public var GlobalScope:LispScope;
+    public var Output:TextWriter;
+    public var Input:TextReader;
 
     public function new() {
         super();
+    }
+
+    private static function init(ret:LispScope, fcnName:String, globalScope:LispScope = null, moduleName:String = null):LispScope {
+        ret.Name = fcnName;
+        ret.GlobalScope = globalScope != null ? globalScope : ret;
+        ret.ModuleName = moduleName;
+        if (ret.ModuleName == null && globalScope != null)
+        {
+            ret.ModuleName = globalScope.ModuleName;
+        }
+        ret.CurrentToken = null;
+        ret.Input = new TextReader();  //Console.In;
+        ret.Output = new TextWriter(); //Console.Out;
+        return ret;
+    }
+
+    public static function forFunction(fcnName:String, globalScope:LispScope = null, moduleName:String = null):LispScope {
+        var ret = new LispScope();
+        return init(ret, fcnName, globalScope, moduleName);
     }
 
     public function ContainsKey(key:String):Bool {
