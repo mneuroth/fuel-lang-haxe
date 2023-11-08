@@ -27,7 +27,7 @@ package;
 
 using LispUtils;
 using LispUtils.Ref;
-using LispParser.LispEnvironment;
+using LispEnvironment;
 
 class TextWriter {
 
