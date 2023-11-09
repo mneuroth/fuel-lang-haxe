@@ -23,18 +23,14 @@
  * 
  * */
 
-import utest.Runner;
-import utest.ui.Report;
+import utest.Assert;
+import utest.Async;
 
-class MainTest {
-    static function main() {
-      var runner = new Runner();
-      runner.addCase(new LispTokenTest());
-      runner.addCase(new LispTokenizerTest());
-      runner.addCase(new LispParserTest());
-      runner.addCase(new LispVariantTest());
-      runner.addCase(new LispInterpreterTest());
-      Report.create(runner);
-      runner.run();
+class LispInterpreterTest extends utest.Test {
+    public function testInterpreter1() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(fuel)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("This is the fuel interpreter!", result.Value);
     }
-  }
+}
