@@ -31,6 +31,8 @@ jobs:
           sudo apt-get install haxe
           haxelib setup ./haxe-libs
           haxelib install utest
+          haxelib install hxjava
+          haxelib install hxcpp
           haxe
           haxe --version
 
