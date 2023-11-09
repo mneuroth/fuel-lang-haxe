@@ -33,4 +33,10 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals("This is the fuel interpreter!", result.Value);
     }
+    public function testInterpreter2() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(+ 1 2 3 4)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(10, result.Value);
+    }
 }
