@@ -11,5 +11,13 @@ class Main {
       trace(token2);
       trace(Std.parseFloat("1.234d"));
       trace(haxe.Json.parse("1.234"));
+
+      var scope = LispEnvironment.CreateDefaultScope();
+      var ast = LispParser.Parse("(+ 1 2 3 4)");
+      //var ast = LispParser.Parse("(fuel 1 2 3 4)");
+      trace("AST:");
+      trace(ast);
+      var interpRes = LispInterpreter.EvalAst(ast, scope);
+      trace("RESULT:",interpRes, "value=",interpRes.Value);
     }
 }
