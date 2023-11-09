@@ -211,7 +211,7 @@ class LispVariant {
     function get_IsList() { return Type == LispType.List || Type == LispType.Nil; }
 
     public var IsFunction(get, never):Bool;
-    public function get_IsFunction() { return Type == LispType.Function; }
+    function get_IsFunction() { return Type == LispType.Function; }
 
     public var IsSymbol(get, never):Bool;
     function get_IsSymbol() { return Type == LispType.Symbol; }
@@ -427,7 +427,7 @@ class LispVariant {
     }
 
     public var StringValue(get, never):String;
-    public function get_StringValue() {
+    function get_StringValue() {
         return Std.string(Value);
     }
 
@@ -498,6 +498,29 @@ class LispVariant {
         return "can not convert $type to $val";
     }
 }
+
+@:forward(Value)
+abstract OpLispVariant(LispVariant) {
+    public inline function new(val:LispVariant) {
+        this = val;
+    }
+
+    @:op(A+B)
+    public function add(rightVal:OpLispVariant):OpLispVariant {
+        return new OpLispVariant(LispVariant.forValue(this.Value + rightVal.Value));
+    }
+
+    @:op(A-B)
+    public function sub(rightVal:OpLispVariant):LispVariant {
+        return LispVariant.forValue(this.Value - rightVal.Value);
+    }
+
+    @:op(A*B)
+    public function mult(rightVal:OpLispVariant):LispVariant {
+        return LispVariant.forValue(this.Value * rightVal.Value);
+    }
+}
+
 
 // /// <summary>
 // /// Generic data container for lisp data types.
