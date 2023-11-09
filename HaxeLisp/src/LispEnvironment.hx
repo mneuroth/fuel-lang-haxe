@@ -26,8 +26,13 @@
  package;
  
  using LispUtils;
+ using LispVariant;
 
  class LispEnvironment {
+    public /*const*/static var Builtin = "<builtin>";
+    
+    private /*const*/static var MainScope = "<main>";
+
     public /*const*/static var Quote = "quote";
     public /*const*/static var Quasiquote = "quasiquote";
     public /*const*/static var UnQuote = "_unquote";
@@ -37,6 +42,35 @@
 
     public /*const*/static var Macros = MetaTag + "macros" + MetaTag;
     public /*const*/static var Modules = MetaTag + "modules" + MetaTag;
+
+    public static function CreateDefaultScope():LispScope {
+        var scope = LispScope.forFunction(MainScope);
+
+        //scope["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
+        //scope["fuel"] = CreateFunction(Fuel, "(fuel)", "");
+        scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
+
+        return scope;
+    }
+
+    private static function CreateFunction(/*Func<object[], LispScope, LispVariant>*/ func:Dynamic, signature:String = null, documentation:String = null, isBuiltin:Bool = true, isSpecialForm:Bool = false, isEvalInExpand:Bool = false, moduleName:String = "<builtin>"):Dynamic
+    {
+        return LispVariant.forValue(new LispFunctionWrapper(func/*, signature, documentation, isBuiltin, isSpecialForm, isEvalInExpand, moduleName*/));
+    }
+
+//    public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+//    {
+//        return ArithmetricOperation(args, (l, r) => l + r);
+//    }
+
+    private static function Fuel(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        //CheckArgs("fuel", 0, args, scope);
+
+        //var text = new StringBuilder();
+        //text.Append(string.Format("fuel version {0} from {1}", Lisp.Version, Lisp.Date));
+        return LispVariant.forValue("This is the fuel interpreter!");
+    }
 
     public static function IsInModules(funcName:String, scope:LispScope):Bool
     {

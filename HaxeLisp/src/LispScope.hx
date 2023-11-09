@@ -111,18 +111,18 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         // first try to resolve in this scope
         if (this.TryGetValue(name, /*out*/ result))
         {
-            UpdateFunctionCache(elemAsVariant, result, isFirst);
+            UpdateFunctionCache(elemAsVariant, result.value, isFirst);
         }
         // then try to resolve in global scope
         else if (GlobalScope != null &&
                  GlobalScope.TryGetValue(name, /*out*/ result))
         {
-            UpdateFunctionCache(elemAsVariant, result, isFirst);
+            UpdateFunctionCache(elemAsVariant, result.value, isFirst);
         }
         // then try to resolve in closure chain scope(s)
         else if (IsInClosureChain(name, /*out*/ foundClosureScope, /*out*/ result))
         {
-            UpdateFunctionCache(elemAsVariant, result, isFirst);
+            UpdateFunctionCache(elemAsVariant, result.value, isFirst);
         }
         // then try to resolve in scope of loaded modules
         else if (LispEnvironment.IsInModules(name, GlobalScope))
@@ -139,13 +139,13 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
             result = elem;
         }
 
-        return result;
+        return result.value;
     }
 
     private static function UpdateFunctionCache(elemAsVariant:LispVariant, /*object*/ value:Dynamic, isFirst:Bool)
     {
         var valueAsVariant:LispVariant = value /*as LispVariant*/;
-        if (isFirst && elemAsVariant != null && valueAsVariant != null && valueAsVariant.IsFunction)
+        if (isFirst && elemAsVariant != null && valueAsVariant != null && valueAsVariant.get_IsFunction())  // TODO
         {
             //if (elemAsVariant.CachedFunction != null)
             //{

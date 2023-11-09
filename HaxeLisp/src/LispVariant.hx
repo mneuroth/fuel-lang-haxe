@@ -33,7 +33,8 @@ class LispFunctionWrapper {
     //public Func<object[], LispScope, LispVariant> Function { get; private set; }
     public var Function:Dynamic;
 
-    public function new() {        
+    public function new(func:Dynamic = null) {
+        Function = func;
     }    
 }
 
@@ -168,7 +169,7 @@ class LispVariant {
         return newObj;
     }
 
-    public var TypeString(get, null):String;    
+    public var TypeString(get, never):String;    
     function get_TypeString() {
         if (Type == LispType.NativeObject)
         {
@@ -182,43 +183,43 @@ class LispVariant {
         return ToStringT(Type);
     }
 
-    public var IsNil(get, null):Bool;
+    public var IsNil(get, never):Bool;
     function get_IsNil() { return Type == LispType.Nil; }
 
-    public var IsError(get, null):Bool;
+    public var IsError(get, never):Bool;
     function get_IsError() { return Type == LispType.Error; }
 
-    public var IsUndefined(get, null):Bool;
+    public var IsUndefined(get, never):Bool;
     function get_IsUndefined() { return Type == LispType.Undefined; }
 
-    public var IsString(get, null):Bool;
+    public var IsString(get, never):Bool;
     function get_IsString() { return Type == LispType.String; }
 
-    public var IsDouble(get, null):Bool;
+    public var IsDouble(get, never):Bool;
     function get_IsDouble() { return Type == LispType.Double; }
 
-    public var IsInt(get, null):Bool;
+    public var IsInt(get, never):Bool;
     function get_IsInt() { return Type == LispType.Int; }
 
-    public var IsNumber(get, null):Bool;
+    public var IsNumber(get, never):Bool;
     function get_IsNumber() { return IsInt || IsDouble; }
 
-    public var IsBool(get, null):Bool;
+    public var IsBool(get, never):Bool;
     function get_IsBool() { return Type == LispType.Bool; }
 
-    public var IsList(get, null):Bool;
+    public var IsList(get, never):Bool;
     function get_IsList() { return Type == LispType.List || Type == LispType.Nil; }
 
-    public var IsFunction(get, null):Bool;
-    function get_IsFunction() { return Type == LispType.Function; }
+    public var IsFunction(get, never):Bool;
+    public function get_IsFunction() { return Type == LispType.Function; }
 
-    public var IsSymbol(get, null):Bool;
+    public var IsSymbol(get, never):Bool;
     function get_IsSymbol() { return Type == LispType.Symbol; }
 
-    public var IsNativeObject(get, null):Bool;
+    public var IsNativeObject(get, never):Bool;
     function get_IsNativeObject() { return Type == LispType.NativeObject; }
 
-    public var IsLValue(get, null):Bool;
+    public var IsLValue(get, never):Bool;
     function get_IsLValue() { return Type == LispType.LValue; }
 
     /// <summary>
@@ -285,7 +286,7 @@ class LispVariant {
         return CompareTo(LispVariant.forValue(other));
     }
 
-    public var FunctionValue(get, null):LispFunctionWrapper;
+    public var FunctionValue(get, never):LispFunctionWrapper;
     function get_FunctionValue() {
         if (Type != LispType.Function)
         {
@@ -294,7 +295,7 @@ class LispVariant {
         return cast(Value, LispFunctionWrapper);
     }
 
-    public var ListValue(get, null):Array<Dynamic>;  //IEnumerable<object>
+    public var ListValue(get, never):Array<Dynamic>;  //IEnumerable<object>
     function get_ListValue() {
         // Nil is an empty list () !
         if (Type == LispType.Nil)
@@ -312,7 +313,7 @@ class LispVariant {
         return cast(Value, Array<Dynamic>);  //((IEnumerable)Value).Cast<object>();
     }
 
-    public var ListRef(get, null):Array<Dynamic>;  //List<object>
+    public var ListRef(get, never):Array<Dynamic>;  //List<object>
     function get_ListRef() {
         // Nil is an empty list () !
         if (Type == LispType.Nil)
@@ -330,7 +331,7 @@ class LispVariant {
         return cast(Value, Array<Dynamic>);  //List<object>
     }
 
-    public var DoubleValue(get, null):Float;
+    public var DoubleValue(get, never):Float;
     function get_DoubleValue() {
         if (Type != LispType.Double)
         {
@@ -339,7 +340,7 @@ class LispVariant {
         return cast(Value, Float);
     }
     
-    public var IntValue(get, null):Int;
+    public var IntValue(get, never):Int;
     function get_IntValue() {
         if (Type != LispType.Int)
         {
@@ -348,7 +349,7 @@ class LispVariant {
         return cast(Value, Int);
     }    
 
-    public var BoolValue(get, null):Bool;
+    public var BoolValue(get, never):Bool;
     function get_BoolValue() {
         if (Type != LispType.Bool)
         {
@@ -357,7 +358,7 @@ class LispVariant {
         return cast(Value, Bool);
     }
 
-    public var NativeObjectValue(get, null):Dynamic;
+    public var NativeObjectValue(get, never):Dynamic;
     function get_NativeObjectValue() {
         if (Type != LispType.NativeObject && Type != LispType.Nil)
         {
@@ -425,7 +426,7 @@ class LispVariant {
         throw CreateInvalidCastException("double", CanNotConvertTo(TypeString, "double"));
     }
 
-    public var StringValue(get, null):String;
+    public var StringValue(get, never):String;
     public function get_StringValue() {
         return Std.string(Value);
     }
@@ -434,7 +435,7 @@ class LispVariant {
     {
         if (IsSymbol)
         {
-            return Value.ToString();
+            return Std.string(Value);  //.ToString();
         }
         if (IsString)
         {
