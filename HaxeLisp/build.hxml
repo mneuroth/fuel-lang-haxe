@@ -14,3 +14,18 @@
 
 --neko main.n
 --cmd neko main.n
+
+--next
+
+--python bin/main.py
+--cmd python3 bin/main.py
+
+--next
+
+--java bin/main.java
+--cmd java -jar bin/main.java/Main.jar
+
+--next
+
+--cpp bin/main.cpp
+--cmd bin/main.cpp/Main

@@ -70,7 +70,7 @@ function TryParseInt(val:String):TupleReturn<Bool,Int> {
     } catch(e:Exception) {
         //trace(e);
     }
-    return new TupleReturn<Bool,Int>(false, null);
+    return new TupleReturn<Bool,Int>(false, /*null*/0);
 }
 
 function TryParseFloat(val:String):TupleReturn<Bool,Float> {
@@ -82,7 +82,7 @@ function TryParseFloat(val:String):TupleReturn<Bool,Float> {
     } catch(e:Exception) {
         //trace(e);
     }
-    return new TupleReturn<Bool,Float>(false, null);
+    return new TupleReturn<Bool,Float>(false, /*null*/0.0);
 }
 
 
