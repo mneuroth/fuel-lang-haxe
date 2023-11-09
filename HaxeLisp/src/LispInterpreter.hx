@@ -80,7 +80,7 @@ class LispBreakpointPosition {
                 try
                 {
                     first = astWithResolvedValues.First();
-                    firstElem = first.get_FunctionValue();  //(LispVariant)     // TODO
+                    firstElem = LispUtils.ToLispVariant(first).FunctionValue;
                 }
                 catch (LispException)
                 {
@@ -191,7 +191,7 @@ class LispBreakpointPosition {
         var _function = astWithResolvedValues.First();
 
         // normal evaluation...
-        var functionWrapper:LispVariant.LispFunctionWrapper = _function.get_FunctionValue();  //(LispVariant)
+        var functionWrapper:LispVariant.LispFunctionWrapper = LispUtils.ToLispVariant(_function).FunctionValue;  //(LispVariant)
 
         // trace current function (if tracing is enabled)
         if (scope.GlobalScope.Tracing)
@@ -438,8 +438,7 @@ class LispBreakpointPosition {
         var isSymbol = false;
         if (elem is LispVariant)
         {
-            var variant = /*(LispVariant)*/elem;
-            isSymbol = variant.get_IsSymbol();      // TODO
+            isSymbol = LispUtils.ToLispVariant(elem).IsSymbol;
         }
         return isSymbol;
     }

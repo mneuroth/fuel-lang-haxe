@@ -27,6 +27,7 @@
  
  using LispUtils;
  using LispVariant;
+ using LispVariant.OpLispVariant;
 
  class LispEnvironment {
     public /*const*/static var Builtin = "<builtin>";
@@ -48,6 +49,7 @@
 
         //scope["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
         //scope["fuel"] = CreateFunction(Fuel, "(fuel)", "");
+        scope.set("+", CreateFunction(Addition, "(add)", ""));
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
 
         return scope;
@@ -58,10 +60,20 @@
         return LispVariant.forValue(new LispFunctionWrapper(func/*, signature, documentation, isBuiltin, isSpecialForm, isEvalInExpand, moduleName*/));
     }
 
-//    public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
-//    {
-//        return ArithmetricOperation(args, (l, r) => l + r);
-//    }
+    public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        //var val1:OpLispVariant = cast(args[0], OpLispVariant);
+        //var val2:OpLispVariant = cast(args[1], OpLispVariant);
+        //var val1 = new OpLispVariant(args[0]);
+        //var val2 = new OpLispVariant(args[1]);
+        /*
+        //trace("ADD:", val1.Value + val2.Value);
+        //var sum = LispVariant.add(val1, val2);
+        var sum:LispVariant = val1 + val2;
+        return LispVariant.forValue(sum);
+        */
+        return ArithmetricOperation(args, function(l:OpLispVariant, r:OpLispVariant) return l + r);   // TODO
+    }
 
     private static function Fuel(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
@@ -70,6 +82,23 @@
         //var text = new StringBuilder();
         //text.Append(string.Format("fuel version {0} from {1}", Lisp.Version, Lisp.Date));
         return LispVariant.forValue("This is the fuel interpreter!");
+    }
+    
+    private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 
+    {
+        var result:OpLispVariant = null;
+        for (elem in args)
+        {
+            if (result == null)
+            {
+                result = new OpLispVariant(elem);
+            }
+            else
+            {
+                result = op(result, elem);
+            }
+        }
+        return LispVariant.forValue(result.Value);
     }
 
     public static function IsInModules(funcName:String, scope:LispScope):Bool

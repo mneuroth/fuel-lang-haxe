@@ -153,3 +153,8 @@ function StringCompare(val1:String, val2:String):Int {
     }
     return 0;
 }
+
+function ToLispVariant(val:Dynamic) {
+    var ret:LispVariant = cast(val, LispVariant);
+    return ret;
+}

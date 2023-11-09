@@ -145,7 +145,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
     private static function UpdateFunctionCache(elemAsVariant:LispVariant, /*object*/ value:Dynamic, isFirst:Bool)
     {
         var valueAsVariant:LispVariant = value /*as LispVariant*/;
-        if (isFirst && elemAsVariant != null && valueAsVariant != null && valueAsVariant.get_IsFunction())  // TODO
+        if (isFirst && elemAsVariant != null && valueAsVariant != null && valueAsVariant.IsFunction)
         {
             //if (elemAsVariant.CachedFunction != null)
             //{
