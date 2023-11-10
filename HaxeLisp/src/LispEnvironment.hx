@@ -61,6 +61,13 @@
         scope.set("*", CreateFunction(Multiplication, "(* expr1 expr2 ...)", "see: mul"));
         scope.set("div", CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ..."));
         scope.set("/", CreateFunction(Division, "(* expr1 expr2 ...)", "see: div"));
+        scope.set("mod", CreateFunction(Modulo, "(mod expr1 expr2)", "Returns value of modulo operation between expr1 and expr2"));
+        scope.set("%", CreateFunction(Modulo, "(% expr1 expr2)", "see: mod"));
+
+        scope.set("<", CreateFunction(Less, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese."));
+        scope.set(">", CreateFunction(Greater, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese."));
+        scope.set("<=", CreateFunction(LessEqual, "(<= expr1 expr2)", "Returns #t if value of expression1 is equal or smaller than value of expression2 and returns #f otherwiese."));
+        scope.set(">=", CreateFunction(GreaterEqual, "(>= expr1 expr2)", "Returns #t if value of expression1 is equal or larger than value of expression2 and returns #f otherwiese."));
 
         return scope;
     }
@@ -103,6 +110,31 @@
     public static function Division(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_divide(l, r));
+    }
+
+    public static function Modulo(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_modulo(l, r));
+    }
+
+    public static function Less(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_less(l, r));
+    }
+
+    public static function Greater(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_greater(l, r));
+    }
+
+    public static function LessEqual(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_less_than(l, r));
+    }
+
+    public static function GreaterEqual(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_greater_than(l, r));
     }
 
     private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 

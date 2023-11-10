@@ -63,4 +63,58 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(12, result.Value);
     }
+    public function testInterpreter7() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(% 7 2)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(1, result.Value);
+    }
+    public function testInterpreter8() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(< 7 2)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        var ast = LispParser.Parse("(< 2 7)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(< 3 3)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+    }
+    public function testInterpreter9() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(> 7 2)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(> 2 7)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        var ast = LispParser.Parse("(> 3 3)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+    }
+    public function testInterpreter10() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(<= 7 2)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        var ast = LispParser.Parse("(<= 2 7)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(<= 3 3)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+    }
+    public function testInterpreter11() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(>= 7 2)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(>= 2 7)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        var ast = LispParser.Parse("(>= 3 3)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+    }
 }

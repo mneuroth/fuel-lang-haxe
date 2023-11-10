@@ -624,6 +624,63 @@ class LispVariant {
         }
         throw CreateInvalidOperationException("/", l, r);
     }
+
+    public static function op_modulo(l:LispVariant, r:LispVariant):LispVariant
+    {
+        if (l.IsDouble || r.IsDouble)
+        {
+            return LispVariant.forValue(l.ToDouble() % r.ToDouble());
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return LispVariant.forValue(l.ToInt() % r.ToInt());
+        }
+        throw CreateInvalidOperationException("%", l, r);
+    }
+
+    public static function op_less(l:LispVariant, r:LispVariant):LispVariant
+    {
+        if (l.IsDouble || r.IsDouble)
+        {
+            return LispVariant.forValue(l.ToDouble() < r.ToDouble());
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return LispVariant.forValue(l.ToInt() < r.ToInt());
+        }
+        if (l.IsString || r.IsString)
+        {
+            return LispVariant.forValue(LispUtils.StringCompare(l.ToString(), r.ToString()) < 0);
+        }
+        throw CreateInvalidOperationException("< or >", l, r);
+    }
+
+    public static function op_greater(l:LispVariant, r:LispVariant):LispVariant
+    {
+        return op_less(r, l);
+    }
+
+    public static function op_less_than(l:LispVariant, r:LispVariant):LispVariant
+    {
+        if (l.IsDouble || r.IsDouble)
+        {
+            return LispVariant.forValue(l.ToDouble() <= r.ToDouble());
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return LispVariant.forValue(l.ToInt() <= r.ToInt());
+        }
+        if (l.IsString || r.IsString)
+        {
+            return LispVariant.forValue(LispUtils.StringCompare(l.ToString(), r.ToString()) <= 0);
+        }
+        throw CreateInvalidOperationException("<= or >=", l, r);
+    }
+
+    public static function op_greater_than(l:LispVariant, r:LispVariant):LispVariant
+    {
+        return op_less_than(r, l);
+    }
 }
 
 @:forward(Value)
