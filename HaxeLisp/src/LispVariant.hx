@@ -555,6 +555,10 @@ class LispVariant {
     private static function CanNotConvertTo(type:String, val:String) {
         return "can not convert $type to $val";
     }
+
+    public static function op_add(left:LispVariant, right:LispVariant) {
+        return LispVariant.forValue(left.Value + right.Value);
+    }
 }
 
 @:forward(Value)

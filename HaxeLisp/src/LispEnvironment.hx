@@ -60,21 +60,6 @@
         return LispVariant.forValue(new LispFunctionWrapper(func/*, signature, documentation, isBuiltin, isSpecialForm, isEvalInExpand, moduleName*/));
     }
 
-    public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
-    {
-        //var val1:OpLispVariant = cast(args[0], OpLispVariant);
-        //var val2:OpLispVariant = cast(args[1], OpLispVariant);
-        //var val1 = new OpLispVariant(args[0]);
-        //var val2 = new OpLispVariant(args[1]);
-        /*
-        //trace("ADD:", val1.Value + val2.Value);
-        //var sum = LispVariant.add(val1, val2);
-        var sum:LispVariant = val1 + val2;
-        return LispVariant.forValue(sum);
-        */
-        return ArithmetricOperation(args, function(l:OpLispVariant, r:OpLispVariant) return l + r);   // TODO
-    }
-
     private static function Fuel(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         //CheckArgs("fuel", 0, args, scope);
@@ -84,14 +69,19 @@
         return LispVariant.forValue("This is the fuel interpreter!");
     }
     
+    public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_add(l, r));
+    }
+
     private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 
     {
-        var result:OpLispVariant = null;
+        var result:LispVariant = null;
         for (elem in args)
         {
             if (result == null)
             {
-                result = new OpLispVariant(elem);
+                result = LispVariant.forValue(elem.Value);
             }
             else
             {
@@ -100,6 +90,40 @@
         }
         return LispVariant.forValue(result.Value);
     }
+
+    //
+    // for tests with overloaded operators
+    //
+    // public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    // {
+    //     //var val1:OpLispVariant = cast(args[0], OpLispVariant);
+    //     //var val2:OpLispVariant = cast(args[1], OpLispVariant);
+    //     //var val1 = new OpLispVariant(args[0]);
+    //     //var val2 = new OpLispVariant(args[1]);        
+    //     //trace("ADD:", val1.Value + val2.Value);
+    //     //var sum = LispVariant.add(val1, val2);
+    //     //var sum:LispVariant = val1 + val2;
+    //     //return LispVariant.forValue(sum);
+
+    //     return ArithmetricOperation(args, function(l:OpLispVariant, r:OpLispVariant) return l + r);
+    // }
+
+    // private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 
+    // {
+    //     var result:OpLispVariant = null;
+    //     for (elem in args)
+    //     {
+    //         if (result == null)
+    //         {
+    //             result = new OpLispVariant(elem);
+    //         }
+    //         else
+    //         {
+    //             result = op(result, elem);
+    //         }
+    //     }
+    //     return LispVariant.forValue(result.Value);
+    // }
 
     public static function IsInModules(funcName:String, scope:LispScope):Bool
     {
