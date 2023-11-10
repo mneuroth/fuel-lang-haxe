@@ -33,4 +33,14 @@ class LispException extends haxe.Exception {
     public function new(text:String, token:LispToken=null, moduleName:String="") {
         super(text);
     }
+
+    public static function fromScope(text:String, scope:LispScope):LispException {
+        var exc:LispException;
+        if( scope != null ) {
+            exc = new LispException(text, scope.CurrentToken, scope.ModuleName);
+        } else {
+            exc = new LispException(text);
+        }
+        return exc;
+    }
 }

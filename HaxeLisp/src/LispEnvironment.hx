@@ -44,15 +44,29 @@
     public /*const*/static var Macros = MetaTag + "macros" + MetaTag;
     public /*const*/static var Modules = MetaTag + "modules" + MetaTag;
 
+    public /*const*/static var Version = "v0.99.4";
+    public /*const*/static var Date = "11.11.2023";
+
+
     public static function CreateDefaultScope():LispScope {
         var scope = LispScope.forFunction(MainScope);
 
-        //scope["+"] = CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add");
         //scope["fuel"] = CreateFunction(Fuel, "(fuel)", "");
-        scope.set("+", CreateFunction(Addition, "(add)", ""));
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
+        scope.set("add", CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ..."));
+        scope.set("+", CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add"));
+        scope.set("sub", CreateFunction(Substraction, "(sub expr1 expr2 ...)", "Returns value of expr1 subtracted with expr2 subtracted with ..."));
+        scope.set("-", CreateFunction(Substraction, "(- expr1 expr2 ...)", "see: sub"));
 
         return scope;
+    }
+    
+    private static function CheckArgs(name:String, count:Int, /*object[]*/ args:Array<Dynamic>, scope:LispScope)
+    {
+        if (count < 0 || args.length != count)
+        {
+            throw LispException.fromScope('Bad argument count in $name, has $args.length expected $count', scope);
+        }
     }
 
     private static function CreateFunction(/*Func<object[], LispScope, LispVariant>*/ func:Dynamic, signature:String = null, documentation:String = null, isBuiltin:Bool = true, isSpecialForm:Bool = false, isEvalInExpand:Bool = false, moduleName:String = "<builtin>"):Dynamic
@@ -62,16 +76,19 @@
 
     private static function Fuel(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        //CheckArgs("fuel", 0, args, scope);
+        CheckArgs("fuel", 0, args, scope);
 
-        //var text = new StringBuilder();
-        //text.Append(string.Format("fuel version {0} from {1}", Lisp.Version, Lisp.Date));
-        return LispVariant.forValue("This is the fuel interpreter!");
+        return LispVariant.forValue('fuel version ${LispEnvironment.Version} from ${LispEnvironment.Date}');
     }
     
     public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_add(l, r));
+    }
+
+    public static function Substraction(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_minus(l, r));
     }
 
     private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 

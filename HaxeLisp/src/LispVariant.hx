@@ -547,20 +547,20 @@ class LispVariant {
 
     private function CreateInvalidCastException(name:String, msg:String = "no"):haxe.Exception
     {
-        var exception = new LispException("Invalid cast for $msg, value=$StringValue $name");
+        var exception = new LispException('Invalid cast for $msg, value=$StringValue $name');
         exception.AddTokenInfos(Token);
         return exception;
     }
 
     private static function CreateInvalidOperationException(operation:String, l:LispVariant, r:LispVariant):haxe.Exception
     {
-        var exception = new LispException("no $operation operator for types $l.Type and r.Type");
+        var exception = new LispException('no $operation operator for types ${l.Type} and ${r.Type}');
         exception.AddTokenInfos(l.Token);
         return exception;
     }
 
     private static function CanNotConvertTo(type:String, val:String) {
-        return "can not convert $type to $val";
+        return 'can not convert $type to $val';
     }
 
     public static function op_add(l:LispVariant, r:LispVariant) {
@@ -584,6 +584,19 @@ class LispVariant {
             return LispVariant.forValue(newList);
         }
         throw CreateInvalidOperationException("+", l, r);
+    }
+
+    public static function op_minus(l:LispVariant, r:LispVariant):LispVariant
+    {
+        if (l.IsDouble || r.IsDouble)
+        {
+            return LispVariant.forValue(l.ToDouble() - r.ToDouble());
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return LispVariant.forValue(l.ToInt() - r.ToInt());
+        }
+        throw CreateInvalidOperationException("-", l, r);
     }
 }
 
