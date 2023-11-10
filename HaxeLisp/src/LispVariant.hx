@@ -598,6 +598,32 @@ class LispVariant {
         }
         throw CreateInvalidOperationException("-", l, r);
     }
+    
+    public static function op_mul(l:LispVariant, r:LispVariant):LispVariant
+    {
+        if (l.IsDouble || r.IsDouble)
+        {
+            return LispVariant.forValue(l.ToDouble() * r.ToDouble());
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return LispVariant.forValue(l.ToInt() * r.ToInt());
+        }
+        throw CreateInvalidOperationException("*", l, r);
+    }
+
+    public static function op_divide(l:LispVariant, r:LispVariant):LispVariant
+    {
+        if (l.IsDouble || r.IsDouble)
+        {
+            return LispVariant.forValue(l.ToDouble() / r.ToDouble());
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return LispVariant.forValue(l.ToInt() / r.ToInt());
+        }
+        throw CreateInvalidOperationException("/", l, r);
+    }
 }
 
 @:forward(Value)

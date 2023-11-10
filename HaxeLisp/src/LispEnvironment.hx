@@ -57,6 +57,10 @@
         scope.set("+", CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add"));
         scope.set("sub", CreateFunction(Substraction, "(sub expr1 expr2 ...)", "Returns value of expr1 subtracted with expr2 subtracted with ..."));
         scope.set("-", CreateFunction(Substraction, "(- expr1 expr2 ...)", "see: sub"));
+        scope.set("mul", CreateFunction(Multiplication, "(sub expr1 expr2 ...)", "(mul expr1 expr2 ...)", "Returns value of expr1 multipied by expr2 multiplied by ..."));
+        scope.set("*", CreateFunction(Multiplication, "(* expr1 expr2 ...)", "see: mul"));
+        scope.set("div", CreateFunction(Division, "(div expr1 expr2 ...)", "Returns value of expr1 divided by expr2 divided by ..."));
+        scope.set("/", CreateFunction(Division, "(* expr1 expr2 ...)", "see: div"));
 
         return scope;
     }
@@ -89,6 +93,16 @@
     public static function Substraction(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_minus(l, r));
+    }
+
+    public static function Multiplication(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_mul(l, r));
+    }
+
+    public static function Division(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_divide(l, r));
     }
 
     private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 

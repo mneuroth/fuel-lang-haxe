@@ -45,4 +45,22 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(39, result.Value);
     }
+    public function testInterpreter4() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(* 2 3 5)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(30, result.Value);
+    }
+    public function testInterpreter5() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(* 2.4 3.2)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(7.68, result.Value);
+    }
+    public function testInterpreter6() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(/ 24 2)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(12, result.Value);
+    }
 }
