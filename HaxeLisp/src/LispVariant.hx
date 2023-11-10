@@ -552,12 +552,38 @@ class LispVariant {
         return exception;
     }
 
+    private static function CreateInvalidOperationException(operation:String, l:LispVariant, r:LispVariant):haxe.Exception
+    {
+        var exception = new LispException("no $operation operator for types $l.Type and r.Type");
+        exception.AddTokenInfos(l.Token);
+        return exception;
+    }
+
     private static function CanNotConvertTo(type:String, val:String) {
         return "can not convert $type to $val";
     }
 
-    public static function op_add(left:LispVariant, right:LispVariant) {
-        return LispVariant.forValue(left.Value + right.Value);
+    public static function op_add(l:LispVariant, r:LispVariant) {
+        if (l.IsString || r.IsString)
+        {
+            return LispVariant.forValue(l.StringValue + r.StringValue);
+        }
+        if (l.IsDouble || r.IsDouble)
+        {
+            return LispVariant.forValue(l.ToDouble() + r.ToDouble());
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return LispVariant.forValue(l.ToInt() + r.ToInt());
+        }
+        if (l.IsList && r.IsList)
+        {
+            var newList = new Array<Dynamic>();  //List<object>();
+            newList.AddRange(l.ListValue);
+            newList.AddRange(r.ListValue);
+            return LispVariant.forValue(newList);
+        }
+        throw CreateInvalidOperationException("+", l, r);
     }
 }
 
