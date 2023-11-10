@@ -403,7 +403,7 @@ class LispBreakpointPosition {
         var i = 1;
         var replaced = false;
         var realArguments:Array<Dynamic> = astAsList.Skip(1).ToList();  //IEnumerable<object>
-        var quotedRealArguments:Array<Dynamic> = [new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments]; //new Array<Dynamic>();  //TODO add 2 elements: { new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments };  //List<object> 
+        var quotedRealArguments:Array<Dynamic> = [new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments];  //List<object> 
         expression = ReplaceSymbolWithValueInExpression(new LispVariant(LispType.Symbol, "quoted-macro-args"), quotedRealArguments, expression, true, /*ref*/ replaced);
 
         for (formalArgument in formalArguments)

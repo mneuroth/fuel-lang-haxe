@@ -28,6 +28,10 @@ package;
 using LispUtils;
 
 class LispFunctionWrapper {
+    public var Signature:String;
+    public var Documentation:String;
+    public var ModuleName:String;
+    public var IsBuiltIn:Bool;
     public var IsSpecialForm:Bool;
 
     //public Func<object[], LispScope, LispVariant> Function { get; private set; }
@@ -457,7 +461,6 @@ class LispVariant {
         {
             return LispToken.Nil;
         }
-/* TODO        
         if (IsList)
         {
             return ExpandContainerToString(ListValue);
@@ -466,6 +469,7 @@ class LispVariant {
         {
             return "function " + (FunctionValue.Signature != null ? FunctionValue.Signature : "<unknown>");
         }
+/* TODO -> implement later          
         if (IsNativeObject)
         {
             return NativeObjectStringRepresentation;
@@ -482,8 +486,62 @@ class LispVariant {
         return "?";
     }
 
+    /// <summary>
+    /// Comverts this value into a string representation used by the debugger module.
+    /// </summary>
+    /// <returns>The string representation</returns>
+    public function ToStringDebugger():String
+    {
+        if (IsString)
+        {
+            return "\"" + StringValue + "\"";
+        }
+        return ToString();
+    }
+
+    private static function ExpandContainerToString(/*object*/ maybeContainer:Dynamic):String
+    {
+        var ret = "";  //""string.Empty;
+
+        if (maybeContainer is /*IEnumerable<object>*/Array)
+        {
+            var container = /*(IEnumerable<object>)*/cast(maybeContainer, Array<Dynamic>);
+            for (item in container)
+            {
+                if (ret.length > 0)
+                {
+                    ret += " ";
+                }
+                ret += ExpandContainerToString(item);
+            }
+            ret = "(" + ret + ")";
+        }
+        else
+        {
+            ret += ExpandItemForContainer(maybeContainer);
+        }
+
+        return ret;
+    }
+
+    private static function ExpandItemForContainer(/*object*/ item:Dynamic):String
+    {
+        if (item is LispVariant)
+        {
+            var variant = cast(item, LispVariant);
+            if (variant.IsString)
+            {
+                return variant.ToStringDebugger();
+            }
+        }
+        return item.ToString();
+    }
+
     public function SymbolCompare(other:Dynamic) {
-// TODO --> implement !        
+        if (other is LispVariant)
+        {
+            return Value == cast(other, LispVariant);  //Value.Equals(((LispVariant)other).Value);
+        }
         return false;
     }
 

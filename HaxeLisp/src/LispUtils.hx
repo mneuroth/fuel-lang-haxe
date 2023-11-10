@@ -68,16 +68,18 @@ class ArrayExtender {
     static public function ToList(arr:Array<Dynamic>):Array<Dynamic> {
         return arr;
     }
-    static public function Skip(arr:Array<Dynamic>, index:Int):Array<Dynamic> {
-// TODO -> remove first element
+    static public function Skip(arr:Array<Dynamic>, count:Int):Array<Dynamic> {
+        arr = arr.slice(0, count);
         return arr;
     }
     static public function AddRange(arr:Array<Dynamic>, other:Array<Dynamic>):Array<Dynamic> {
-// TODO -> remove first element
+        for(elem in other) {
+            arr.push(elem);
+        }
         return arr;
     }
     static public function CopyTo(arr:Array<Dynamic>, other:Array<Dynamic>, index:Int):Array<Dynamic> {
-// TODO -> remove first element
+        arr = other.copy();
         return arr;
     }
 }
