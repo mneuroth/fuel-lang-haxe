@@ -681,6 +681,57 @@ class LispVariant {
     {
         return op_less_than(r, l);
     }
+
+    public static function op_equal(l:LispVariant, r:LispVariant):LispVariant
+    {
+        return LispVariant.forValue(EqualOp(r, l));
+    }
+
+    public static function op_not_equal(l:LispVariant, r:LispVariant):LispVariant
+    {
+        return LispVariant.forValue(!EqualOp(r, l));
+    }
+
+    public static function EqualOp(l:LispVariant, r:LispVariant):Bool
+    {
+        if (l.IsNativeObject && r.IsNativeObject)
+        {
+            return l.NativeObjectValue == r.NativeObjectValue;
+        }
+        if (l.IsSymbol || r.IsSymbol)
+        {
+            return l.IsSymbol && r.IsSymbol && (l.ToString() == r.ToString());
+        }
+        if (l.IsBool && r.IsBool)
+        {
+            return l.BoolValue == r.BoolValue;
+        }
+        if (l.IsNil || r.IsNil)
+        {
+            return l.IsNil && r.IsNil;
+        }
+        if (l.IsList && r.IsList)
+        {
+            return l.ListValue == r.ListValue;  //l.ListValue.SequenceEqual(r.ListValue);
+        }
+        if (l.IsUndefined || r.IsUndefined)
+        {
+            return l.IsUndefined && r.IsUndefined;
+        }
+        if (l.IsString || r.IsString)
+        {
+            return l.ToString() == r.ToString();
+        }
+        if (l.IsDouble || r.IsDouble)
+        {
+            return Math.abs(l.ToDouble() - r.ToDouble()) < Tolerance;
+        }
+        if (l.IsInt || r.IsInt)
+        {
+            return l.ToInt() == r.ToInt();
+        }
+        throw CreateInvalidOperationException("==", l, r);
+    }    
 }
 
 @:forward(Value)

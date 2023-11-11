@@ -117,4 +117,28 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(true, result.Value);
     }
+    public function testInterpreter12() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(equal 7 7)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(equal 8 7)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        var ast = LispParser.Parse("(= 17 17)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(== 18 17)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+    }
+    public function testInterpreter13() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(!= 17 7)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(!= 8 8)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+    }
 }

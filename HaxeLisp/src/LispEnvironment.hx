@@ -69,6 +69,12 @@
         scope.set("<=", CreateFunction(LessEqual, "(<= expr1 expr2)", "Returns #t if value of expression1 is equal or smaller than value of expression2 and returns #f otherwiese."));
         scope.set(">=", CreateFunction(GreaterEqual, "(>= expr1 expr2)", "Returns #t if value of expression1 is equal or larger than value of expression2 and returns #f otherwiese."));
 
+        scope.set("equal", CreateFunction(EqualTest, "(equal expr1 expr2)", "Returns #t if value of expression1 is equal with value of expression2 and returns #f otherwiese."));
+        scope.set("=", CreateFunction(EqualTest, "(= expr1 expr2)", "see: equal"));
+        scope.set("==", CreateFunction(EqualTest, "(== expr1 expr2)", "see: equal"));
+
+        scope.set("!=", CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese."));
+
         return scope;
     }
     
@@ -119,22 +125,49 @@
 
     public static function Less(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_less(l, r));
+        return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_less(l, r), scope, "<");
     }
 
     public static function Greater(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_greater(l, r));
+        return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_greater(l, r), scope, ">");
     }
 
     public static function LessEqual(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_less_than(l, r));
+        return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_less_than(l, r), scope, "<=");
     }
 
     public static function GreaterEqual(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_greater_than(l, r));
+        return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_greater_than(l, r), scope, ">=");
+    }
+
+    public static function EqualTest(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_equal(l, r), scope, "==");
+    }
+
+    public static function NotEqualTest(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_not_equal(l, r), scope, "!=");
+    }
+
+    private static function CompareOperation(/*object[]*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic, scope:LispScope, name:String):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, name, function(arg1, arg2):LispVariant return op(arg1, arg2));
+    }
+
+    public static function FuelFuncWrapper2/*<T1, T2, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, T2, TResult>*/ func:Dynamic):LispVariant
+    {
+        CheckArgs(name, 2, args, scope);
+
+        var arg1 = /*(T1)*/cast(args[0], LispVariant);
+        var arg2 = /*(T2)*/cast(args[1], LispVariant);
+        var result = func(arg1, arg2);
+
+        var tempResult:LispVariant = cast(result, LispVariant);
+        return tempResult!=null ? tempResult : LispVariant.forValue(result);
     }
 
     private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 
