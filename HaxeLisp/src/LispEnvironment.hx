@@ -33,9 +33,12 @@
  class LispEnvironment {
     public /*const*/static var Builtin = "<builtin>";
     
+    private /*const*/static var If = "if";
     private /*const*/static var Fn = "fn";
     private /*const*/static var Def = "def";
+    private /*const*/static var Defn = "defn";
     private /*const*/static var Gdef = "gdef";
+    private /*const*/static var Gdefn = "gdefn";
 
     private /*const*/static var MainScope = "<main>";
 
@@ -83,13 +86,15 @@
 
         scope.set("!=", CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese."));
 
+        scope.set(If, CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", true, true));
         scope.set("do", CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", true, true));
         scope.set("begin", CreateFunction(do_form, "(begin statement1 statement2 ...)", "see: do", true, true));
         scope.set("lambda", CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", true, true));
-        scope.set("fn", CreateFunction(fn_form, "(fn (arguments) block)", "Returns a function.", true, true));
-        scope.set("defn", CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", true, true));
+        scope.set(Fn, CreateFunction(fn_form, "(fn (arguments) block)", "Returns a function.", true, true));
+        scope.set(Defn, CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", true, true));
+        scope.set(Gdefn, CreateFunction(gdefn_form, "(gdefn name (args) block)", "Defines a function in the global scope.", true, true));
 
-        scope.set("def", CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
+        scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
 
         return scope;
     }
@@ -201,6 +206,19 @@
             }
         }
         return LispVariant.forValue(result.Value);
+    }
+
+    public static function if_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        if (!(args.length == 2 || args.length == 3))
+        {
+            // throw exception
+            CheckArgs(If, -1, args, scope);                
+        }
+
+        var passed = LispInterpreter.EvalAst(args[0], scope).BoolValue;
+        var elseCode = args.length > 2 ? args[2] : null;
+        return LispInterpreter.EvalAst(passed ? args[1] : elseCode, scope);
     }
 
     public static function do_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant

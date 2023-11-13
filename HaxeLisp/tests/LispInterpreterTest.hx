@@ -147,4 +147,10 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(8, result.Value);
     }
+    public function testInterpreter15() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(do (if (== 4 5) -1 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(1, result.Value);
+    }
 }
