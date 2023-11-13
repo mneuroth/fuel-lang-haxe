@@ -28,10 +28,15 @@
  using LispUtils;
  using LispVariant;
  using LispVariant.OpLispVariant;
+ using LispToken.LispTokenType;
 
  class LispEnvironment {
     public /*const*/static var Builtin = "<builtin>";
     
+    private /*const*/static var Fn = "fn";
+    private /*const*/static var Def = "def";
+    private /*const*/static var Gdef = "gdef";
+
     private /*const*/static var MainScope = "<main>";
 
     public /*const*/static var Quote = "quote";
@@ -43,6 +48,9 @@
 
     public /*const*/static var Macros = MetaTag + "macros" + MetaTag;
     public /*const*/static var Modules = MetaTag + "modules" + MetaTag;
+
+    public /*const*/static var ArgsMeta = MetaTag + "args" + MetaTag;
+    public /*const*/static var AdditionalArgs = "_additionalArgs";
 
     public /*const*/static var Version = "v0.99.4";
     public /*const*/static var Date = "11.11.2023";
@@ -75,6 +83,14 @@
 
         scope.set("!=", CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese."));
 
+        scope.set("do", CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", true, true));
+        scope.set("begin", CreateFunction(do_form, "(begin statement1 statement2 ...)", "see: do", true, true));
+        scope.set("lambda", CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", true, true));
+        scope.set("fn", CreateFunction(fn_form, "(fn (arguments) block)", "Returns a function.", true, true));
+        scope.set("defn", CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", true, true));
+
+        scope.set("def", CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
+
         return scope;
     }
     
@@ -88,7 +104,7 @@
 
     private static function CreateFunction(/*Func<object[], LispScope, LispVariant>*/ func:Dynamic, signature:String = null, documentation:String = null, isBuiltin:Bool = true, isSpecialForm:Bool = false, isEvalInExpand:Bool = false, moduleName:String = "<builtin>"):Dynamic
     {
-        return LispVariant.forValue(new LispFunctionWrapper(func/*, signature, documentation, isBuiltin, isSpecialForm, isEvalInExpand, moduleName*/));
+        return LispVariant.forValue(new LispFunctionWrapper(func, signature, documentation, isBuiltin, isSpecialForm, isEvalInExpand, moduleName));
     }
 
     private static function Fuel(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -187,6 +203,126 @@
         return LispVariant.forValue(result.Value);
     }
 
+    public static function do_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var result = LispVariant.forValue();
+
+        for (statement in args)
+        {
+            var lv:LispVariant = statement;
+            if (!((statement is /*Enumerable<object>*/Array) || ((statement is LispVariant) && cast(statement, LispVariant).IsList)))
+            {
+                throw new LispException("List expected in do", (cast(statement, LispVariant)).Token, scope.ModuleName, scope.DumpStackToString());
+            }
+            result = LispInterpreter.EvalAst(statement, scope);
+            if (scope.IsInReturn)
+            {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    public static function fn_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var name = cast(scope.UserData, String);
+        var moduleName = scope.ModuleName;
+        var userDoc = scope.UserDoc;
+        var signature = userDoc != null ? userDoc.value1 : null;
+        var documentation = userDoc != null ? userDoc.value2 : null;
+        
+        var /*Func<object[], LispScope, LispVariant>*/ fcn:Dynamic =
+            function (localArgs:Array<Dynamic>, localScope:LispScope):LispVariant
+            {
+                var childScope = LispScope.forFunction(name, localScope.GlobalScope, moduleName);
+                localScope.PushNextScope(childScope);
+
+                // add formal arguments to current scope
+                var i = 0;
+                var formalArgs:Array<Dynamic> = (args[0] is LispVariant ? (cast(args[0], LispVariant)).ListValue : GetExpression(args[0]))/*.ToArray()*/;
+
+                if (formalArgs.length > localArgs.length)
+                {
+                    //throw new LispException("Invalid number of arguments");
+
+                    // fill all not given arguments with nil
+                    var newLocalArgs = new Array<Dynamic>();  //object[formalArgs.Length];
+                    newLocalArgs.resize(formalArgs.length);
+                    for (n in 0...formalArgs.length)
+                    {
+                        if (n < localArgs.length)
+                        {
+                            newLocalArgs[n] = localArgs[n];
+                        }
+                        else
+                        {
+                            newLocalArgs[n] = new LispVariant(LispType.Nil);
+                        }
+                    }
+
+                    localArgs = newLocalArgs;
+                }
+
+                for (arg in formalArgs)
+                {
+                    childScope.set(arg.ToString(), localArgs[i]);
+                    i++;
+                }
+
+                // support args function for accessing all given parameters
+                childScope.set(ArgsMeta, LispVariant.forValue(localArgs));
+                var formalArgsCount:Int = formalArgs.length;
+                if (localArgs.length > formalArgsCount)
+                {
+                    var additionalArgs = new Array<Dynamic>();  //object[localArgs.Length - formalArgsCount];
+                    additionalArgs.resize(localArgs.length - formalArgsCount);
+                    for (n in 0...localArgs.length - formalArgsCount)
+                    {
+                        additionalArgs[n] = localArgs[n + formalArgsCount];
+                    }
+                    childScope.set(AdditionalArgs, LispVariant.forValue(additionalArgs));
+                }
+
+                // save the current call stack to resolve variables in closures
+                childScope.ClosureChain = scope;
+                childScope.NeedsLValue = scope.NeedsLValue;     // support setf in recursive calls
+
+                var ret:LispVariant;
+                try
+                {
+                    ret = LispInterpreter.EvalAst(args[1], childScope);
+                }
+/* //TODO                
+                catch (ex:LispStopDebuggerException)
+                {
+                    // forward a debugger stop exception to stop the debugger loop
+                    throw ex;
+                }
+*/                
+                catch (ex:haxe.Exception)
+                {
+                    // add the stack info and module name to the data of the exception
+//TODO                    ex.AddModuleNameAndStackInfos(childScope.ModuleName, childScope.DumpStackToString());
+//TODO                    ex.AddTokenInfos(childScope.CurrentToken);
+
+                    var debugger = scope.GlobalScope.Debugger;
+                    if (debugger != null)
+                    {
+                        scope.GlobalScope.Output.WriteLine(Std.string(ex));
+
+//TODO                        debugger.InteractiveLoop(initialTopScope: childScope, currentAst: (IList<object>)(args[1]) /*new List<object> { info.Item2 }*/ );
+                    }
+
+                    throw ex;
+                }
+                localScope.PopNextScope();
+                return ret;
+            };
+
+        return LispVariant.forValue(CreateFunction(fcn, signature, documentation, /*isBuiltin:*/ false, /*isSpecialForm:*/ false, /*isEvalInExpand:*/ false, /*moduleName:*/ scope.ModuleName));
+    }
+
     //
     // for tests with overloaded operators
     //
@@ -231,7 +367,7 @@
     {
         var result:Ref<Dynamic> = new Ref<Dynamic>(null);  //object
         FindFunctionInModules(funcName, scope, /*out*/ result);
-        return result;         
+        return result.value;
     }
 
     public static function IsMacro(funcName:Dynamic, scope:LispScope):Bool
@@ -269,7 +405,7 @@
         var val2:Ref<Dynamic> = new Ref<Dynamic>(null);
         if (scope != null &&
             scope.TryGetValue(key, /*out*/ val) &&
-            (cast(val, LispScope)).TryGetValue(funcName.ToString(), /*out*/ val2))
+            (cast(val.value, LispScope)).TryGetValue(funcName.ToString(), /*out*/ val2))
         {
             return val2.value;
         }
@@ -297,11 +433,131 @@
             var val:Dynamic = new Ref<Dynamic>(null);  //object
             if (module.TryGetValue(funcName, /*out*/ val))
             {
-                foundValue.value = val;
+                foundValue.value = val.value;
                 return true;
             }
         }
         return false;
+    }
+
+    public static function defn_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return defn_form_helper(args, scope, Def);
+    }
+
+    public static function gdefn_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return defn_form_helper(args, scope, Gdef);
+    }
+
+    private static function defn_form_helper(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String):LispVariant
+    {
+        CheckArgs(name, 3, args, scope);
+
+        UpdateDocumentationInformationAtScope(args, scope);
+
+        var fn = (cast(scope.GlobalScope.get(Fn), LispVariant)).FunctionValue;
+        scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
+        var resultingFcn = fn.Function([args[1], args[2]], scope);  //(new[] { args[1], args[2] }, scope);
+        scope.UserData = null;
+
+        var defFcn = (cast(scope.GlobalScope.get(name), LispVariant)).FunctionValue;
+        return defFcn.Function([args[0], resultingFcn], scope);  //(new[] { args[0], resultingFcn }, scope);
+    }
+
+    private static function EvalArgIfNeeded(/*object*/ arg:Dynamic, scope:LispScope):LispVariant
+    {
+        return (arg is /*IEnumerable<object>*/Array) ? LispInterpreter.EvalAst(arg, scope) : cast(arg, LispVariant);
+    }
+
+    private static function GetSignatureFromArgs(/*object*/ arg0:Dynamic, name:String):String
+    {
+        var signature = "(" + (name != null ? name : "?");
+        var formalArgsAsString = GetFormalArgsAsString(arg0);
+        if (formalArgsAsString.length > 0)
+        {
+            signature += " ";
+        }
+        signature += formalArgsAsString;
+        signature += ")";
+        return signature;
+    }
+
+    private static function GetFormalArgsAsString(/*object*/ args:Dynamic):String
+    {
+        var result = "";  //string.Empty;
+        var /*IEnumerable<object>*/ theArgs:Array<Dynamic> = null;
+        if (args is LispVariant)
+        {
+            theArgs = (cast(args, LispVariant)).ListValue;
+        }
+        else
+        {
+            theArgs = /*(IEnumerable<object>)*/cast(args, Array<Dynamic>);
+        }
+        for (s in theArgs)
+        {
+            if (result.length > 0)
+            {
+                result += " ";
+            }
+            result += s;
+        }
+        return result;
+    }
+
+    private static function UpdateDocumentationInformationAtScope(/*object[]*/ args:Array<Dynamic>, scope:LispScope)
+    {
+        var documentation = "";  //string.Empty;
+        var token = GetTokenBeforeDefn(args[0], scope);
+        if ((token != null) && (token.Type == LispTokenType.Comment))
+        {
+            documentation = token.Value.ToString();
+        }
+        var signature = GetSignatureFromArgs(args[1], args[0].ToString());
+        scope.UserDoc = new LispUtils.TupleReturn<String, String>(signature, documentation);
+    }
+
+    // returns token just before the defn statement:
+    // item is fcn token, go three tokens before, example:
+    // ; comment before defn
+    // (defn fcn (x) (+ x 1))
+    // --> Comment Token
+    private static function GetTokenBeforeDefn(/*object*/ item:Dynamic, scope:LispScope):LispToken
+    {
+        if (item is LispVariant)
+        {
+            var tokenName:LispVariant = cast(item, LispVariant);
+            var token1 = scope.GetPreviousToken(tokenName.Token);
+            var token2 = scope.GetPreviousToken(token1);
+            var token3 = scope.GetPreviousToken(token2);
+            return token3;
+        }
+        return null;
+    }
+
+    public static function def_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return def_form_helper(args, scope, Def, scope);
+    }
+
+    public static function gdef_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return def_form_helper(args, scope, Gdef, scope.GlobalScope);
+    }
+
+    private static function def_form_helper(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, scopeToSet:LispScope):LispVariant
+    {
+        CheckArgs(name, 2, args, scope);
+
+        var symbol = EvalArgIfNeeded(args[0], scope);
+        if (!(symbol.IsSymbol || symbol.IsString))
+        {
+            throw LispException.fromScope("Symbol expected", scope);
+        }
+        var value = LispInterpreter.EvalAst(args[1], scope);
+        scopeToSet.set(symbol.ToString(), value);
+        return LispVariant.forValue(value);
     }
 }
 

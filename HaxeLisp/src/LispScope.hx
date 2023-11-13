@@ -28,6 +28,7 @@ package;
 using LispUtils;
 using LispUtils.Ref;
 using LispEnvironment;
+using LispToken;
 
 class TextWriter {
     public function new() {        
@@ -50,6 +51,21 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
 
     public var Tracing:Bool;
 
+    /// <summary>
+    /// Gets and sets all tokens of the current script,
+    /// used for debugging purpose and for showing the 
+    /// position of an error.
+    /// </summary>
+    public var Tokens:Array<LispToken>;
+    
+    /// <summary>
+    /// Gets and sets the next and previous scope,
+    /// used for debugging purpose to show the 
+    /// call stack
+    /// </summary>
+    public var Next:LispScope;  //{ get; private set; }
+    public var Previous:LispScope;  //{ get; set; }
+
     public var ClosureChain:LispScope;
 
     public var ModuleName:String;
@@ -61,6 +77,23 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
     public var GlobalScope:LispScope;
     public var Output:TextWriter;
     public var Input:TextReader;
+
+    public var IsInReturn:Bool;
+
+    public var NeedsLValue:Bool;
+
+    /// <summary>
+    /// Gets or sets user data.
+    /// Needed for debugging support --> set function name to LispScope
+    /// </summary>
+    /// <value> The user data. </value>
+    public var UserData:Dynamic;
+
+    /// <summary>
+    /// Gets or sets the user documentation information.
+    /// </summary>
+    /// <value>The user documentation.</value>
+    public var UserDoc:TupleReturn<String,String>;
 
     public function new() {
         super();
@@ -87,6 +120,18 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
 
     public function ContainsKey(key:String):Bool {
         return exists(key);
+    }
+
+    public function PushNextScope(nextScope:LispScope)
+    {
+        Next = nextScope;
+        nextScope.Previous = this;
+    }
+
+    public function PopNextScope()
+    {
+        Next.Previous = null;
+        Next = null;
     }
 
     /// <summary>
@@ -127,7 +172,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         // then try to resolve in scope of loaded modules
         else if (LispEnvironment.IsInModules(name, GlobalScope))
         {
-            result = LispEnvironment.GetFunctionInModules(name, GlobalScope);
+            result.value = LispEnvironment.GetFunctionInModules(name, GlobalScope);
         }
         else
         {
@@ -142,6 +187,28 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         return result.value;
     }
 
+    public function DumpStackToString(currentLevel:Int=-1):String {
+// TODO --> implement later !        
+        return "<NOT IMPLEMENTED YET>";
+    }
+
+    public function GetPreviousToken(token:LispToken):LispToken
+    {
+        var previous:LispToken = null;
+        if (Tokens != null)
+        {
+            for (item in Tokens)
+            {
+                if (item == token)
+                {
+                    return previous;
+                }
+                previous = item;
+            }
+        }
+        return null;
+    }
+    
     private static function UpdateFunctionCache(elemAsVariant:LispVariant, /*object*/ value:Dynamic, isFirst:Bool)
     {
         var valueAsVariant:LispVariant = value /*as LispVariant*/;

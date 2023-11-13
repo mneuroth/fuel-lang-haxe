@@ -37,8 +37,13 @@ class LispFunctionWrapper {
     //public Func<object[], LispScope, LispVariant> Function { get; private set; }
     public var Function:Dynamic;
 
-    public function new(func:Dynamic = null) {
+    public function new(func:Dynamic = null, signature:String = null, documentation:String = null, isBuiltin:Bool = true, isSpecialForm:Bool = false, isEvalInExpand:Bool = false, moduleName:String = "<builtin>") {
         Function = func;
+        Signature = signature;
+        Documentation = documentation;
+        IsBuiltIn = isBuiltin;
+        IsSpecialForm = isSpecialForm;
+        ModuleName = moduleName;
     }    
 }
 
@@ -153,10 +158,19 @@ class LispVariant {
         this.Value = value;
         this.IsUnQuoted = unQuoted;
     }
-    public static function forValue(value:Dynamic):LispVariant {
+    public static function forValue(value:Dynamic=null):LispVariant {
         var newObj = new LispVariant(TypeOf(value), value);
         if (value == null) {
             newObj.Type = LispType.Nil;
+        }
+        if(value is LispVariant) {
+            var _value = cast(value, LispVariant);
+            if (_value != null)
+            {                
+                newObj.Type = _value.Type;
+                newObj.Value = _value.Value;
+                newObj.IsUnQuoted = _value.IsUnQuoted;
+            }
         }
         return newObj;
     }

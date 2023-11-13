@@ -82,7 +82,7 @@ class LispBreakpointPosition {
                     first = astWithResolvedValues.First();
                     firstElem = LispUtils.ToLispVariant(first).FunctionValue;
                 }
-                catch (LispException)
+                catch (exc:LispException)
                 {
                     if (!compile)
                     {
@@ -212,7 +212,7 @@ class LispBreakpointPosition {
                                     !functionWrapper.IsSpecialForm;
             var result = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
             // process statemens like this: `,@l  with l = (1 2 3)
-            var variant:LispVariant = result/* as LispVariant*/;
+            var variant:LispVariant = result is LispVariant ? result : null; //result/* as LispVariant*/;
             if (variant != null) 
             {                    
                 if (variant.IsUnQuoted == LispUnQuoteModus.UnQuoteSplicing && variant.IsList)

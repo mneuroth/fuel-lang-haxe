@@ -30,7 +30,7 @@ import haxe.Exception;
 import LispToken.LispToken;
 
 class LispException extends haxe.Exception {
-    public function new(text:String, token:LispToken=null, moduleName:String="") {
+    public function new(text:String, token:LispToken=null, moduleName:String="", stackInfo:String="not available") {
         super(text);
     }
 
