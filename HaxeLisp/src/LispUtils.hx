@@ -156,6 +156,10 @@ function StringCompare(val1:String, val2:String):Int {
     return 0;
 }
 
+function IsNullOrEmpty(val:String):Bool {
+    return val == null || val.length == 0;
+}
+
 function ToLispVariant(val:Dynamic) {
     var ret:LispVariant = cast(val, LispVariant);
     return ret;

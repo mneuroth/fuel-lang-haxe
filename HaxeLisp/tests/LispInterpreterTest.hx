@@ -153,4 +153,16 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(1, result.Value);
     }
+    public function testInterpreter16() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(do (def i 1) (while (< i 5) (setf i (+ i 1))))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(5, result.Value);
+    }
+    public function testInterpreter17() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(do (def i 1) (setf i (+ i 1)))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(2, result.Value);
+    }
 }

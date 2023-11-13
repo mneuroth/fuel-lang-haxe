@@ -34,8 +34,10 @@
     public /*const*/static var Builtin = "<builtin>";
     
     private /*const*/static var If = "if";
+    private /*const*/static var While = "while";
     private /*const*/static var Fn = "fn";
     private /*const*/static var Def = "def";
+    private /*const*/static var Setf = "setf";
     private /*const*/static var Defn = "defn";
     private /*const*/static var Gdef = "gdef";
     private /*const*/static var Gdefn = "gdefn";
@@ -87,6 +89,7 @@
         scope.set("!=", CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese."));
 
         scope.set(If, CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", true, true));
+        scope.set(While, CreateFunction(while_form, "(while cond block)", "The while loop.", true, true));
         scope.set("do", CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", true, true));
         scope.set("begin", CreateFunction(do_form, "(begin statement1 statement2 ...)", "see: do", true, true));
         scope.set("lambda", CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", true, true));
@@ -95,6 +98,7 @@
         scope.set(Gdefn, CreateFunction(gdefn_form, "(gdefn name (args) block)", "Defines a function in the global scope.", true, true));
 
         scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
+        scope.set(Setf, CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
 
         return scope;
     }
@@ -219,6 +223,24 @@
         var passed = LispInterpreter.EvalAst(args[0], scope).BoolValue;
         var elseCode = args.length > 2 ? args[2] : null;
         return LispInterpreter.EvalAst(passed ? args[1] : elseCode, scope);
+    }
+
+    public static function while_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(While, 2, args, scope);
+
+        var result = new LispVariant(null);
+        var condition = LispInterpreter.EvalAst(args[0], scope);
+        while (condition.ToBool())
+        {
+            result = LispInterpreter.EvalAst(args[1], scope);
+            if (scope.IsInReturn)
+            {
+                break;
+            }
+            condition = LispInterpreter.EvalAst(args[0], scope);
+        }
+        return result;
     }
 
     public static function do_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -576,6 +598,28 @@
         var value = LispInterpreter.EvalAst(args[1], scope);
         scopeToSet.set(symbol.ToString(), value);
         return LispVariant.forValue(value);
+    }
+
+    public static function setf_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(Setf, 2, args, scope);
+
+        var originalNeedsLValue = scope.NeedsLValue;
+        scope.NeedsLValue = true;
+        var symbol = EvalArgIfNeeded(args[0], scope);
+        scope.NeedsLValue = originalNeedsLValue;  
+        var symbolName = symbol != null ? symbol.ToString() : null;
+        var value = LispInterpreter.EvalAst(args[1], scope);
+        if(symbol.IsLValue)
+        {
+            var /*Action<object>*/ action:Dynamic = /*(Action<object>)*/symbol.Value;
+            action(value);
+        }
+        else
+        {
+            scope.SetInScopes(symbolName, value);
+        }
+        return value;
     }
 }
 

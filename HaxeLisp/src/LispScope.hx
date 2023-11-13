@@ -142,7 +142,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
     /// <returns>Resolved value or null</returns>
     public function ResolveInScopes(elem:Dynamic, isFirst:Bool):Dynamic
     {
-        var result:Ref<Dynamic> = new Ref<Dynamic>(null);
+        var result = new Ref<Dynamic>(null);
 
         // try to access the cached function value (speed optimization)
         var elemAsVariant:LispVariant = elem /*as LispVariant*/;
@@ -152,7 +152,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         }            
 
         var name = elem.ToString();
-        var foundClosureScope:LispScope = new LispScope();
+        var foundClosureScope = new Ref<LispScope>(new LispScope());
         // first try to resolve in this scope
         if (this.TryGetValue(name, /*out*/ result))
         {
@@ -185,6 +185,40 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         }
 
         return result.value;
+    }
+
+    /// <summary>
+    /// Searches the given symbol in the scope environment and 
+    /// sets the value if found.
+    /// Throws an exception if the symbol is not found in the scope 
+    /// environment.
+    /// </summary>
+    /// <param name="symbolName">Name of the symbol.</param>
+    /// <param name="value">The value.</param>
+    /// <exception cref="LispException">Symbol  + symbolName +  not found</exception>
+    public function SetInScopes(symbolName:String, /*object*/ value:Dynamic)
+    {
+        var foundClosureScope = new Ref<LispScope>(null);
+        var val =new Ref<Dynamic>(null);
+        if (!LispUtils.IsNullOrEmpty(symbolName))
+        {
+            if (ContainsKey(symbolName))
+            {
+                this.set(symbolName, value);
+            }
+            else if (IsInClosureChain(symbolName, /*out*/ foundClosureScope, /*out*/ val))
+            {
+                foundClosureScope.value.set(symbolName, value);
+            }
+            else if (GlobalScope != null && GlobalScope.ContainsKey(symbolName))
+            {
+                GlobalScope.set(symbolName, value);
+            }
+            else
+            {
+                throw LispException.fromScope("Symbol " + symbolName + " not found", this);
+            }
+        }
     }
 
     public function DumpStackToString(currentLevel:Int=-1):String {
@@ -229,20 +263,20 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
     /// <param name="closureScopeFound">The closure scope found.</param>
     /// <param name="value">The found value.</param>
     /// <returns>True if name was found.</returns>
-    private function IsInClosureChain(name:String, /*out LispScope*/ closureScopeFound:LispScope, /*out object*/ value:Dynamic):Bool
+    private function IsInClosureChain(name:String, /*out LispScope*/ closureScopeFound:Ref<LispScope>, /*out object*/ value:Ref<Dynamic>):Bool
     {
         if (ClosureChain != null)
         {
             if (ClosureChain.TryGetValue(name, /*out*/ value))
             {
-                closureScopeFound = ClosureChain;
+                closureScopeFound.value = ClosureChain;
                 return true;
             }
             return ClosureChain.IsInClosureChain(name, /*out*/ closureScopeFound, /*out*/ value);
         }
 
-        closureScopeFound = null;
-        value = null;
+        closureScopeFound.value = null;
+        value.value = null;
         return false;
     }
 }
