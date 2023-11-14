@@ -7,8 +7,26 @@
 --interp
 --library utest
 
-#--next
+# --next
 
-#--js bin/maintest.js
-#--library utest
-#--cmd node bin/maintest.js
+# --js bin/maintest.js
+# --library utest
+# --cmd node bin/maintest.js
+
+# --next
+
+# --python bin/maintest.py
+# --library utest
+# --cmd python3 bin/maintest.py
+
+# --next
+
+# --java bin/maintest.java
+# --library utest
+# --cmd java -jar bin/maintest.java/Maintest.jar
+
+# --next
+
+# --cpp bin/maintest.cpp
+# --library utest
+# --cmd bin/maintest.cpp/Maintest

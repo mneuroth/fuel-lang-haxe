@@ -164,3 +164,47 @@ function ToLispVariant(val:Dynamic) {
     var ret:LispVariant = cast(val, LispVariant);
     return ret;
 }
+
+/// <summary>
+/// Gets the script files from program arguments.
+/// Returns all elements of the given args array which does not start with a "-".
+/// </summary>
+/// <param name="args">The arguments.</param>
+/// <returns>Array of string names</returns>
+function GetScriptFilesFromProgramArgs(/*string[]*/ args:Array<String>):Array<String>  // string[]
+{
+    return args.filter(function (s) { return s.indexOf("-") != 0; });
+//    return new Array<String>();  //args.Where(s => !s.StartsWith("-")).ToArray();
+}
+
+/// <summary>
+/// Reads a file or returns an empty string.
+/// </summary>
+/// <param name="fileName">Name of the file.</param>
+/// <returns>Content of the file as string</returns>
+function ReadFileOrEmptyString(fileName:String):String
+{
+    var exists:Bool = false;
+    try
+    {
+//TODO        exists = File.Exists(fileName);
+    }
+    catch (ArgumentException)
+    {
+        exists = false;
+    }
+    return  "";  //exists ? File.ReadAllText(fileName) : /*string.Empty*/"";   //TODO
+}
+
+/// <summary>
+/// Decorates the code with a block.
+/// </summary>
+/// <param name="code">The code.</param>
+/// <param name="offset">The position offset created by the decorated code.</param>
+/// <returns>Decorated code.</returns>
+function DecorateWithBlock(code:String, /*out*/ offset:Ref<Int>):String
+{
+    var /*const string*/ block = "(do ";
+    offset.value = block.length;
+    return block + code + "\n)";
+}

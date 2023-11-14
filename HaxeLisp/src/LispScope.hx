@@ -34,7 +34,7 @@ class TextWriter {
     public function new() {        
     }
 
-    public function WriteLine(text:String, ?a1, ?a2, ?a3) {
+    public function WriteLine(text:String="", ?a1, ?a2, ?a3) {
         trace(text);
     }
 }
