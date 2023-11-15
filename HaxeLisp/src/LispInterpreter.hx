@@ -55,7 +55,7 @@ class LispBreakpointPosition {
     /// <param name="astAsList"></param>
     /// <param name="compile"></param>
     /// <returns></returns>
-    public static function ResolveArgsInScopes(scope:LispScope, /*IEnumerable<object>*/ astAsList:Array<Dynamic>, compile:Bool): Array<Dynamic> //List<object>
+    public static function ResolveArgsInScopes(scope:LispScope, /*IEnumerable<object>*/ astAsList:Array<Dynamic>, compile:Bool):Array<Dynamic> //List<object>
     {
         var astWithResolvedValues = new Array<Dynamic>();  //List<object>();
         var firstElement = astAsList.FirstOrDefault();
@@ -210,7 +210,7 @@ class LispBreakpointPosition {
             //arguments[i - 1] = needEvaluation ? EvalAst(asContainer, scope) : astWithResolvedValues[i];
             var needEvaluation = (astWithResolvedValues[i] is /*IEnumerable<object>*/Array/*<Dynamic>*/) &&
                                     !functionWrapper.IsSpecialForm;
-            var result = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : astWithResolvedValues[i];
+            var result:Dynamic = needEvaluation ? EvalAst(astWithResolvedValues[i], scope) : LispVariant.forValue(astWithResolvedValues[i]);
             // process statemens like this: `,@l  with l = (1 2 3)
             var variant:LispVariant = result is LispVariant ? result : null; //result/* as LispVariant*/;
             if (variant != null) 

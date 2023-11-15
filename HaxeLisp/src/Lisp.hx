@@ -64,11 +64,11 @@ class Lisp {
         RegisterNativeObjects(nativeItems, currentScope);
         var offset = new Ref<Int>(0);
         var code = LispUtils.DecorateWithBlock(lispCode, /*out*/ offset);
-        var ast = LispParser.Parse(code, offset.value, currentScope);
+        var ast:Dynamic = LispParser.Parse(code, offset.value, currentScope);
 #if ENABLE_COMPILE_TIME_MACROS 
         var expandedAst = LispInterpreter.ExpandMacros(ast, currentScope);
 #else
-        var expandedAst = ast;
+        var expandedAst:Dynamic = ast;
 #end
         var result:LispVariant = null;
         if (onlyMacroExpand)
