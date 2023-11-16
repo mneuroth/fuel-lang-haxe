@@ -31,10 +31,17 @@
  using LispToken.LispTokenType;
 
  class LispEnvironment {
+    public /*const*/static var MetaTag = "###";
     public /*const*/static var Builtin = "<builtin>";
     
+    private /*const*/static var MainScope = "<main>";
+
     private /*const*/static var If = "if";
     private /*const*/static var While = "while";
+    private /*const*/static var Begin = "begin";
+    private /*const*/static var Do = "do";
+    private /*const*/static var Or = "or";
+    private /*const*/static var And = "and";
     private /*const*/static var Fn = "fn";
     private /*const*/static var Def = "def";
     private /*const*/static var Setf = "setf";
@@ -42,20 +49,18 @@
     private /*const*/static var Gdef = "gdef";
     private /*const*/static var Gdefn = "gdefn";
 
-    private /*const*/static var MainScope = "<main>";
-
     public /*const*/static var Quote = "quote";
     public /*const*/static var Quasiquote = "quasiquote";
     public /*const*/static var UnQuote = "_unquote";
     public /*const*/static var UnQuoteSplicing = "_unquotesplicing";
 
-    public /*const*/static var MetaTag = "###";
-
-    public /*const*/static var Macros = MetaTag + "macros" + MetaTag;
-    public /*const*/static var Modules = MetaTag + "modules" + MetaTag;
+    public /*const*/static var Lambda = "lambda";
 
     public /*const*/static var ArgsMeta = MetaTag + "args" + MetaTag;
     public /*const*/static var AdditionalArgs = "_additionalArgs";
+
+    public /*const*/static var Macros = MetaTag + "macros" + MetaTag;
+    public /*const*/static var Modules = MetaTag + "modules" + MetaTag;
 
     public /*const*/static var Version = "v0.99.4";
     public /*const*/static var Date = "11.11.2023";
@@ -88,17 +93,20 @@
 
         scope.set("!=", CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese."));
 
+        scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
+        scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
+        scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
+        scope.set(Gdef, CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
+        scope.set(Setf, CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
+
         scope.set(If, CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", true, true));
         scope.set(While, CreateFunction(while_form, "(while cond block)", "The while loop.", true, true));
-        scope.set("do", CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", true, true));
-        scope.set("begin", CreateFunction(do_form, "(begin statement1 statement2 ...)", "see: do", true, true));
-        scope.set("lambda", CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", true, true));
+        scope.set(Do, CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", true, true));
+        scope.set(Begin, CreateFunction(do_form, "(begin statement1 statement2 ...)", "see: do", true, true));
+        scope.set(Lambda, CreateFunction(fn_form, "(lambda (arguments) block)", "Returns a lambda function.", true, true));
         scope.set(Fn, CreateFunction(fn_form, "(fn (arguments) block)", "Returns a function.", true, true));
         scope.set(Defn, CreateFunction(defn_form, "(defn name (args) block)", "Defines a function in the current scope.", true, true));
         scope.set(Gdefn, CreateFunction(gdefn_form, "(gdefn name (args) block)", "Defines a function in the global scope.", true, true));
-
-        scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
-        scope.set(Setf, CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
 
         return scope;
     }
@@ -574,6 +582,40 @@
             return token3;
         }
         return null;
+    }
+
+    private static function bool_operation_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope, /*Func<bool, bool, bool>*/ func:Dynamic, initial:Bool):LispVariant
+    {
+        var result = initial;
+        for (arg in args)
+        {
+            var value:Bool = LispInterpreter.EvalAst(arg, scope).BoolValue;
+            result = func(result, value);
+            if(initial) {
+                // process and
+                if (!result)
+                {
+                    break;
+                }
+            } else {
+                // process or
+                if (result)
+                {
+                    break;
+                }        
+            }
+        }
+        return LispVariant.forValue(result);
+    }
+
+    public static function and_form(/*object[]*/ args, scope:LispScope):LispVariant
+    {
+        return bool_operation_form(args, scope, function (r:Bool, v:Bool) { return r && v; }, true);
+    }
+
+    public static function or_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return bool_operation_form(args, scope, function (r:Bool, v:Bool) { return r || v; }, false);
     }
 
     public static function def_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant

@@ -165,4 +165,34 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(2, result.Value);
     }
+    public function testInterpreter18() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(do (or #f #f))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        ast = LispParser.Parse("(do (or #t #f))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        ast = LispParser.Parse("(do (or #f #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        ast = LispParser.Parse("(do (or #t #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+    }
+    public function testInterpreter19() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(do (and #f #f))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        ast = LispParser.Parse("(do (and #t #f))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        ast = LispParser.Parse("(do (and #f #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        ast = LispParser.Parse("(do (and #t #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+    }
 }
