@@ -108,6 +108,8 @@
         scope.set("first", CreateFunction(FirstElem, "(first list)", "see: car"));
         scope.set("last", CreateFunction(LastElem, "(last list)", "Returns the last element of the list."));
         scope.set("car", CreateFunction(FirstElem, "(car list)", "Returns the first element of the list."));
+        scope.set("rest", CreateFunction(Rest, "(rest list)", "see: cdr"));
+        scope.set("cdr", CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list."));
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -345,6 +347,19 @@
         {
             return LispVariant.forValue(elements.Last());
         }
+    }
+
+    public static function Rest(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("rest", 1, args, scope);
+
+        var val = cast(args[0], LispVariant);
+        if(val.IsString)
+        {
+            return LispVariant.forValue(val.StringValue.substr(1));
+        }
+        var elements = val.ListValue;
+        return LispVariant.forValue(elements.Skip(1));
     }
 
     private static function CheckForFunction(functionName:String, /*object*/ arg0:Dynamic, scope:LispScope):LispVariant

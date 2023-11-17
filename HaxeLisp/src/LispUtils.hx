@@ -69,7 +69,7 @@ class ArrayExtender {
         return arr;
     }
     static public function Skip(arr:Array<Dynamic>, count:Int):Array<Dynamic> {
-        arr = arr.slice(0, count);
+        arr = arr.slice(count);
         return arr;
     }
     static public function AddRange(arr:Array<Dynamic>, other:Array<Dynamic>):Array<Dynamic> {

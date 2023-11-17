@@ -262,4 +262,16 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals("o", result.ToString());
     }
+    public function testInterpreter28() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(rest (list 17 4 3 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(4 3 2 1)", result.ToString());
+        var ast = LispParser.Parse("(rest \"Hello\")");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("ello", result.ToString());
+        var ast = LispParser.Parse("(cdr (list 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(1)", result.ToString());
+    }
 }
