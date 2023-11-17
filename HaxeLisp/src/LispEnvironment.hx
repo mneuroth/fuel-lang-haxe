@@ -48,6 +48,8 @@
     private /*const*/static var Defn = "defn";
     private /*const*/static var Gdef = "gdef";
     private /*const*/static var Gdefn = "gdefn";
+    private /*const*/static var MapFcn = "map";
+    private /*const*/static var ReduceFcn = "reduce";
 
     public /*const*/static var Quote = "quote";
     public /*const*/static var Quasiquote = "quasiquote";
@@ -99,6 +101,11 @@
         scope.set("!", CreateFunction(Not, "(! expr)", "see: not"));
 
         scope.set("list", CreateFunction(CreateList, "(list item1 item2 ...)", "Returns a new list with the given elements."));
+        scope.set(MapFcn, CreateFunction(MapLoop, "(map function list)", "Returns a new list with elements, where all elements of the list where applied to the function."));
+        scope.set(ReduceFcn, CreateFunction(Reduce, "(reduce function list initial)", "Reduce function."));
+        scope.set("cons", CreateFunction(Cons, "(cons item list)", "Returns a new list containing the item and the elements of the list."));
+        scope.set("len", CreateFunction(Length, "(len list)", "Returns the length of the list."));
+        scope.set("car", CreateFunction(FirstElem, "(car list)", "Returns the first element of the list."));
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -206,6 +213,141 @@
             result.Add(arg);
         }
         return result;
+    }
+
+    public static function MapLoop(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant 
+    {
+        CheckArgs(MapFcn, 2, args, scope);
+
+        var functionVal = CheckForFunction(MapFcn, args[0], scope).FunctionValue;
+        var elements = CheckForList(MapFcn, args[1], scope);
+
+        var result = new LispVariant(LispType.List, new Array<Dynamic>() /*List<object>()*/);
+        for (elem in elements)
+        {
+            // call for every element the given function (args[0])
+            var arr = new Array<Dynamic>();
+            arr.push(elem);
+            result.Add(functionVal.Function(/*new[] {elem}*/arr, scope));
+        }
+        return result;
+    }
+    
+    public static function Reduce(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(ReduceFcn, 3, args, scope);
+
+        var functionVal = CheckForFunction(ReduceFcn, args[0], scope).FunctionValue;
+        var elements = CheckForList(ReduceFcn, args[1], scope);
+
+        var start = cast(args[2], LispVariant);
+        var result = LispVariant.forValue(start);
+        for (elem in elements)
+        {
+            // call for every element the given function (args[0])
+            var arr = new Array<Dynamic>();
+            arr.push(elem);
+            arr.push(result);
+            result = functionVal.Function(/*new[] { elem, result }*/arr, scope);
+        }
+        return result;
+    }
+
+    public static function Cons(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var result = new LispVariant(LispType.List, new Array<Dynamic>());  //new List<object>()
+        if (args.length > 0)
+        {
+            result.Add(args[0]);
+        }
+        if (args.length > 1)
+        {
+            var item2 = cast(args[1], LispVariant);
+            if (item2.IsList)
+            {
+                for (item in item2.ListValue)
+                {
+                    result.Add(item);
+                }
+            }
+            else
+            {
+                result.Add(args[1]);
+            }
+        }
+        return result;
+    }
+
+    public static function Length(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("len", 1, args, scope);
+
+        var val = cast(args[0], LispVariant);
+        if (val.IsNativeObject)
+        {
+//TODO
+            // if (val.Value is Dictionary<object, object>)
+            // {
+            //     return new LispVariant(((Dictionary<object, object>)val.Value).Count);
+            // }
+        }
+        if (val.IsString)
+        {
+            return LispVariant.forValue(val.StringValue.length);
+        }
+        var elements = val.ListValue;
+        return LispVariant.forValue(elements.length/*Count()*/);
+    }
+
+    public static function FirstElem(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("first", 1, args, scope);
+
+        var val = cast(args[0], LispVariant);
+        if (val.IsString)
+        {
+            return LispVariant.forValue(val.StringValue.substr(0, 1));
+        }
+        var elements = val.ListValue;
+        if (scope.NeedsLValue)
+        {
+            var /*List<object>*/ container:Array<Dynamic> = elements; // as List<object>;
+            //Action<object> action = (v) => { container[0] = v; };
+            var action = function (v) { container[0] = v; };
+            return new LispVariant(LispType.LValue, action);
+        }
+        else
+        {
+            return LispVariant.forValue(elements.First());
+        }
+    }
+
+    private static function CheckForFunction(functionName:String, /*object*/ arg0:Dynamic, scope:LispScope):LispVariant
+    {
+        var functionVal = cast(arg0, LispVariant);
+        if (!functionVal.IsFunction)
+        {
+            throw LispException.fromScope("No function in " + functionName, scope);
+        }
+        return functionVal;
+    }
+
+    private static function CheckForList(functionName:String, /*object*/ listObj:Dynamic, scope:LispScope):Array<Dynamic>  //IEnumerable<object>
+    {
+        if (listObj is Array/*object[]*/)
+        {
+            return GetExpression(listObj);
+        }
+        var value = cast(listObj, LispVariant);
+        if (value.IsNativeObject && (value.Value is /*IEnumerable<object>*/Array))
+        {
+            return cast(value.Value, Array<Dynamic>);  // IEnumerable<object>
+        }
+        if (!value.IsList)
+        {
+            throw new LispException("No list in " + functionName, scope.GetPreviousToken(cast(listObj, LispVariant).Token), scope.ModuleName, scope.DumpStackToString());
+        }
+        return value.ListValue;
     }
 
     private static function CompareOperation(/*object[]*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic, scope:LispScope, name:String):LispVariant

@@ -213,4 +213,41 @@ class LispInterpreterTest extends utest.Test {
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals("(1 2 3 4)", result.ToString());
     }
+    public function testInterpreter22() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(map (lambda (x) (* x x)) (list 1 2 3 4))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(1 4 9 16)", result.ToString());
+    }
+    public function testInterpreter23() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(reduce (lambda (x y) (+ x y)) (list 1 2 3 4) 0)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("10", result.ToString());
+    }
+    public function testInterpreter24() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(cons 8 (list 4 3 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(8 4 3 2 1)", result.ToString());
+    }
+    public function testInterpreter25() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(len (list 4 3 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("4", result.ToString());
+        var ast = LispParser.Parse("(len \"Hello\")");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("5", result.ToString());
+// TODO -> len for Dictionary        
+    }
+    public function testInterpreter26() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(car (list 17 4 3 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("17", result.ToString());
+        var ast = LispParser.Parse("(car \"Hello\")");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("H", result.ToString());
+    }
 }
