@@ -105,6 +105,8 @@
         scope.set(ReduceFcn, CreateFunction(Reduce, "(reduce function list initial)", "Reduce function."));
         scope.set("cons", CreateFunction(Cons, "(cons item list)", "Returns a new list containing the item and the elements of the list."));
         scope.set("len", CreateFunction(Length, "(len list)", "Returns the length of the list."));
+        scope.set("first", CreateFunction(FirstElem, "(first list)", "see: car"));
+        scope.set("last", CreateFunction(LastElem, "(last list)", "Returns the last element of the list."));
         scope.set("car", CreateFunction(FirstElem, "(car list)", "Returns the first element of the list."));
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
@@ -319,6 +321,29 @@
         else
         {
             return LispVariant.forValue(elements.First());
+        }
+    }
+
+    public static function LastElem(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("last", 1, args, scope);
+
+        var val = cast(args[0], LispVariant);
+        if (val.IsString)
+        {
+            return LispVariant.forValue(val.StringValue.substr(val.StringValue.length-1));
+        }
+        var elements = val.ListValue;
+        if (scope.NeedsLValue)
+        {
+            var /*List<object>*/ container:Array<Dynamic> = elements; // as List<object>;
+            //Action<object> action = (v) => { container[container.Count - 1] = v; };
+            var action = function (v) { container[container.length - 1] = v; };
+            return new LispVariant(LispType.LValue, action);
+        }
+        else
+        {
+            return LispVariant.forValue(elements.Last());
         }
     }
 
