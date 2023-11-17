@@ -25,6 +25,7 @@
 
 package;
 
+//import sys.io.File;
 using LispUtils;
 using LispUtils.Ref;
 using LispEnvironment;
@@ -35,7 +36,24 @@ class TextWriter {
     }
 
     public function WriteLine(text:String="", ?a1, ?a2, ?a3) {
+#if sys
+        //File.write(text);
+        // var temp = text;
+        // if( a1 is null ) {
+        //     temp += a1;
+        // }
+        Sys.print(text);
+#else
         trace(text);
+#end
+    }
+    public function Write(text:String="", ?a1, ?a2, ?a3) {
+#if sys
+        //File.write("stdout").writeString(text);
+        Sys.println(text);
+#else
+        trace(text);
+#end
     }
 }
 

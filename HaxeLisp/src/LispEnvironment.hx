@@ -71,6 +71,9 @@
 
         //scope["fuel"] = CreateFunction(Fuel, "(fuel)", "");
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
+
+        scope.set("print", CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console."));
+
         scope.set("add", CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ..."));
         scope.set("+", CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add"));
         scope.set("sub", CreateFunction(Substraction, "(sub expr1 expr2 ...)", "Returns value of expr1 subtracted with expr2 subtracted with ..."));
@@ -90,8 +93,12 @@
         scope.set("equal", CreateFunction(EqualTest, "(equal expr1 expr2)", "Returns #t if value of expression1 is equal with value of expression2 and returns #f otherwiese."));
         scope.set("=", CreateFunction(EqualTest, "(= expr1 expr2)", "see: equal"));
         scope.set("==", CreateFunction(EqualTest, "(== expr1 expr2)", "see: equal"));
-
         scope.set("!=", CreateFunction(NotEqualTest, "(!= expr1 expr2)", "Returns #t if value of expression1 is not equal with value of expression2 and returns #f otherwiese."));
+
+        scope.set("not", CreateFunction(Not, "(not expr)", "Returns the inverted bool value of the expression."));
+        scope.set("!", CreateFunction(Not, "(! expr)", "see: not"));
+
+        scope.set("list", CreateFunction(CreateList, "(list item1 item2 ...)", "Returns a new list with the given elements."));
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -156,6 +163,11 @@
         return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_modulo(l, r));
     }
 
+    public static function Not(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, bool>*/(args, scope, "not", function (arg1) { return LispVariant.forValue(!arg1.ToBool()); });
+    }
+
     public static function Less(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_less(l, r), scope, "<");
@@ -186,9 +198,30 @@
         return CompareOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_not_equal(l, r), scope, "!=");
     }
 
+    public static function CreateList(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant 
+    {
+        var result = new LispVariant(LispType.List, new Array<Dynamic>());  //List<object>()
+        for (arg in args)
+        {
+            result.Add(arg);
+        }
+        return result;
+    }
+
     private static function CompareOperation(/*object[]*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic, scope:LispScope, name:String):LispVariant
     {
         return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, name, function(arg1, arg2):LispVariant return op(arg1, arg2));
+    }
+
+    public static function FuelFuncWrapper1/*<T1, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, TResult>*/ func:Dynamic):LispVariant
+    {
+        CheckArgs(name, 1, args, scope);
+
+        var arg1 = /*(T1)*/cast(args[0], LispVariant);
+        var result = func(arg1);
+
+        var tempResult:LispVariant = cast(result, LispVariant);
+        return tempResult!=null ? tempResult : LispVariant.forValue(result);
     }
 
     public static function FuelFuncWrapper2/*<T1, T2, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, T2, TResult>*/ func:Dynamic):LispVariant
@@ -404,6 +437,41 @@
     //     }
     //     return LispVariant.forValue(result.Value);
     // }
+
+    public static function Print(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var text = GetStringRepresentation(args, scope);
+        scope.GlobalScope.Output.Write(text);
+        return LispVariant.forValue(text);
+    }
+
+    public static function PrintLn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var text = GetStringRepresentation(args, scope);
+        scope.GlobalScope.Output.WriteLine(text);
+        return LispVariant.forValue(text);
+    }
+
+    private static function GetStringRepresentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope, separator:String = " "):String
+    {
+        var text = "";  //string.Empty;
+        for (item in args)
+        {
+            if (text.length > 0)
+            {
+                text += separator;
+            }
+            text += item.ToString();
+        }
+        /*TODO
+        if (scope.ContainsKey(Traceon) && (bool)scope[Traceon])
+        {
+            var buffer = (StringBuilder)scope[Tracebuffer];
+            buffer.Append(text);
+        }
+        */
+        return text;
+    }
 
     public static function IsInModules(funcName:String, scope:LispScope):Bool
     {

@@ -195,4 +195,22 @@ class LispInterpreterTest extends utest.Test {
         result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(true, result.Value);
     }
+    public function testInterpreter20() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(! #f)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        var ast = LispParser.Parse("(! #t)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
+        var ast = LispParser.Parse("(not #f)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+    }
+    public function testInterpreter21() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(list 1 2 3 4)");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(1 2 3 4)", result.ToString());
+    }
 }

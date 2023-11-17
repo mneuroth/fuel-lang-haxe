@@ -577,6 +577,16 @@ class LispVariant {
         return 'can not convert $type to $val';
     }
 
+    public function Add(/*object*/ value:Dynamic):Void
+    {
+        if (Type != LispType.List)
+        {
+            throw CreateInvalidCastException("list");
+        }
+        var list = cast(Value, Array<Dynamic>);  //List<object>
+        list.Add(value);
+    }
+
     public static function op_add(l:LispVariant, r:LispVariant) {
         if (l.IsString || r.IsString)
         {
