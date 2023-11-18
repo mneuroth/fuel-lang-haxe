@@ -99,6 +99,12 @@ class StringExtender {
         temp.reverse();
         return temp.join('');
     }
+    static public function ToUpper(s:String):String {
+        return s.toUpperCase();
+    }
+    static public function ToLower(s:String):String {
+        return s.toLowerCase();
+    }
 }
 
 class MapExtender {

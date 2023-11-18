@@ -25,6 +25,8 @@
 
  package;
  
+ using StringTools;
+
  using LispUtils;
  using LispVariant;
  using LispVariant.OpLispVariant;
@@ -95,8 +97,9 @@
         var arg1 = /*(T1)*/cast(args[0], LispVariant);
         var result = func(arg1);
 
-        var tempResult:LispVariant = cast(result, LispVariant);
-        return tempResult!=null ? tempResult : LispVariant.forValue(result);
+        //var tempResult:LispVariant = cast(result, LispVariant);
+        //return tempResult!=null ? tempResult : LispVariant.forValue(result);
+        return LispVariant.forValue(result);
     }
 
     public static function FuelFuncWrapper2/*<T1, T2, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, T2, TResult>*/ func:Dynamic):LispVariant
@@ -107,8 +110,9 @@
         var arg2 = /*(T2)*/cast(args[1], LispVariant);
         var result = func(arg1, arg2);
 
-        var tempResult:LispVariant = cast(result, LispVariant);
-        return tempResult!=null ? tempResult : LispVariant.forValue(result);
+        //var tempResult:LispVariant = cast(result, LispVariant);
+        //return tempResult!=null ? tempResult : LispVariant.forValue(result);
+        return LispVariant.forValue(result);
     }
 
     public static function CreateDefaultScope():LispScope {
@@ -120,7 +124,11 @@
         scope.set("print", CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console."));
         scope.set("println", CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
 
-//TODO        
+//TODO
+        scope.set("trim", CreateFunction(Trim, "(trim expr1)", "Returns a string with no starting and trailing whitespaces."));
+        scope.set("lower-case", CreateFunction(LowerCase, "(lower-case expr1)", "Returns a string with only lower case characters."));
+        scope.set("upper-case", CreateFunction(UpperCase, "(upper-case expr1)", "Returns a string with only upper case characters."));
+        scope.set("string", CreateFunction(Addition, "(string expr1 expr2 ...)", "see: add"));
         scope.set("add", CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ..."));
         scope.set("+", CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add"));
         scope.set("sub", CreateFunction(Substraction, "(sub expr1 expr2 ...)", "Returns value of expr1 subtracted with expr2 subtracted with ..."));
@@ -170,6 +178,8 @@
         scope.set(Apply, CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments."));
         scope.set(Eval, CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast)."));
         scope.set(EvalStr, CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string."));
+
+//TODO -> support map/dictionary        
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -223,6 +233,21 @@
         return LispVariant.forValue('fuel version ${LispEnvironment.Version} from ${LispEnvironment.Date}');
     }
     
+    public static function Trim(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<object, string>*/(args, scope, "trim", function (arg1):String { return StringTools.trim(arg1.ToString()); });
+    }
+
+    public static function LowerCase(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<object, string>*/(args, scope, "lower-case", function (arg1):String { return arg1.ToString().toLowerCase(); });
+    }
+
+    public static function UpperCase(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<object, string>*/(args, scope, "upper-case", function (arg1):String { return arg1.ToString().toUpperCase(); });
+    }
+
     public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return ArithmetricOperation(args, function(l:LispVariant, r:LispVariant) return LispVariant.op_add(l, r));

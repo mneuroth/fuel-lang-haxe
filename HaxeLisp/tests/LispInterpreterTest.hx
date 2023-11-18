@@ -357,4 +357,14 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(evalstr \"(* 4 2 3)\")");
         Assert.equals("24", res.ToString());
     }
+    public function testInterpreter43() {
+        var res = Lisp.Eval("(upper-case \"Hallo 2 Welt! öÄü\")");
+        Assert.equals("HALLO 2 WELT! ÖÄÜ", res.ToString());
+        var res = Lisp.Eval("(lower-case \"Hallo 2 Welt! öÄü\")");
+        Assert.equals("hallo 2 welt! öäü", res.ToString());
+    }
+    public function testInterpreter44() {
+        var res = Lisp.Eval("(trim \"  hallo Welt  \")");
+        Assert.equals("hallo Welt", res.ToString());
+    }
 }
