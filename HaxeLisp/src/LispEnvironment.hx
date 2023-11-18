@@ -110,6 +110,7 @@
         scope.set("car", CreateFunction(FirstElem, "(car list)", "Returns the first element of the list."));
         scope.set("rest", CreateFunction(Rest, "(rest list)", "see: cdr"));
         scope.set("cdr", CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list."));
+        scope.set("nth", CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list."));
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -360,6 +361,30 @@
         }
         var elements = val.ListValue;
         return LispVariant.forValue(elements.Skip(1));
+    }
+
+    public static function Nth(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("nth", 2, args, scope);
+
+        var index = cast(args[0], LispVariant).IntValue;
+        var val = cast(args[1], LispVariant);
+        if (val.IsString)
+        {
+            return LispVariant.forValue(val.StringValue.substr(index, 1));
+        }
+        var elements = val.ListValue;
+        if(scope.NeedsLValue)
+        {
+            var /*List<object>*/ container:Array<Dynamic> = elements; // as List<object>;
+            //Action<object> action = (v) => { container[index] = v; };
+            var action = function (v) { container[index] = v; };
+            return new LispVariant(LispType.LValue, action);
+        }
+        else
+        {
+            return LispVariant.forValue(elements.ElementAt(index));
+        }
     }
 
     private static function CheckForFunction(functionName:String, /*object*/ arg0:Dynamic, scope:LispScope):LispVariant

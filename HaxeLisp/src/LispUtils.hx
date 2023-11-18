@@ -82,6 +82,9 @@ class ArrayExtender {
         arr = other.copy();
         return arr;
     }
+    static public function ElementAt(arr:Array<Dynamic>, index:Int):Dynamic {
+        return arr[index];
+    }
 }
 
 class MapExtender {
