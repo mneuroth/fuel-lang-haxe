@@ -201,7 +201,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
             //{
             //    throw new LispException('Could not resolve symbol $name');
             //}
-            result = elem;
+            result.value = elem;
         }
 
         return result.value;

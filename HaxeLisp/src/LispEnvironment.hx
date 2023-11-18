@@ -719,7 +719,7 @@
 
     public static function quote_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, Quote, function (arg1) { LispVariant.forValue(arg1); });
+        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, Quote, function (arg1) { return LispVariant.forValue(arg1); });
     }
 
     private static function ProcessQuotedSExpression(/*IEnumerable<object>*/ expr:Array<Dynamic>, scope:LispScope, /*out*/ splicing:Ref<Bool>):Dynamic
@@ -794,12 +794,12 @@
     
     public static function unquote_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, UnQuote, function (arg1) { LispVariant.forValue(arg1); });
+        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, UnQuote, function (arg1) { return LispVariant.forValue(arg1); });
     }
 
     public static function unquotesplicing_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, UnQuoteSplicing, function (arg1) { LispVariant.forValue(arg1); });
+        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, UnQuoteSplicing, function (arg1) { return LispVariant.forValue(arg1); });
     }
 
     public static function if_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant

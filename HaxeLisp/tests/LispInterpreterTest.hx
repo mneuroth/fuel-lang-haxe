@@ -212,6 +212,16 @@ class LispInterpreterTest extends utest.Test {
         var ast = LispParser.Parse("(list 1 2 3 4)");
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals("(1 2 3 4)", result.ToString());
+        var ast = LispParser.Parse("(quote (1 2 3 4))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(1 2 3 4)", result.ToString());
+        var res = Lisp.Eval("'(1 2 3)");
+        Assert.equals("(1 2 3)", res.ToString());
+        var res = Lisp.Eval("'(1 2 3 4)");
+        Assert.equals("(1 2 3 4)", res.ToString());
+        //var ast2 = LispParser.Parse("'(1 2 3 4)");
+        //var result2 = LispInterpreter.EvalAst(ast2, scope);
+        //Assert.equals("(1 2 3 4)", result2.ToString());
     }
     public function testInterpreter22() {
         var scope = LispEnvironment.CreateDefaultScope();
@@ -362,6 +372,11 @@ class LispInterpreterTest extends utest.Test {
         Assert.equals("HALLO 2 WELT! ÖÄÜ", res.ToString());
         var res = Lisp.Eval("(lower-case \"Hallo 2 Welt! öÄü\")");
         Assert.equals("hallo 2 welt! öäü", res.ToString());
+
+        // var res = Lisp.Eval("(upper-case \"Hallo 2 Welt!\")");
+        // Assert.equals("HALLO 2 WELT!", res.ToString());
+        // var res = Lisp.Eval("(lower-case \"Hallo 2 Welt!\")");
+        // Assert.equals("hallo 2 welt!", res.ToString());
     }
     public function testInterpreter44() {
         var res = Lisp.Eval("(trim \"  hallo Welt  \")");
