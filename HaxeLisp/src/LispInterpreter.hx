@@ -82,11 +82,11 @@ class LispBreakpointPosition {
                     first = astWithResolvedValues.First();
                     firstElem = LispUtils.ToLispVariant(first).FunctionValue;
                 }
-                catch (exc:LispException)
+                catch (exc:/*LispException*/haxe.Exception)
                 {
                     if (!compile)
                     {
-                        throw new LispException("Function \"" + first + "\" not found"/* TODO, scope*/);
+                        throw new LispException("Function \"" + firstElement.ToString() + "\" not found"/* TODO, scope*/);
                     }
                 }
                 isSpecialForm = firstElem.IsSpecialForm;

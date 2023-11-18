@@ -273,7 +273,6 @@ class LispInterpreterTest extends utest.Test {
         var ast = LispParser.Parse("(cdr (list 2 1))");
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals("(1)", result.ToString());
-// TODO Lisp.Eval()        
     }
     public function testInterpreter29() {
         var scope = LispEnvironment.CreateDefaultScope();
@@ -283,5 +282,31 @@ class LispInterpreterTest extends utest.Test {
         var ast = LispParser.Parse("(nth -1 (list 17 4 3 2 1))");
         var result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals("NIL", result.ToString());
+        var ast = LispParser.Parse("(nth 10 (list 17 4 3 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("NIL", result.ToString());
+    }
+    public function testInterpreter30() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(push 42 (list 4 3 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(42 4 3 2 1)", result.ToString());
+    }
+    public function testInterpreter31() {
+        var scope = LispEnvironment.CreateDefaultScope();
+        var ast = LispParser.Parse("(pop (list 4 3 2 1))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("4", result.ToString());
+        var ast = LispParser.Parse("(do (def l (list 5 4 3 2 1)) (pop l) (print l))");
+        var result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals("(4 3 2 1)", result.ToString());
+        var res = Lisp.Eval("(pop (list 4 6 1))");
+        Assert.equals("4", res.ToString());
+    }
+    public function testInterpreter32() {
+        var res = Lisp.Eval("(append (list 1 2 3 4) (list 9 8 7))");
+        Assert.equals("(1 2 3 4 9 8 7)", res.ToString());
+        var res = Lisp.Eval("(append (list 1 2 3 4) 42)");
+        Assert.equals("(1 2 3 4 9 8 7)", res.ToString());
     }
 }

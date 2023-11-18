@@ -111,6 +111,9 @@
         scope.set("rest", CreateFunction(Rest, "(rest list)", "see: cdr"));
         scope.set("cdr", CreateFunction(Rest, "(cdr list)", "Returns a new list containing all elements except the first of the given list."));
         scope.set("nth", CreateFunction(Nth, "(nth number list)", "Returns the [number] element of the list."));
+        scope.set("push", CreateFunction(Push, "(push elem list [index])", "Inserts the element at the given index (default value 0) into the list (implace) and returns the updated list."));
+        scope.set("pop", CreateFunction(Pop, "(pop list [index])", "Removes the element at the given index (default value 0) from the list and returns the removed element."));
+        scope.set("append", CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements."));
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -130,11 +133,19 @@
         return scope;
     }
     
-    private static function CheckArgs(name:String, count:Int, /*object[]*/ args:Array<Dynamic>, scope:LispScope)
+    private static function CheckArgs(name:String, count:Int, /*object[]*/ args:Array<Dynamic>, scope:LispScope):Void
     {
         if (count < 0 || args.length != count)
         {
             throw LispException.fromScope('Bad argument count in $name, has $args.length expected $count', scope);
+        }
+    }
+
+    private static function CheckOptionalArgs(name:String, minCount:Int, maxCount:Int, /*object[]*/ args:Array<Dynamic>, scope:LispScope):Void
+    {
+        if ((args.length < minCount) || (args.length > maxCount))
+        {
+            throw new LispException('Bad argument count in $name, has ${args.length} expected between $minCount and $maxCount');
         }
     }
 
@@ -385,6 +396,66 @@
         {
             return LispVariant.forValue(elements.ElementAt(index));
         }
+    }
+
+    public static function Push(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckOptionalArgs("push", 2, 3, args, scope);
+
+        var val = cast(args[0], LispVariant);
+        var list = cast(args[1], LispVariant);
+        var pos = args.length > 2 ? cast(args[2], LispVariant).ToInt() : 0;
+        if (list.IsList)
+        {
+            var elements = list.ListRef;
+            if (pos < elements.length)
+            {
+                elements.Insert(pos, val);
+                return LispVariant.forValue(elements);
+            }
+            return LispVariant.forValue(LispType.Nil);
+        }
+        else
+        {
+            throw new LispException('push not supported for type ${GetLispType(list)}');
+        }
+    }
+
+    public static function Pop(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckOptionalArgs("pop", 1, 2, args, scope);
+
+        var list = cast(args[0], LispVariant);
+        var pos = args.length > 1 ? cast(args[1], LispVariant).ToInt() : 0;
+        if (list.IsList)
+        {
+            var elements = list.ListRef;
+            if (pos < elements.length)
+            {
+                var elem = elements.ElementAt(pos);
+                elements.RemoveAt(pos);
+                return LispVariant.forValue(elem);
+            }
+            return LispVariant.forValue(LispType.Nil);
+        }
+        else
+        {
+            throw new LispException('pop not supported for type ${GetLispType(list)}');
+        }
+    }
+
+    public static function Append(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var result = new LispVariant(LispType.List, new Array<Dynamic>());  //List<object>
+        for (listElement in args)
+        {
+            var lst = cast(listElement, LispVariant).ListValue;
+            for (item in lst)
+            {
+                result.Add(item);                    
+            }
+        }
+        return result;
     }
 
     private static function CheckForFunction(functionName:String, /*object*/ arg0:Dynamic, scope:LispScope):LispVariant
@@ -750,14 +821,17 @@
     {
         foundValue.value = null;
         var importedModules = /*(LispScope)*/cast(scope.GlobalScope.get(Modules), LispScope);
-        for (/*KeyValuePair<string, object>*/ kv in importedModules)
+        if (importedModules != null)
         {
-            var module = /*(LispScope)*/kv.Value;
-            var val:Dynamic = new Ref<Dynamic>(null);  //object
-            if (module.TryGetValue(funcName, /*out*/ val))
+            for (/*KeyValuePair<string, object>*/ kv in importedModules)
             {
-                foundValue.value = val.value;
-                return true;
+                var module = /*(LispScope)*/kv.Value;
+                var val:Dynamic = new Ref<Dynamic>(null);  //object
+                if (module.TryGetValue(funcName, /*out*/ val))
+                {
+                    foundValue.value = val.value;
+                    return true;
+                }
             }
         }
         return false;
@@ -937,5 +1011,15 @@
             scope.SetInScopes(symbolName, value);
         }
         return value;
+    }
+
+    private static function GetLispType(/*object*/ obj:Dynamic):String
+    {
+        var lispVariant = cast(obj, LispVariant);
+        if (lispVariant != null)
+        {
+            return lispVariant.TypeString;
+        }
+        return obj.GetType().ToString();
     }
 }

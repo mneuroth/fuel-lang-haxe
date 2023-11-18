@@ -65,6 +65,12 @@ class ArrayExtender {
     static public function Add(arr:Array<Dynamic>, item:Dynamic) {
         arr.push(item);
     }
+    static public function Insert(arr:Array<Dynamic>, pos:Int, item:Dynamic) {
+        arr.insert(pos, item);
+    }
+    static public function RemoveAt(arr:Array<Dynamic>, pos:Int) {
+        arr.splice(pos, 1);
+    }
     static public function ToList(arr:Array<Dynamic>):Array<Dynamic> {
         return arr;
     }
