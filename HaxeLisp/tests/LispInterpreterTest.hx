@@ -382,4 +382,16 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(trim \"  hallo Welt  \")");
         Assert.equals("hallo Welt", res.ToString());
     }
+    public function testInterpreter45() {
+        var res = Lisp.Eval("(replace \"Hallo Welt\" \"Welt\" \"earth\")");
+        Assert.equals("Hallo earth", res.ToString());
+    }
+    public function testInterpreter46() {
+        var res = Lisp.Eval("(slice \"Hallo my World\" 6 2)");
+        Assert.equals("my", res.ToString());
+    }
+    public function testInterpreter47() {
+        var res = Lisp.Eval("(search \"my\" \"Hallo my World\")");
+        Assert.equals("6", res.ToString());
+    }
 }

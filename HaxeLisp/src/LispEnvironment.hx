@@ -115,6 +115,20 @@
         return LispVariant.forValue(result);
     }
 
+    public static function FuelFuncWrapper3/*<T1, T2, T3, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, T2, T3, TResult>*/ func:Dynamic):LispVariant
+    {
+        CheckArgs(name, 3, args, scope);
+
+        var arg1 = /*(T1)*/cast(args[0], LispVariant);
+        var arg2 = /*(T2)*/cast(args[1], LispVariant);
+        var arg3 = /*(T3)*/cast(args[2], LispVariant);
+        var result = func(arg1, arg2, arg3);
+
+        //LispVariant tempResult = result as LispVariant;
+        //return tempResult ?? new LispVariant(result);
+        return LispVariant.forValue(result);
+    }
+
     public static function CreateDefaultScope():LispScope {
         var scope = LispScope.forFunction(MainScope);
 
@@ -125,6 +139,9 @@
         scope.set("println", CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
 
 //TODO
+        scope.set("search", CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos."));
+        scope.set("slice", CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len."));
+        scope.set("replace", CreateFunction(Replace, "(replace expr1 searchtxt replacetxt)", "Returns a string of the given string expr1 with replacing searchtxt with replacetxt."));
         scope.set("trim", CreateFunction(Trim, "(trim expr1)", "Returns a string with no starting and trailing whitespaces."));
         scope.set("lower-case", CreateFunction(LowerCase, "(lower-case expr1)", "Returns a string with only lower case characters."));
         scope.set("upper-case", CreateFunction(UpperCase, "(upper-case expr1)", "Returns a string with only upper case characters."));
@@ -232,7 +249,81 @@
 
         return LispVariant.forValue('fuel version ${LispEnvironment.Version} from ${LispEnvironment.Date}');
     }
-    
+
+    public static function Search(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckOptionalArgs("search", 2, 4, args, scope);
+
+        var arg0 = cast(args[0], LispVariant);
+        var arg1 = cast(args[1], LispVariant);
+        var pos = args.length > 2 ? cast(args[2], LispVariant).ToInt() : -1;
+        var len = args.length > 3 ? cast(args[3], LispVariant).ToInt() : -1;
+
+        var foundPos = -1;
+        if (arg1.IsString)
+        {
+            var searchText = arg0.ToString();
+            var source = arg1.ToString();
+            if (pos >= 0)
+            {
+                if (len >= 0)
+                {
+                    foundPos = source.indexOf(searchText, pos/*TODO, len*/);
+                }
+                else
+                {
+                    foundPos = source.indexOf(searchText, pos);
+                }
+            }
+            else
+            {
+                foundPos = source.indexOf(searchText);
+            }
+        }
+        else if (arg1.IsList)
+        {
+            var list = arg1.ListValue;
+            var i = 0;
+            for (elem in list)
+            {
+                if (arg0.EqualOp(elem))
+                {
+                    foundPos = i;
+                    break;
+                }
+                i++;
+            }
+        }
+        else
+        {
+            throw new LispException('search not supported for type ${Type.typeof(arg1)}');  //.GetType()
+        }
+        return LispVariant.forValue(foundPos);
+    }
+
+    public static function Slice(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("slice", 3, args, scope);
+
+        var value = cast(args[0], LispVariant).ToString();
+        var startPos = cast(args[1], LispVariant).ToInt();
+        var len = cast(args[2], LispVariant).ToInt();
+        if (len >= 0)
+        {
+            value = value.substr(startPos, len);
+        }
+        else
+        {
+            value = value.substr(startPos);
+        }
+        return LispVariant.forValue(value);
+    }
+
+    public static function Replace(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper3/*<LispVariant, LispVariant, LispVariant, string>*/(args, scope, "replace", function (arg1, arg2, arg3) { return StringTools.replace(arg1.ToString(), arg2.ToString(), arg3.ToString());});
+    }
+
     public static function Trim(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return FuelFuncWrapper1/*<object, string>*/(args, scope, "trim", function (arg1):String { return StringTools.trim(arg1.ToString()); });
