@@ -88,6 +88,8 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
 
     public var ModuleName:String;
 
+    public var IsInEval:Bool;
+
     public var CurrentToken:LispToken;
 
     public var Name:String;

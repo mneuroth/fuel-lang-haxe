@@ -329,4 +329,32 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("'(+ 1 2 4 2.3)");
         Assert.equals("(+ 1 2 4 2.3)", res.ToString());
     }
+    public function testInterpreter37() {
+        var res = Lisp.Eval("(do (defn test (x y) (argscount)) (def x (test 4 5)))");
+        Assert.equals("2", res.ToString());
+    }
+    public function testInterpreter38() {
+        var res = Lisp.Eval("(do (defn test (x y) (args)) (def x (test 4 5)))");
+        Assert.equals("(4 5)", res.ToString());
+    }
+    public function testInterpreter39() {
+        var res = Lisp.Eval("(do (defn test (x y) (arg 1)) (def x (test 4 5)))");
+        Assert.equals("5", res.ToString());
+        var res = Lisp.Eval("(do (defn test (x y) (arg 0)) (def x (test 4 5)))");
+        Assert.equals("4", res.ToString());
+        //var res = Lisp.Eval("(do (defn test (x y) (arg 3)) (def x (test 4 5)))");     //TODO -> check for exception
+        //Assert.equals("4", res.ToString());
+    }
+    public function testInterpreter40() {
+        var res = Lisp.Eval("(do (defn test (x y) (+ x y 1)) (apply test '(4 5)))");
+        Assert.equals("10", res.ToString());
+    }
+    public function testInterpreter41() {
+        var res = Lisp.Eval("(eval '(+ 1 2 3))");
+        Assert.equals("6", res.ToString());
+    }
+    public function testInterpreter42() {
+        var res = Lisp.Eval("(evalstr \"(* 4 2 3)\")");
+        Assert.equals("24", res.ToString());
+    }
 }

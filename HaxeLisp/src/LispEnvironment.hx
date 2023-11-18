@@ -33,7 +33,8 @@
  class LispEnvironment {
     public /*const*/static var MetaTag = "###";
     public /*const*/static var Builtin = "<builtin>";
-    
+    public /*const*/static var EvalStrTag = "<evalstr>:";
+
     private /*const*/static var MainScope = "<main>";
 
     private /*const*/static var If = "if";
@@ -76,6 +77,39 @@
     public /*const*/static var Version = "v0.99.4";
     public /*const*/static var Date = "11.11.2023";
 
+    public static function FuelFuncWrapper0<TResult>(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<TResult>*/ func:Dynamic):LispVariant
+    {
+        CheckArgs(name, 0, args, scope);
+
+        var result = func();
+
+        //var tempResult:LispVariant = cast(result, LispVariant);
+        //return tempResult!=null ? tempResult : LispVariant.forValue(result);
+        return LispVariant.forValue(result);
+    }
+
+    public static function FuelFuncWrapper1/*<T1, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, TResult>*/ func:Dynamic):LispVariant
+    {
+        CheckArgs(name, 1, args, scope);
+
+        var arg1 = /*(T1)*/cast(args[0], LispVariant);
+        var result = func(arg1);
+
+        var tempResult:LispVariant = cast(result, LispVariant);
+        return tempResult!=null ? tempResult : LispVariant.forValue(result);
+    }
+
+    public static function FuelFuncWrapper2/*<T1, T2, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, T2, TResult>*/ func:Dynamic):LispVariant
+    {
+        CheckArgs(name, 2, args, scope);
+
+        var arg1 = /*(T1)*/cast(args[0], LispVariant);
+        var arg2 = /*(T2)*/cast(args[1], LispVariant);
+        var result = func(arg1, arg2);
+
+        var tempResult:LispVariant = cast(result, LispVariant);
+        return tempResult!=null ? tempResult : LispVariant.forValue(result);
+    }
 
     public static function CreateDefaultScope():LispScope {
         var scope = LispScope.forFunction(MainScope);
@@ -86,6 +120,7 @@
         scope.set("print", CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console."));
         scope.set("println", CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
 
+//TODO        
         scope.set("add", CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ..."));
         scope.set("+", CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add"));
         scope.set("sub", CreateFunction(Substraction, "(sub expr1 expr2 ...)", "Returns value of expr1 subtracted with expr2 subtracted with ..."));
@@ -129,11 +164,20 @@
         scope.set(Sym, CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol."));
         scope.set(Str, CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string."));
 
+        scope.set(ArgsCount, CreateFunction(ArgsCountFcn, "(argscount)", "Returns the number of arguments for the current function."));
+        scope.set(Args, CreateFunction(ArgsFcn, "(args)", "Returns all the values of the arguments for the current function."));
+        scope.set(Arg, CreateFunction(ArgFcn, "(arg number)", "Returns the value of the [number] argument for the current function."));
+        scope.set(Apply, CreateFunction(ApplyFcn, "(apply function arguments-list)", "Calls the function with the arguments."));
+        scope.set(Eval, CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast)."));
+        scope.set(EvalStr, CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string."));
+
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
         scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
         scope.set(Gdef, CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
         scope.set(Setf, CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
+
+//TODO -> support macros !
 
         scope.set(Quote, CreateFunction(quote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
         scope.set(Quasiquote, CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
@@ -525,6 +569,79 @@
         return new LispVariant(LispType.String, value);
     }
 
+    public static function ArgsCountFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue.length; });
+    }
+
+    public static function ArgsFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper0(args, scope, "args", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue/*.ToArray()*/; });
+    }
+
+    public static function ArgFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("arg", 1, args, scope);
+
+        var index = cast(args[0], LispVariant).IntValue;
+        var array = cast(scope.get(ArgsMeta), LispVariant).ListValue/*.ToArray()*/;
+        if (index >= 0 && index < array.length)
+        {
+            return LispVariant.forValue(array[index]);
+        }
+        throw new LispException('Index out of range in args function (index=$index max=${array.length})');
+    }
+    
+    public static function ApplyFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(Apply, 2, args, scope);
+
+        var fcn = LispInterpreter.EvalAst(args[0], scope);
+
+        var arguments = cast(args[1], LispVariant);
+
+        if (arguments.IsList)
+        {
+            var argumentsArray = arguments.ListValue/*.ToArray()*/;
+            var result = fcn.FunctionValue.Function(argumentsArray, scope);
+            return result;
+        }
+
+        throw LispException.fromScope("Expected list as arguments in apply", scope);
+    }
+
+    public static function EvalFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("eval", 1, args, scope);
+
+        var result:LispVariant;
+        // convert LispVariant.List --> object[] needed for evaluation
+        var variant = cast(args[0], LispVariant);
+        if (variant.IsList)
+        {
+            var /*object[]*/ code = variant.ListValue/*.ToArray()*/;
+            result = LispInterpreter.EvalAst(code, scope);
+        }
+        else
+        {
+            result = LispInterpreter.EvalAst(variant, scope);
+        }
+        return result;
+    }
+
+    public static function EvalStrFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("evalstr", 1, args, scope);
+
+        var variant = cast(args[0], LispVariant);
+        var tempModuleName = scope.ModuleName;
+        scope.IsInEval = true;
+        var result = Lisp.Eval(variant.ToString(), scope, EvalStrTag + Std.string(scope.ModuleName) + ":" + variant.ToString());
+        scope.IsInEval = false;
+        scope.ModuleName = tempModuleName;
+        return result;
+    }
+
     private static function CheckForFunction(functionName:String, /*object*/ arg0:Dynamic, scope:LispScope):LispVariant
     {
         var functionVal = cast(arg0, LispVariant);
@@ -556,29 +673,6 @@
     private static function CompareOperation(/*object[]*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic, scope:LispScope, name:String):LispVariant
     {
         return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, name, function(arg1, arg2):LispVariant return op(arg1, arg2));
-    }
-
-    public static function FuelFuncWrapper1/*<T1, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, TResult>*/ func:Dynamic):LispVariant
-    {
-        CheckArgs(name, 1, args, scope);
-
-        var arg1 = /*(T1)*/cast(args[0], LispVariant);
-        var result = func(arg1);
-
-        var tempResult:LispVariant = cast(result, LispVariant);
-        return tempResult!=null ? tempResult : LispVariant.forValue(result);
-    }
-
-    public static function FuelFuncWrapper2/*<T1, T2, TResult>*/(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<T1, T2, TResult>*/ func:Dynamic):LispVariant
-    {
-        CheckArgs(name, 2, args, scope);
-
-        var arg1 = /*(T1)*/cast(args[0], LispVariant);
-        var arg2 = /*(T2)*/cast(args[1], LispVariant);
-        var result = func(arg1, arg2);
-
-        var tempResult:LispVariant = cast(result, LispVariant);
-        return tempResult!=null ? tempResult : LispVariant.forValue(result);
     }
 
     private static function ArithmetricOperation(/*IEnumerable<object>*/ args:Array<Dynamic>, /*Func<LispVariant, LispVariant, LispVariant>*/ op:Dynamic):LispVariant 
