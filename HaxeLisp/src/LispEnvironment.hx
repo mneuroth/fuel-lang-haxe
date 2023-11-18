@@ -51,11 +51,6 @@
     private /*const*/static var MapFcn = "map";
     private /*const*/static var ReduceFcn = "reduce";
 
-    public /*const*/static var Quote = "quote";
-    public /*const*/static var Quasiquote = "quasiquote";
-    public /*const*/static var UnQuote = "_unquote";
-    public /*const*/static var UnQuoteSplicing = "_unquotesplicing";
-
     public /*const*/static var Lambda = "lambda";
 
     public /*const*/static var ArgsMeta = MetaTag + "args" + MetaTag;
@@ -63,6 +58,20 @@
 
     public /*const*/static var Macros = MetaTag + "macros" + MetaTag;
     public /*const*/static var Modules = MetaTag + "modules" + MetaTag;
+
+    private /*const*/static var ArgsCount = "argscount";
+    private /*const*/static var Args = "args";
+    private /*const*/static var Arg = "arg";
+    public /*const*/static var Apply = "apply";
+    public /*const*/static var Eval = "eval";
+    public /*const*/static var EvalStr = "evalstr";
+    public /*const*/static var Quote = "quote";
+    public /*const*/static var Quasiquote = "quasiquote";
+    public /*const*/static var UnQuote = "_unquote";
+    public /*const*/static var UnQuoteSplicing = "_unquotesplicing";
+
+    public /*const*/static var Sym = "sym";
+    public /*const*/static var Str = "str";
 
     public /*const*/static var Version = "v0.99.4";
     public /*const*/static var Date = "11.11.2023";
@@ -75,6 +84,7 @@
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
 
         scope.set("print", CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console."));
+        scope.set("println", CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
 
         scope.set("add", CreateFunction(Addition, "(add expr1 expr2 ...)", "Returns value of expr1 added with expr2 added with ..."));
         scope.set("+", CreateFunction(Addition, "(+ expr1 expr2 ...)", "see: add"));
@@ -114,6 +124,10 @@
         scope.set("push", CreateFunction(Push, "(push elem list [index])", "Inserts the element at the given index (default value 0) into the list (implace) and returns the updated list."));
         scope.set("pop", CreateFunction(Pop, "(pop list [index])", "Removes the element at the given index (default value 0) from the list and returns the removed element."));
         scope.set("append", CreateFunction(Append, "(append list1 list2 ...)", "Returns a new list containing all given lists elements."));
+        scope.set("reverse", CreateFunction(Reverse, "(reverse expr)", "Returns a list or string with a reverted order."));
+        scope.set("rval", CreateFunction(RValue, "(rval expr)", "Returns a RValue of the expr, disables LValue evaluation.", true, true));
+        scope.set(Sym, CreateFunction(Symbol, "(sym expr)", "Returns the evaluated expression as symbol."));
+        scope.set(Str, CreateFunction(ConvertToString, "(str expr)", "Returns the evaluated expression as string."));
 
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -121,6 +135,10 @@
         scope.set(Gdef, CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
         scope.set(Setf, CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
 
+        scope.set(Quote, CreateFunction(quote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
+        scope.set(Quasiquote, CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
+        scope.set(UnQuote, CreateFunction(unquote_form, "(unquotesplicing expr)", "Special form for unquotingsplicing expressions in quasiquote functions.", true, true));
+        scope.set(UnQuoteSplicing, CreateFunction(unquotesplicing_form, "(unquotesplicing expr)", "Special form for unquotingsplicing expressions in quasiquote functions.", true, true));
         scope.set(If, CreateFunction(if_form, "(if cond then-block [else-block])", "The if statement.", true, true));
         scope.set(While, CreateFunction(while_form, "(while cond block)", "The while loop.", true, true));
         scope.set(Do, CreateFunction(do_form, "(do statement1 statement2 ...)", "Returns a sequence of statements.", true, true));
@@ -458,6 +476,55 @@
         return result;
     }
 
+    public static function Reverse(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("reverse", 1, args, scope);
+
+        var val = cast(args[0], LispVariant);
+        if (val.IsString)
+        {
+            return LispVariant.forValue(val.StringValue.reverse());
+        }
+        var elements = val.ListValue.copy();
+        elements.reverse();
+        return LispVariant.forValue(elements);
+    }
+
+    public static function RValue(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("rval", 1, args, scope);
+
+        var originalLValue = scope.NeedsLValue;
+        scope.NeedsLValue = false;
+        var value = EvalArgIfNeeded(args[0], scope);
+        scope.NeedsLValue = originalLValue;
+        return value; //  new LispVariant(value);
+    }
+
+    public static function Symbol(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, Sym, function (arg1) { new LispVariant(LispType.Symbol, arg1.ToString()); } );
+    }
+
+    public static function ConvertToString(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(Str, 1, args, scope);
+
+        var value = cast(args[0], LispVariant).ToString();
+        // convert native object into a readable form
+        // used for: (println (str nativeLst))
+        if (args[0] is LispVariant)
+        {
+            var variant = cast(args[0], LispVariant);
+//TODO            
+            // if (variant.IsNativeObject)
+            // {
+            //     value = variant.NativeObjectStringRepresentation;
+            // }                
+        }
+        return new LispVariant(LispType.String, value);
+    }
+
     private static function CheckForFunction(functionName:String, /*object*/ arg0:Dynamic, scope:LispScope):LispVariant
     {
         var functionVal = cast(arg0, LispVariant);
@@ -529,6 +596,91 @@
             }
         }
         return LispVariant.forValue(result.Value);
+    }
+
+    public static function quote_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, Quote, function (arg1) { LispVariant.forValue(arg1); });
+    }
+
+    private static function ProcessQuotedSExpression(/*IEnumerable<object>*/ expr:Array<Dynamic>, scope:LispScope, /*out*/ splicing:Ref<Bool>):Dynamic
+    {
+        //List<object> result = new List<object>();
+        var result = new Array<Dynamic>();
+
+        splicing.value = false;
+
+        if (expr.length == 2)
+        {
+            var item1 = expr.First();
+            var item2 = expr.ElementAt(1);
+            if (item1 is LispVariant)
+            {
+                var variant = cast(item1, LispVariant);
+                if (variant.IsSymbol && (variant.ToString() == UnQuote || variant.ToString() == UnQuoteSplicing))
+                {
+                    var evalResult = LispInterpreter.EvalAst(item2, scope);
+                    splicing.value = variant.ToString() == UnQuoteSplicing;
+                    evalResult.IsUnQuoted = splicing.value ? LispUnQuoteModus.UnQuoteSplicing : LispUnQuoteModus.UnQuote;
+                    return evalResult;
+                }
+            }
+            result.Add(item1);
+            result.Add(item2);
+        }
+        else
+        {
+            for (itm in expr)
+            {
+                if (itm is Array/*IEnumerable<object>*/)
+                {
+                    var tempSplicing:Ref<Bool> = new Ref<Bool>(false);
+                    var res = ProcessQuotedSExpression(itm /*as IEnumerable<object>*/, scope, /*out*/ tempSplicing);
+                    if (tempSplicing.value)
+                    {
+                        var variant = cast(res, LispVariant);
+                        result.AddRange(variant.ListValue);
+                    }
+                    else
+                    {
+                        result.Add(res);
+                    }
+                }
+                else
+                {
+                    result.Add(itm);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static function quasiquote_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(Quasiquote, 1, args, scope);
+
+        // iterate through arguments and evaluate unquote/splicing expressions
+        var expression = args[0];
+        if (expression is LispVariant)
+        {
+            return cast(expression, LispVariant);
+        }
+        else if(expression is Array/*IEnumerable<object>*/)
+        {
+            var splicing = new Ref<Bool>(false);
+            return new LispVariant(ProcessQuotedSExpression(expression /*Array<Dynamic>*//*as IEnumerable<object>*/, scope, /*out*/ splicing));
+        }
+        return LispVariant.forValue(expression);
+    }
+    
+    public static function unquote_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, UnQuote, function (arg1) { LispVariant.forValue(arg1); });
+    }
+
+    public static function unquotesplicing_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<object, LispVariant>*/(args, scope, UnQuoteSplicing, function (arg1) { LispVariant.forValue(arg1); });
     }
 
     public static function if_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant

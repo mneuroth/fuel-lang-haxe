@@ -93,6 +93,14 @@ class ArrayExtender {
     }
 }
 
+class StringExtender {
+    static public function reverse(s:String):String {
+        var temp = s.split('');
+        temp.reverse();
+        return temp.join('');
+    }
+}
+
 class MapExtender {
     static public function TryGetValue(map:haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/, name:String, value:Ref<Dynamic>):Bool {
         if (map.exists(name)) {

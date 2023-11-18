@@ -306,7 +306,27 @@ class LispInterpreterTest extends utest.Test {
     public function testInterpreter32() {
         var res = Lisp.Eval("(append (list 1 2 3 4) (list 9 8 7))");
         Assert.equals("(1 2 3 4 9 8 7)", res.ToString());
-        var res = Lisp.Eval("(append (list 1 2 3 4) 42)");
-        Assert.equals("(1 2 3 4 9 8 7)", res.ToString());
+        var res = Lisp.Eval("(append (list 1 2 3 4) (list 42) (list 99 -1))");
+        Assert.equals("(1 2 3 4 42 99 -1)", res.ToString());
+    }
+    public function testInterpreter33() {
+        var res = Lisp.Eval("(reverse (list 1 2 3 4))");
+        Assert.equals("(4 3 2 1)", res.ToString());
+        var res = Lisp.Eval("(reverse \"hello!\")");
+        Assert.equals("!olleh", res.ToString());
+    }
+    public function testInterpreter34() {
+        var res = Lisp.Eval("(str (+ 1 2))");
+        Assert.equals("3", res.ToString());
+    }
+    public function testInterpreter35() {
+        var res = Lisp.Eval("(str (+ 1 2))");
+        Assert.equals("3", res.ToString());
+    }
+    public function testInterpreter36() {
+        var res = Lisp.Eval("(quote (+ 1 2))");
+        Assert.equals("(+ 1 2)", res.ToString());
+        var res = Lisp.Eval("'(+ 1 2 4 2.3)");
+        Assert.equals("(+ 1 2 4 2.3)", res.ToString());
     }
 }
