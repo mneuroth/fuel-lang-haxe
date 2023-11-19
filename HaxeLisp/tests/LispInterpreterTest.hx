@@ -394,4 +394,36 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(search \"my\" \"Hallo my World\")");
         Assert.equals("6", res.ToString());
     }
+    public function testInterpreter48() {
+        var res = Lisp.Eval("(float \"1.234\")");
+        Assert.equals("1.234", res.ToString());
+        var res = Lisp.Eval("(float 42)");
+        Assert.equals("42", res.ToString());
+        var res = Lisp.Eval("(float 7.89)");
+        Assert.equals("7.89", res.ToString());
+    }
+    public function testInterpreter49() {
+        var res = Lisp.Eval("(int \"1.234\")");
+        Assert.equals("1", res.ToString());
+        var res = Lisp.Eval("(int 42)");
+        Assert.equals("42", res.ToString());
+        var res = Lisp.Eval("(int 7.89)");
+        Assert.equals("7", res.ToString());
+    }
+    public function testInterpreter50() {
+        var res = Lisp.Eval("(parse-float \"1.234\")");
+        Assert.equals("1.234", res.ToString());
+        var res = Lisp.Eval("(parse-float 42)");
+        Assert.equals("42", res.ToString());
+        var res = Lisp.Eval("(parse-float 7.89)");
+        Assert.equals("7.89", res.ToString());
+    }
+    public function testInterpreter51() {
+        var res = Lisp.Eval("(parse-integer \"1.234\")");
+        Assert.equals("1", res.ToString());
+        var res = Lisp.Eval("(parse-integer 42)");
+        Assert.equals("42", res.ToString());
+        var res = Lisp.Eval("(parse-integer 7.89)");
+        Assert.equals("7", res.ToString());
+    }
 }

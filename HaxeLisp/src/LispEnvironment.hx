@@ -139,6 +139,11 @@
         scope.set("println", CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
 
 //TODO
+        scope.set("parse-integer", CreateFunction(ParseInteger, "(parse-integer expr)", "Convert the string expr into an integer value"));
+        scope.set("parse-float", CreateFunction(ParseFloat, "(parse-float expr)", "Convert the string expr into a float value"));
+        scope.set("int", CreateFunction(ToInt, "(int expr)", "Convert the expr into an integer value"));
+        scope.set("float", CreateFunction(ToFloat, "(float expr)", "Convert the expr into a float value"));
+
         scope.set("search", CreateFunction(Search, "(search searchtxt expr [pos] [len])", "Returns the first position of the searchtxt in the string, starting from position pos."));
         scope.set("slice", CreateFunction(Slice, "(slice expr1 pos len)", "Returns a substring of the given string expr1, starting from position pos with length len."));
         scope.set("replace", CreateFunction(Replace, "(replace expr1 searchtxt replacetxt)", "Returns a string of the given string expr1 with replacing searchtxt with replacetxt."));
@@ -248,6 +253,90 @@
         CheckArgs("fuel", 0, args, scope);
 
         return LispVariant.forValue('fuel version ${LispEnvironment.Version} from ${LispEnvironment.Date}');
+    }
+
+    public static function ParseInteger(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("parse-integer", 1, args, scope);
+
+        var value:Int;
+        try
+        {
+            //value = Convert.ToInt32(((LispVariant)args[0]).ToString(), CultureInfo.InvariantCulture);
+            value = Std.parseInt(cast(args[0], LispVariant).ToString());
+        }
+        catch (Exception)
+        {
+            return new LispVariant(LispType.Undefined);
+        }
+        return LispVariant.forValue(value);
+    }    
+
+    public static function ParseFloat(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("parse-float", 1, args, scope);
+
+        var value:Float;
+        try
+        {
+            //value = Convert.ToDouble(((LispVariant)args[0]).ToString(), CultureInfo.InvariantCulture);
+            value = Std.parseFloat(cast(args[0], LispVariant).ToString());
+        }
+        catch (Exception)
+        {
+            return new LispVariant(LispType.Undefined);
+        }
+        return LispVariant.forValue(value);
+    }
+
+    public static function ToInt(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("int", 1, args, scope);
+
+//TODO -> use value.ToInt() instead of if statements !        
+        var value = cast(args[0], LispVariant);
+        if (value.IsInt)
+        {
+            return LispVariant.forValue(value.IntValue);
+        }
+        if (value.IsDouble)
+        {
+            return LispVariant.forValue(Std.int(value.DoubleValue));
+        }
+        if (value.IsString)
+        {
+            return ParseInteger(args, scope);
+        }
+        if (value.IsBool)
+        {
+            return LispVariant.forValue(value.BoolValue ? 1 : 0);
+        }
+        return new LispVariant(LispType.Undefined);
+    }
+
+    public static function ToFloat(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("float", 1, args, scope);
+
+//TODO -> use value.ToDouble() instead of if statements !        
+        var value = cast(args[0], LispVariant);
+        if (value.IsInt)
+        {
+            return LispVariant.forValue(value.ToDouble());
+        }
+        if (value.IsDouble)
+        {
+            return LispVariant.forValue(value.DoubleValue);
+        }
+        if (value.IsString)
+        {
+            return ParseFloat(args, scope);
+        }
+        if (value.IsBool)
+        {
+            return LispVariant.forValue(value.BoolValue ? 1.0 : 0.0);
+        }
+        return new LispVariant(LispType.Undefined);
     }
 
     public static function Search(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
