@@ -430,4 +430,32 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(do (println (format \"Hello int={0} double={1} str={2}\" 42 2.3456 \"world\")))");
         Assert.equals("Hello int=42 double=2.3456 str=world", res.ToString());
     }
+    public function testInterpreter53() {
+        var res = Lisp.Eval("(do (defn f (x) (return (+ x x))) (println (f 7)))");
+        Assert.equals("14", res.ToString());
+    }
+    public function testInterpreter54() {
+        var res = Lisp.Eval("(nop)");
+        Assert.equals("<undefined>", res.ToString());
+    }
+    public function testInterpreter55() {
+        var res = Lisp.Eval("(typestr \"hello\")");
+        Assert.equals("String", res.ToString());
+        var res = Lisp.Eval("(typestr #t)");
+        Assert.equals("Bool", res.ToString());
+        var res = Lisp.Eval("(typestr 42)");
+        Assert.equals("Int", res.ToString());
+        var res = Lisp.Eval("(typestr 4.2)");
+        Assert.equals("Double", res.ToString());
+    }
+    public function testInterpreter56() {
+        var res = Lisp.Eval("(type \"hello\")");
+        Assert.equals("6", res.ToString());
+        var res = Lisp.Eval("(type #t)");
+        Assert.equals("3", res.ToString());
+        var res = Lisp.Eval("(type 42)");
+        Assert.equals("4", res.ToString());
+        var res = Lisp.Eval("(type 4.2)");
+        Assert.equals("5", res.ToString());
+    }
 }

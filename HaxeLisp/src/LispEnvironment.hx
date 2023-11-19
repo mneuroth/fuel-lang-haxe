@@ -137,10 +137,15 @@ class LispEnvironment {
         //scope["fuel"] = CreateFunction(Fuel, "(fuel)", "");
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
 
+//TODO
+
+        // interpreter functions
+        scope.set("type", CreateFunction(GetType, "(type expr)", "Returns the type id of the value of the expression."));
+        scope.set("typestr", CreateFunction(GetTypeString, "(typestr expr)", "Returns a readable string representing the type of the value of the expression."));
+        scope.set("nop", CreateFunction(Nop, "(nop)", "Does nothing (no operation)."));
+        scope.set("return", CreateFunction(Return, "(return expr)", "Returns the value of the expression and quits the function."));
         scope.set("print", CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console."));
         scope.set("println", CreateFunction(PrintLn, "(readline)", "Reads a line from the console input."));
-
-//TODO
         scope.set("format", CreateFunction(Format, "(format format-str expr1 expr2 ...)", "Formats the content of the format string with the values of the given expressions and returns a string."));
         scope.set("flush", CreateFunction(Flush, "(flush)", "Flushes the output to the console."));
         scope.set("readline", CreateFunction(ReadLine, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
@@ -261,6 +266,27 @@ class LispEnvironment {
         return LispVariant.forValue('fuel version ${LispEnvironment.Version} from ${LispEnvironment.Date}');
     }
     
+    public static function Nop(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return new LispVariant(LispType.Undefined);
+    }
+
+    public static function Return(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        scope.IsInReturn = true;
+        return LispVariant.forValue(args[0]);
+    }
+
+    public static function GetType(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, int>*/(args, scope, "type", function (arg1:LispVariant):Int { return /*(int)*/LispVariant.ToTypeId(arg1.Type); });
+    }
+
+    public static function GetTypeString(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, string>*/(args, scope, "typestr", function (arg1:LispVariant):String { return arg1.TypeString; });
+    }
+
     public static function Print(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         var text = GetStringRepresentation(args, scope);

@@ -64,6 +64,36 @@ class LispFunctionWrapper {
     Error;
 }
 
+function ToTypeId(Type:LispType):Int {
+    switch(Type) {
+        case Undefined:
+            return 1;
+        case Nil:
+            return 2;
+        case Bool:
+            return 3;
+        case Int:
+            return 4;
+        case Double:
+            return 5;
+        case String:
+            return 6;
+        case List:
+            return 7;
+        case Function:
+            return 8;
+        case Symbol:
+            return 9;
+        case NativeObject:
+            return 10;
+        //case Array:
+        case LValue:
+            return 11;
+        case Error:
+            return 12;
+    }
+}
+
 function ToStringT(Type:LispType):String {
     switch(Type) {
         case Undefined:
