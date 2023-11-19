@@ -56,7 +56,11 @@ class TextWriter {
 #end
     }
     public function Flush():Void {
+#if sys
         Sys.stdout().flush();
+#else
+        trace("Flush() is not supported!");
+#end        
     }
 }
 
@@ -65,7 +69,12 @@ class TextReader {
     }
 
     public function ReadLine():String {
+#if sys
         return Sys.stdin().readLine();
+#else
+        trace("ReadLine() is not supported!")
+        return "";
+#end
     }
 }
  
