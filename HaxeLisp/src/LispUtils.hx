@@ -112,7 +112,17 @@ class StringExtender {
             value = ereg.matchedLeft() + values[Std.parseInt(ereg.matched(2))] + ereg.matchedRight();
         }
         return value;
-    }    
+    }
+    public static function Append(s:String, other:String):String {
+        s = s + other;
+        return s;
+    }
+    public static function StartsWith(s:String, other:String):Bool {
+        return s.indexOf(other) == 0;
+    }
+    public static function Contains(s:String, other:String):Bool {
+        return s.indexOf(other) > 0;
+    }
 }
 
 class MapExtender {

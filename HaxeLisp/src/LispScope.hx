@@ -292,6 +292,28 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         }
     }
 
+    public function GetFunctionsHelpFormated(functionName:String, /*Func<string, string, bool>*/ select:Dynamic = null):String
+    {
+        var result = "";  //string.Empty;
+        for (key in keys())
+        {
+            if (select != null)
+            {
+                if (select(key, functionName))
+                {
+                    var value = cast(get(key), LispVariant);  //(LispVariant)this[key];
+                    result += value.FunctionValue.FormatedDoc;
+                }
+            }
+            else if (key.StartsWith(functionName))
+            {
+                var value = cast(get(key), LispVariant);  //(LispVariant)this[key];
+                result += value.FunctionValue.FormatedDoc;
+            }
+        }
+        return result;
+    }
+    
     /// <summary>
     /// Determines whether the given name is available in the closure chain.
     /// </summary>

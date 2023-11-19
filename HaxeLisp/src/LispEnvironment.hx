@@ -78,8 +78,8 @@ class LispEnvironment {
     public /*const*/static var Sym = "sym";
     public /*const*/static var Str = "str";
 
-    public /*const*/static var Version = "v0.99.4";
-    public /*const*/static var Date = "11.11.2023";
+    public /*const*/static var FuelVersion = "v0.99.4";
+    public /*const*/static var FuelDate = "11.11.2023";
 
     public static function FuelFuncWrapper0<TResult>(/*object[]*/ args:Array<Dynamic>, scope:LispScope, name:String, /*Func<TResult>*/ func:Dynamic):LispVariant
     {
@@ -134,10 +134,18 @@ class LispEnvironment {
     public static function CreateDefaultScope():LispScope {
         var scope = LispScope.forFunction(MainScope);
 
-        //scope["fuel"] = CreateFunction(Fuel, "(fuel)", "");
-        scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
+        scope.set("fuel", CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language."));
+        scope.set("copyright", CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language."));
+        scope.set("help", CreateFunction(Help, "(help)", "Returns and shows the available builtin functions."));
+        scope.set("doc", CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s)."));
+        scope.set("searchdoc", CreateFunction(SearchDocumentation, "(searchdoc name ...)", "Returns and shows the documentation of functions containing name(s)."));
 
 //TODO
+        scope.set("import", CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code."));
+        scope.set("tickcount", CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times."));
+        scope.set("sleep", CreateFunction(Sleep, "(sleep time-in-ms)", "Sleeps the given number of milliseconds."));
+        scope.set("date-time", CreateFunction(Datetime, "(date-time)", "Returns a list with informations about the current date and time: (year month day hours minutes seconds)."));
+        scope.set("platform", CreateFunction(Platform, "(platform)", "Returns a list with informations about the current platform: (operating_system runtime_environment)."));
 
         // interpreter functions
         scope.set("type", CreateFunction(GetType, "(type expr)", "Returns the type id of the value of the expression."));
@@ -263,9 +271,227 @@ class LispEnvironment {
     {
         CheckArgs("fuel", 0, args, scope);
 
-        return LispVariant.forValue('fuel version ${LispEnvironment.Version} from ${LispEnvironment.Date}');
+        return LispVariant.forValue('fuel version ${LispEnvironment.FuelVersion} from ${LispEnvironment.FuelDate}');
     }
     
+    private static function Copyright(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("copyright", 0, args, scope);
+
+        var text = 'Copyright: ${Lisp.License} ${Lisp.LicenseUrl}';
+        return LispVariant.forValue(text);
+    }
+
+    private static function Help(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("help", 0, args, scope);
+
+        var helpText = "";  //new StringBuilder();
+        helpText.Append("available functions:\n");
+        for (cmd in scope.keys())
+        {                
+            var s = cmd+"\n";
+            helpText += s;
+            //helpText.Append(s);
+        }
+        scope.GlobalScope.Output.WriteLine(helpText/*.ToString()*/);
+        return LispVariant.forValue(helpText/*.ToString()*/);
+    }
+    
+    private static function Documentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return DoSearchDocumentation(args, scope, null);
+    }
+
+    private static function SearchDocumentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return DoSearchDocumentation(args, scope, function (k, n) { return k.indexOf(n)>=0; });
+    }
+
+    private static function DoSearchDocumentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope, /*Func<string, string, bool>*/ select:Dynamic):LispVariant
+    {
+        if (args.length > 0)
+        {
+            var help = "";  //string.Empty;
+            for (item in args)
+            {
+                help += scope.GetFunctionsHelpFormated(item.ToString(), select);
+                // search for functions in all loaded modules
+                // for (KeyValuePair<string, object> module in (LispScope)(scope.GlobalScope[Modules]))
+                // {
+                //     help += ((LispScope)module.Value).GetFunctionsHelpFormated(item.ToString(), select);
+                // }
+                var modules = cast(scope.GlobalScope.get(Modules), LispVariant);
+                if (modules!=null) 
+                {
+                    for (module in modules.ListValue)
+                    {
+                        help += cast(module.Value, LispScope).GetFunctionsHelpFormated(item.ToString(), select);
+                    }
+                }
+            }
+            return DumpDocumentation(scope, function () { scope.GlobalScope.Output.WriteLine(help); });
+        }
+        return DumpDocumentation(scope, function () { /*scope.GlobalScope.DumpBuiltinFunctionsHelpFormated();*/ });
+    }
+
+    private static function DumpDocumentation(scope:LispScope, /*Action*/ dump:Dynamic):LispVariant
+    {
+        var text = "";  //new StringBuilder();
+        var tempOutputWriter = scope.GlobalScope.Output;
+//TODO        
+        scope.GlobalScope.Output = new LispScope.TextWriter();  //new StringWriter(text);
+        dump();
+        scope.GlobalScope.Output = tempOutputWriter;
+        return LispVariant.forValue(text/*.ToString()*/);
+    }
+
+    private static function CurrentTickCount(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper0/*<int>*/(args, scope, "tickcount", function ():Float { return Sys.cpuTime(); });
+    }
+
+    private static function Sleep(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, "sleep", function (arg1:LispVariant):LispVariant
+        {
+            Sys.sleep(arg1.ToDouble()*0.001);
+            return new LispVariant(LispType.Undefined);
+        });
+    }
+
+    private static function Datetime(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("date-time", 0, args, scope);
+
+        var timestamp = Date.now();
+        var year = timestamp.getFullYear();
+        var month = timestamp.getMonth();
+        var day = timestamp.getDay();
+        var hour = timestamp.getHours();
+        var minute = timestamp.getMinutes();
+        var second = timestamp.getSeconds();
+        var value = new Array<Dynamic>();   //List<LispVariant>
+        value.push(LispVariant.forValue(year));
+        value.push(LispVariant.forValue(month));
+        value.push(LispVariant.forValue(day));
+        value.push(LispVariant.forValue(hour));
+        value.push(LispVariant.forValue(minute));
+        value.push(LispVariant.forValue(second));
+        return LispVariant.forValue(value);
+    }
+
+    private static function Platform(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var osString = Sys.systemName();
+        //OperatingSystem os = Environment.OSVersion;
+        //PlatformID pid = os.Platform;
+        /*
+        switch(pid)
+        {
+            case PlatformID.MacOSX:
+                osString = "MACOSX";
+                break;
+            case PlatformID.Unix:
+                osString = "UNIX";
+                break;
+            case PlatformID.Win32NT:
+            case PlatformID.Win32S:
+            case PlatformID.Win32Windows:
+                osString = "WIN";
+                break;
+            case PlatformID.Xbox:
+                osString = "XBOX";
+                break;
+            default:
+                osString = "UNKNOWN";
+                break;
+        }
+        */
+        //var is64Bit = IntPtr.Size == 8;
+        var value = new Array<Dynamic>();
+        value.push(LispVariant.forValue(osString));
+        value.push(LispVariant.forValue("haxe"));  //".NET"
+        value.push(LispVariant.forValue("unknown"));  // /* is64Bit ? "64bit" : "32bit"*//*, Environment.Is64BitProcess*/ /*, Environment.OSVersion.ToString(), Environment.Version.ToString()*/ };
+        return LispVariant.forValue(value);
+    }
+
+    private static function Import(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var result = new LispVariant(LispType.Undefined);
+
+//TODO        
+        // foreach (var module in args)
+        // {
+        //     string code = string.Empty;
+        //     string orgModuleFileName = ((LispVariant)module).StringValue;
+        //     string fileName = orgModuleFileName;
+        //     if (!File.Exists(fileName))
+        //     {
+        //         // try the given library path (if available)
+        //         fileName = LispUtils.LibraryPath + Path.DirectorySeparatorChar + orgModuleFileName;
+        //         fileName = AddFileExtensionIfNeeded(fileName);
+        //         if (!File.Exists(fileName)) 
+        //         {
+        //             // try default path .\Library\modulename.fuel
+        //             fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+        //             fileName = AddFileExtensionIfNeeded(fileName);
+        //             if (!File.Exists(fileName))
+        //             {
+        //                 // try default path for visiscript .\lib\fuel\modulename.fuel
+        //                 fileName = "." + Path.DirectorySeparatorChar + "lib" + Path.DirectorySeparatorChar + "fuel" + Path.DirectorySeparatorChar + orgModuleFileName;
+        //                 fileName = AddFileExtensionIfNeeded(fileName);
+        //                 if (!File.Exists(fileName))
+        //                 {
+        //                     // try default path <fuel.exe-path>\Library\modulename.fuel
+        //                     fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
+        //                     fileName = AddFileExtensionIfNeeded(fileName);
+        //                     if (!File.Exists(fileName))
+        //                     {
+        //                         // try environment variable FUELPATH
+        //                         string envPath = Environment.GetEnvironmentVariable("FUELPATH");
+        //                         if (envPath != null)
+        //                         {
+        //                             fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
+        //                             fileName = AddFileExtensionIfNeeded(fileName);
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     if (File.Exists(fileName))
+        //     {
+        //         code = File.ReadAllText(fileName);
+        //     }
+        //     else
+        //     {
+        //         // use std lib of fuel from builtin resources
+        //         if(orgModuleFileName=="fuellib")
+        //         {
+        //             code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
+        //         }
+        //         else
+        //         {
+        //             scope.GlobalScope.Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+        //         }
+        //     }
+        //     if (!string.IsNullOrEmpty(code))
+        //     {
+        //         var importScope = new LispScope("import "+fileName, scope.GlobalScope, fileName);
+        //         scope.PushNextScope(importScope);
+
+        //         result = Lisp.Eval(code, importScope, fileName);
+
+        //         // add new module to modules scope
+        //         ((LispScope)scope.GlobalScope[Modules]).Add(fileName, importScope);
+
+        //         scope.PopNextScope();
+        //     }
+        // }
+        return result;
+    }
+
     public static function Nop(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return new LispVariant(LispType.Undefined);

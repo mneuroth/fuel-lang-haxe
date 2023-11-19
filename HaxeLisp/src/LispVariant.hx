@@ -45,6 +45,45 @@ class LispFunctionWrapper {
         IsSpecialForm = isSpecialForm;
         ModuleName = moduleName;
     }    
+
+    public var FormatedDoc(get, never):String;
+    function get_FormatedDoc():String
+    {
+        /*const string*/var separator = "\n\n";
+        /*const string*/var splitter = "-------------------------------------------------" + separator;
+        return GetFormatedHelpString(separator, splitter);
+    }
+
+    private function GetFormatedHelpString(separator:String, splitter:String, /*Func<string, string>*/ nameDecorator:Dynamic = null, /*Func<string, string>*/ syntaxDecorator:Dynamic = null):String
+    {
+        if (nameDecorator == null)
+        {
+            nameDecorator = function (s) { return s; }
+        }
+        if (syntaxDecorator == null)
+        {
+            syntaxDecorator = function (s) { return s; }
+        }
+        var name = "???";
+        var signature = (Signature != null ? Signature : ""/*string.Empty*/);
+        if (signature.length > 0 && signature.StartsWith("("))
+        {
+            var len = signature.indexOf(" "/*, StringComparison.Ordinal*/);
+            // process commands like: (doc)
+            if (len < 0)
+            {
+                len = signature.indexOf(")"/*, StringComparison.Ordinal*/) - 1;
+            }
+            name = nameDecorator(signature.substr(1, len));
+        }
+        name += IsSpecialForm ? " [special form]" : ""/*string.Empty*/;
+        name += separator;
+        var syntax = syntaxDecorator("Syntax: " + signature) + separator;
+        var doc = (Documentation != null ? Documentation : "<not available>");
+        doc += separator;
+        return splitter + name + syntax + doc + "\n";
+        return "???";
+    }
 }
 
 /* public*/ enum LispType
