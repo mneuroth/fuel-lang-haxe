@@ -348,14 +348,24 @@ class LispEnvironment {
 
     private static function CurrentTickCount(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper0/*<int>*/(args, scope, "tickcount", function ():Float { return Sys.cpuTime(); });
+        return FuelFuncWrapper0/*<int>*/(args, scope, "tickcount",
+                    function ():Float
+                        {
+#if sys
+                            return Sys.cpuTime();
+#else
+                            return -1;
+#end
+                        });
     }
 
     private static function Sleep(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, "sleep", function (arg1:LispVariant):LispVariant
         {
+#if sys
             Sys.sleep(arg1.ToDouble()*0.001);
+#end
             return new LispVariant(LispType.Undefined);
         });
     }
@@ -383,7 +393,11 @@ class LispEnvironment {
 
     private static function Platform(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
+#if sys
         var osString = Sys.systemName();
+#else
+        var osString = "???";
+#end
         //OperatingSystem os = Environment.OSVersion;
         //PlatformID pid = os.Platform;
         /*
