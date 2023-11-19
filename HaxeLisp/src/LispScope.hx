@@ -72,7 +72,7 @@ class TextReader {
 #if sys
         return Sys.stdin().readLine();
 #else
-        trace("ReadLine() is not supported!")
+        trace("ReadLine() is not supported!");
         return "";
 #end
     }
