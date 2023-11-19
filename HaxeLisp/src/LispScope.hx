@@ -55,10 +55,17 @@ class TextWriter {
         trace(text);
 #end
     }
+    public function Flush():Void {
+        Sys.stdout().flush();
+    }
 }
 
 class TextReader {
     public function new() {
+    }
+
+    public function ReadLine():String {
+        return Sys.stdin().readLine();
     }
 }
  

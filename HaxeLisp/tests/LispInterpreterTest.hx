@@ -426,4 +426,8 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(parse-integer 7.89)");
         Assert.equals("7", res.ToString());
     }
+    public function testInterpreter52() {
+        var res = Lisp.Eval("(do (println (format \"Hello int={0} double={1} str={2}\" 42 2.3456 \"world\")))");
+        Assert.equals("Hello int=42 double=2.3456 str=world", res.ToString());
+    }
 }

@@ -23,16 +23,18 @@
  * 
  * */
 
- package;
- 
- using StringTools;
+package;
 
- using LispUtils;
- using LispVariant;
- using LispVariant.OpLispVariant;
- using LispToken.LispTokenType;
+import haxe.Exception;
 
- class LispEnvironment {
+using StringTools;
+
+using LispUtils;
+using LispVariant;
+using LispVariant.OpLispVariant;
+using LispToken.LispTokenType;
+
+class LispEnvironment {
     public /*const*/static var MetaTag = "###";
     public /*const*/static var Builtin = "<builtin>";
     public /*const*/static var EvalStrTag = "<evalstr>:";
@@ -136,9 +138,13 @@
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", ""));
 
         scope.set("print", CreateFunction(Print, "(print expr1 expr2 ...)", "Prints the values of the given expressions on the console."));
-        scope.set("println", CreateFunction(PrintLn, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
+        scope.set("println", CreateFunction(PrintLn, "(readline)", "Reads a line from the console input."));
 
 //TODO
+        scope.set("format", CreateFunction(Format, "(format format-str expr1 expr2 ...)", "Formats the content of the format string with the values of the given expressions and returns a string."));
+        scope.set("flush", CreateFunction(Flush, "(flush)", "Flushes the output to the console."));
+        scope.set("readline", CreateFunction(ReadLine, "(println expr1 expr2 ...)", "Prints the values of the given expressions on the console adding a new line at the end of the output."));
+
         scope.set("parse-integer", CreateFunction(ParseInteger, "(parse-integer expr)", "Convert the string expr into an integer value"));
         scope.set("parse-float", CreateFunction(ParseFloat, "(parse-float expr)", "Convert the string expr into a float value"));
         scope.set("int", CreateFunction(ToInt, "(int expr)", "Convert the expr into an integer value"));
@@ -253,6 +259,66 @@
         CheckArgs("fuel", 0, args, scope);
 
         return LispVariant.forValue('fuel version ${LispEnvironment.Version} from ${LispEnvironment.Date}');
+    }
+    
+    public static function Print(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var text = GetStringRepresentation(args, scope);
+        scope.GlobalScope.Output.Write(text);
+        return LispVariant.forValue(text);
+    }
+
+    public static function PrintLn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var text = GetStringRepresentation(args, scope);
+        scope.GlobalScope.Output.WriteLine(text);
+        return LispVariant.forValue(text);
+    }
+
+    public static function Format(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckOptionalArgs("format", 1, 6, args, scope);
+
+        var formatedResult = "";  //string.Empty;
+        var formatStr = cast(args[0], LispVariant).ToString();
+        var /*object[]*/ valueArgs = new Array<Dynamic>();  //object[args.Count() - 1];
+        valueArgs.resize(args.length - 1);
+        //Array.Copy(args, 1, valueArgs, 0, args.Count()-1);
+        for(i in 1...args.length) {
+            valueArgs[i-1] = args[i].ToString();
+            //trace(i);
+        }
+        try
+        {
+            formatedResult = formatStr.Format(valueArgs); //string.Format(formatStr, valueArgs);
+        }
+        // catch(ex:ArgumentNullException)
+        // {
+        //     throw new LispException('Not enough items for format string: ${formatStr}');
+        // }
+        // catch(ex:FormatException)
+        // {
+        //     throw new LispException('Invalid format string: ${formatStr}');
+        // }
+        catch(Exception)
+        {
+            throw new LispException('Invalid format string: ${formatStr}');
+        }
+        return LispVariant.forValue(formatedResult);
+    }
+
+    public static function Flush(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper0/*<LispVariant>*/(args, scope, "flush", function ():LispVariant
+        {
+            scope.GlobalScope.Output.Flush();
+            return LispVariant.forValue(LispType.Undefined);
+        });
+    }
+
+    public static function ReadLine(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper0/*<string>*/(args, scope, "readline", function ():String { return scope.GlobalScope.Input.ReadLine(); });
     }
 
     public static function ParseInteger(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -1166,20 +1232,6 @@
     //     }
     //     return LispVariant.forValue(result.Value);
     // }
-
-    public static function Print(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
-    {
-        var text = GetStringRepresentation(args, scope);
-        scope.GlobalScope.Output.Write(text);
-        return LispVariant.forValue(text);
-    }
-
-    public static function PrintLn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
-    {
-        var text = GetStringRepresentation(args, scope);
-        scope.GlobalScope.Output.WriteLine(text);
-        return LispVariant.forValue(text);
-    }
 
     private static function GetStringRepresentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope, separator:String = " "):String
     {

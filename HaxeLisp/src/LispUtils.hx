@@ -105,6 +105,14 @@ class StringExtender {
     static public function ToLower(s:String):String {
         return s.toLowerCase();
     }
+    public static function Format(value:String, values:Array<Any>) {
+        //see: https://stackoverflow.com/questions/49104997/string-substitution-string-formating-in-haxe
+        var ereg:EReg = ~/(\{(\d{1,2})\})/g;
+        while (ereg.match(value)) {
+            value = ereg.matchedLeft() + values[Std.parseInt(ereg.matched(2))] + ereg.matchedRight();
+        }
+        return value;
+    }    
 }
 
 class MapExtender {
