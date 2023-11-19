@@ -292,6 +292,21 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         }
     }
 
+    public function DumpBuiltinFunctionsHelpHtmlFormated()
+    {
+        Output.WriteLine("<html>");
+        Output.WriteLine("<head>");
+        Output.WriteLine("<title>");
+        Output.WriteLine("Documentation of fuel language");
+        Output.WriteLine("</title>");
+        Output.WriteLine("</head>");
+        Output.WriteLine("<h2>Documentation of builtin functions of the fuel language:</h2>");
+        Output.WriteLine("<body>");
+//TODO        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; }, /*sort:*/ true, /*format:*/function (v) { return v.FunctionValue.HtmlFormatedDoc; });
+        Output.WriteLine("</body>");
+        Output.WriteLine("</html>");
+    }
+
     public function GetFunctionsHelpFormated(functionName:String, /*Func<string, string, bool>*/ select:Dynamic = null):String
     {
         var result = "";  //string.Empty;

@@ -139,6 +139,7 @@ class LispEnvironment {
         scope.set("help", CreateFunction(Help, "(help)", "Returns and shows the available builtin functions."));
         scope.set("doc", CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s)."));
         scope.set("searchdoc", CreateFunction(SearchDocumentation, "(searchdoc name ...)", "Returns and shows the documentation of functions containing name(s)."));
+        scope.set("htmldoc", CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format."));
 
 //TODO
         scope.set("import", CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code."));
@@ -333,6 +334,11 @@ class LispEnvironment {
             return DumpDocumentation(scope, function () { scope.GlobalScope.Output.WriteLine(help); });
         }
         return DumpDocumentation(scope, function () { /*scope.GlobalScope.DumpBuiltinFunctionsHelpFormated();*/ });
+    }
+
+    private static function HtmlDocumentation(scope:LispScope, /*Action*/ dump:Dynamic):LispVariant
+    {
+        return DumpDocumentation(scope, function () { return scope.GlobalScope.DumpBuiltinFunctionsHelpHtmlFormated(); });
     }
 
     private static function DumpDocumentation(scope:LispScope, /*Action*/ dump:Dynamic):LispVariant
