@@ -28,6 +28,7 @@ package;
 import haxe.Exception;
 
 import LispUtils;
+import LispVariant;
 
 class Lisp {
     public /*const*/static var ProgramName = "fuel";
@@ -123,7 +124,7 @@ class Lisp {
         {
             for (/*KeyValuePair<string, object>*/ item in nativeItems)
             {
-//TODO                currentScope.set(item.Key, new LispVariant(LispType.NativeObject, item.Value));
+                currentScope.set(item.Key, new LispVariant(LispType.NativeObject, item.Value));
             }
         }
     }

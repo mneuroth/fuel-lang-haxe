@@ -2,6 +2,7 @@
     Multi-line comments for documentation.
 **/
 
+import LispUtils.CurrentTickCount;
 using LispScope;
 using LispUtils;
 
@@ -29,7 +30,7 @@ class Main {
         var interactiveLoop = false;
         var startDebugger = false;
         var result = new LispVariant(null);
-        var startTickCount = 0; //TODOEnvironment.TickCount;
+        var startTickCount = CurrentTickCount();
 //TODO        var debugger = TryGetDebugger();
 
         if (ContainsOptionAndRemove(allArgs, "-m"))
@@ -195,7 +196,7 @@ class Main {
         }
         if (measureTime)
         {
-//TODO            output.WriteLine('Execution time = ${(Environment.TickCount - startTickCount) * 0.001} s');
+            output.WriteLine('Execution time = ${(LispUtils.CurrentTickCount() - startTickCount) /** 0.001*/} s');
         }
     }
 
@@ -277,12 +278,11 @@ class Main {
 
   static public function main():Void {
       // see: https://haxe.org/manual/lf-target-defines.html
-#if sys      
+#if sys
       var args = Sys.args();
 #else
       var args = new Array<String>();
 #end
-      trace("ARGUMENTS:", args);            
       MainExtended(args, new TextWriter(), new TextReader());
   }
 
@@ -308,13 +308,39 @@ class Main {
       //                                    (+ x 1)
       //                                )                              
       //                                (f 7))");
-      var ast = LispParser.Parse("(do (def i 1) (setf i (+ i 1)))");
+      //var ast = LispParser.Parse("(do (def i 1) (setf i (+ i 1)))");
+      //var ast = LispParser.Parse("(list 1 2 3)");
+      //var ast = LispParser.Parse("(map (lambda (x) (* x x)) (list 1 2 3 4))");
+      //var ast = LispParser.Parse("(car (list 17 4 3 2 1))");
+      //var ast = LispParser.Parse("(rest (list 17 4 3 2 1))");
+      //var ast = LispParser.Parse("(reverse (list 4 3 2 1))");
+      //var ast = LispParser.Parse("(println '(list 1 2 3))");
+      //var ast = LispParser.Parse("(do (defn test (x y) (do (argscount))) (def x (test 4 5)))");
+      //var ast = LispParser.Parse("(evalstr \"(* 4 2 3)\")");
+//      var ast = LispParser.Parse("(trim \"  Hallo 2 Welt!\")");
+//      var ast = LispParser.Parse("(do (print 99 \"hallo\"))");
       //var ast = LispParser.Parse("(fuel)");
       //var ast = LispParser.Parse("(!= 1 2)");
       //var ast = LispParser.Parse("(fuel 1 2 3 4)");
-      trace("AST:");
-      trace(ast);
-      var interpRes = LispInterpreter.EvalAst(ast, scope);
-      trace("RESULT:",interpRes, "value=",interpRes.Value);
+     
+      //trace("AST:");
+      //trace(ast);
+      //var interpRes = LispInterpreter.EvalAst(ast, scope);
+
+//      var interpRes = Lisp.Eval("(do (defn test (x y) (+ x y 1)) (apply test '(4 5)))");
+//      var interpRes = Lisp.Eval("(do (defn test (x y) (+ x y 1)) (apply test (list 4 5)))");
+      //var interpRes = Lisp.Eval("(+ x y 1)");
+      //var interpRes = Lisp.Eval("'(1 2 3)");
+      //var interpRes = LispParser.LispParser.Parse("(do (print #t 2.54 \"string\"))");
+      //var interpRes = Lisp.Eval("(replace \"Hallo Welt\" \"Welt\" \"earth\")");
+      //var interpRes = Lisp.Eval("(searchdoc \"doc\")");
+      //var interpRes = Lisp.Eval("(do (def x 1) (def hallo \"asdf\") (vars))");
+      //var interpRes = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (print (dict-get d \"b\")))");
+      //var interpRes = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-clear d) (len (dict-keys d)))");
+      var interpRes = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-value d \"nix\"))");
+
+      trace("RESULT:"/*,interpRes*/, "value=",interpRes.ToString());
+      trace("--->",Type.typeof(interpRes.ToString()));
+      //trace(Sys.systemName());
     }
 }

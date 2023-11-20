@@ -256,3 +256,12 @@ function DecorateWithBlock(code:String, /*out*/ offset:Ref<Int>):String
     offset.value = block.length;
     return block + code + "\n)";
 }
+
+function CurrentTickCount():Float
+{
+#if sys
+    return Sys.cpuTime();
+#else
+    return -1;
+#end
+}
