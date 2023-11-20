@@ -232,8 +232,18 @@ class LispEnvironment {
         scope.set(Eval, CreateFunction(EvalFcn, "(eval ast)", "Evaluates the abstract syntax tree (ast)."));
         scope.set(EvalStr, CreateFunction(EvalStrFcn, "(evalstr string)", "Evaluates the string."));
 
-//TODO -> support map/dictionary        
+        // additional data types        
+        scope.set("make-dict", CreateFunction(MakeDict, "(make-dict)", "Returns a new dictionary."));
+        scope.set("dict-set", CreateFunction(DictSet, "(dict-set dict key value)", "Sets the value for the key in the dictionary."));
+        scope.set("dict-get", CreateFunction(DictGet, "(dict-get dict key)", "Returns the value for the key or nil if key is not in dictionary."));
+        scope.set("dict-remove", CreateFunction(DictRemove, "(dict-remove dict key)", "Removes the value / key pair from the directory and returns success flag."));
+        scope.set("dict-keys", CreateFunction(DictKeys, "(dict-keys dict)", "Returns all keys in the dictionary."));
+        scope.set("dict-clear", CreateFunction(DictClear, "(dict-keys dict)", "Returns all keys in the dictionary."));
+        scope.set("dict-contains-key", CreateFunction(DictContainsKey, "(dict-contains-key dict key)", "Returns #t if key is contained in dictionary, otherwise #f."));
+        scope.set("dict-contains-value", CreateFunction(DictContainsValue,  "(dict-contains-value dict key)", "Returns #t if value is contained in dictionary, otherwise #f."));
+        // ggf. setf support
 
+        // additional data types
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
         scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
@@ -1244,6 +1254,93 @@ class LispEnvironment {
         scope.IsInEval = false;
         scope.ModuleName = tempModuleName;
         return result;
+    }
+
+    public static function MakeDict(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper0/*<LispVariant>*/(args, scope, "make-dict", function ():LispVariant { return new LispVariant(LispType.NativeObject, new Map<Dynamic, Dynamic>()); });  //new LispVariant(LispType.NativeObject, new Dictionary<object, object>())
+    }
+
+    public static function DictSet(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper3/*<LispVariant, LispVariant, LispVariant, LispVariant>*/(args, scope, "dict-set", function (arg1, arg2, arg3)
+        {
+            var nativeDict = cast(arg1.Value, Map<Dynamic, Dynamic>);  //as Dictionary<object, object>;
+            nativeDict[arg2.Value] = arg3;
+            return arg3;
+        });
+    }
+
+    public static function DictGet(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, "dict-get", function (arg1, arg2)
+        {
+            var nativeDict = cast(arg1.Value, Map<Dynamic, Dynamic>);  //as Dictionary<object, object>;
+            return nativeDict.exists(arg2.Value) ? cast(nativeDict[arg2.Value], LispVariant) : new LispVariant(LispType.Undefined);
+        });
+    }
+
+    public static function DictRemove(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, bool>*/(args, scope, "dict-remove", function (arg1, arg2)
+        {
+            var nativeDict = cast(arg1.Value, Map<Dynamic, Dynamic>);  //as Dictionary<object, object>;
+            var ok = nativeDict.remove(arg2.Value);
+            return ok;
+        });
+    }
+
+    public static function DictKeys(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("dict-keys", 1, args, scope);
+
+        var dict = cast(args[0], LispVariant);
+        var nativeDict = cast(dict.Value, Map<Dynamic, Dynamic>);  //as Dictionary<object, object>;
+        var /*List<LispVariant>*/ result = new Array<Dynamic>();
+        for(key in nativeDict.keys())
+        {
+            result.Add(new LispVariant(LispVariant.GetTypeFor(key), key));
+        }
+
+        return LispVariant.forValue(result);
+    }
+
+    public static function DictClear(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, "dict-clean", function (arg1:LispVariant):LispVariant
+        {
+            var nativeDict = cast(arg1.Value, Map<Dynamic, Dynamic>);  //as Dictionary<object, object>;
+            nativeDict.clear();
+            return new LispVariant(LispType.Undefined);
+        });
+    }
+
+    public static function DictContainsKey(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, bool>*/(args, scope, "dict-contains-key", function (arg1, arg2):Bool
+        {
+            var nativeDict = cast(arg1.Value, Map<Dynamic, Dynamic>);  //as Dictionary<object, object>;
+            var ok = nativeDict.exists(arg2.Value);
+            return ok;
+        });
+    }
+
+    public static function DictContainsValue(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, bool>*/(args, scope, "dict-contains-value", function (arg1, arg2):Bool
+        {
+            var nativeDict = cast(arg1.Value, Map<Dynamic, Dynamic>);  //as Dictionary<object, object>;
+            for (key in nativeDict.keys())
+            {
+                var temp = nativeDict[key];
+                var val = cast(temp, LispVariant);
+                if (arg2.Value == val.Value)
+                {
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     private static function CheckForFunction(functionName:String, /*object*/ arg0:Dynamic, scope:LispScope):LispVariant

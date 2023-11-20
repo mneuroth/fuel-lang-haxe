@@ -458,4 +458,36 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(type 4.2)");
         Assert.equals("5", res.ToString());
     }
+    public function testInterpreter57() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (print (dict-get d \"a\")))");
+        Assert.equals("7", res.ToString());
+    }
+    public function testInterpreter58() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-remove d \"a\") (dict-get d \"a\"))");
+        Assert.equals("<undefined>", res.ToString());
+    }
+    public function testInterpreter59() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-keys d))");
+        Assert.equals("(\"def\" \"a\")", res.ToString());
+    }
+    public function testInterpreter60() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-clear d) (len (dict-keys d)))");
+        Assert.equals("0", res.ToString());
+    }
+    public function testInterpreter61() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-key d \"a\"))");
+        Assert.equals("#t", res.ToString());
+    }
+    public function testInterpreter62() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-key d \"abc\"))");
+        Assert.equals("#f", res.ToString());
+    }
+    public function testInterpreter63() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-value d \"nix\"))");
+        Assert.equals("#t", res.ToString());
+    }
+    public function testInterpreter64() {
+        var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-value d 42))");
+        Assert.equals("#f", res.ToString());
+    }
 }
