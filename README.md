@@ -12,7 +12,7 @@ FUEL is released under the MIT license:
 
 >  FUEL(isp) is a fast usable embeddable lisp interpreter.
 >  
->  Copyright (c) 2016-2019 Michael Neuroth
+>  Copyright (c) 2016-2023 Michael Neuroth
 >
 >  Permission is hereby granted, free of charge, to any person obtaining
 >  a copy of this software and associated documentation files (the "Software"),
