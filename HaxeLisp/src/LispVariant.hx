@@ -54,6 +54,14 @@ class LispFunctionWrapper {
         return GetFormatedHelpString(separator, splitter);
     }
 
+    public var HtmlFormatedDoc(get, never):String;
+    function get_HtmlFormatedDoc():String
+    {
+        /*const string*/var separator = "<br><br>";
+        /*const string*/var splitter = "<hr>" + "<br>";
+        return GetFormatedHelpString(separator, splitter, function (s) { return "<b>" + s + "</b>"; }, function (s) { return "<code>" + s + "</code>"; });
+    }
+
     private function GetFormatedHelpString(separator:String, splitter:String, /*Func<string, string>*/ nameDecorator:Dynamic = null, /*Func<string, string>*/ syntaxDecorator:Dynamic = null):String
     {
         if (nameDecorator == null)

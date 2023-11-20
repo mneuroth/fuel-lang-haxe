@@ -30,6 +30,7 @@ using LispUtils;
 using LispUtils.Ref;
 using LispEnvironment;
 using LispToken;
+using LispVariant;
 
 class TextWriter {
     public function new() {        
@@ -131,6 +132,12 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
     /// <value>The user documentation.</value>
     public var UserDoc:TupleReturn<String,String>;
 
+    public var CurrentLineNo(get, null):Int;    
+    function get_CurrentLineNo():Int
+    {
+        return CurrentToken != null ? CurrentToken.LineNo : -1;
+    }
+    
     public function new() {
         super();
     }
@@ -257,9 +264,38 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         }
     }
 
-    public function DumpStackToString(currentLevel:Int=-1):String {
-// TODO --> implement later !        
-        return "<NOT IMPLEMENTED YET>";
+    public function GetCallStackSize():Int
+    {
+        var current:LispScope = this;
+        var i = 0;
+        do
+        {
+            current = current.Previous;
+            i++;
+        } while (current != null);
+        return i;
+    }
+
+    public function DumpStack(currentLevel:Int = -1):Void
+    {
+        var stackInfo = DumpStackToString(currentLevel);
+        Output.WriteLine(stackInfo);
+    }
+
+    public function DumpStackToString(currentLevel:Int=-1):String 
+    {
+        var ret = "";  //string.Empty;
+        var current:LispScope = this;
+        var i = GetCallStackSize();
+        do
+        {
+            var currentItem = currentLevel == i ? "-->" : "   ";
+
+            ret = '${currentItem,3}${i,5} name=${current.Name,-35} lineno=${current.CurrentLineNo,-4} module=${current.ModuleName}\n' + ret;
+            current = current.Previous;
+            i--;
+        } while (current != null);
+        return ret;
     }
 
     public function GetPreviousToken(token:LispToken):LispToken
@@ -302,7 +338,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         Output.WriteLine("</head>");
         Output.WriteLine("<h2>Documentation of builtin functions of the fuel language:</h2>");
         Output.WriteLine("<body>");
-//TODO        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; }, /*sort:*/ true, /*format:*/function (v) { return v.FunctionValue.HtmlFormatedDoc; });
+        Dump(function (v:LispVariant):Bool { return v.IsFunction && v.FunctionValue.IsBuiltIn; }, /*sort:*/ true, /*format:*/function (v:LispVariant) { return v.FunctionValue.HtmlFormatedDoc; });
         Output.WriteLine("</body>");
         Output.WriteLine("</html>");
     }
@@ -351,5 +387,49 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         closureScopeFound.value = null;
         value.value = null;
         return false;
+    }
+
+    private function Dump(/*Func<LispVariant, bool>*/ select:Dynamic, /*Func<LispVariant, string>*/ show:Dynamic = null, showHelp:Bool = false, sort:Bool = false, /*Func<LispVariant, string>*/ format:Dynamic = null):Void
+    {
+        //var keys = keys();  //Keys.ToList();
+        //trace("==========>",keys);
+        if (sort)
+        {
+//TODO            keys.Sort();                
+        }
+        for (key in keys())
+        {
+            if (!key.StartsWith(LispEnvironment.MetaTag))
+            {
+                var value:LispVariant = cast(get(key), LispVariant);  //(LispVariant)this[key];
+                var is_sel = select(value);
+                var ok1 = value.IsFunction;
+                var ok2 = value.FunctionValue.IsBuiltIn;
+                var ok3 = ok1 && ok2;
+                if (is_sel)
+                {
+                    if (format != null)
+                    {
+                        Output.WriteLine('${format(value)}');
+                    }
+                    else
+                    {
+                        var info:String = show != null ? show(value) : "" /*string.Empty*/;
+                        if (showHelp)
+                        {
+                            Output.WriteLine('${key,20} --> ${value.FunctionValue.Signature}');
+                            if (!/*string*/LispUtils.IsNullOrEmpty(info))
+                            {
+                                Output.WriteLine('${"",20}     ${info}');
+                            }
+                        }
+                        else
+                        {
+                            Output.WriteLine('${key,20} --> ${value.ToStringDebugger(),-40} : ${value.TypeString} ${info}');
+                        }                            
+                    }
+                }
+            }
+        }
     }
 }

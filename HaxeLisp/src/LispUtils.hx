@@ -228,13 +228,20 @@ function ReadFileOrEmptyString(fileName:String):String
     var exists:Bool = false;
     try
     {
-//TODO        exists = File.Exists(fileName);
+#if sys        
+        exists = sys.FileSystem.exists(fileName);
+#end        
     }
     catch (ArgumentException)
     {
         exists = false;
     }
-    return  "";  //exists ? File.ReadAllText(fileName) : /*string.Empty*/"";   //TODO
+#if sys    
+    var content = exists ? sys.io.File.getContent(fileName) : /*string.Empty*/"";
+#else
+    var content = "";
+#end    
+    return content;
 }
 
 /// <summary>

@@ -140,6 +140,7 @@ class LispEnvironment {
         scope.set("doc", CreateFunction(Documentation, "(doc functionname ...)", "Returns and shows the documentation of all builtin functions or for the given function name(s)."));
         scope.set("searchdoc", CreateFunction(SearchDocumentation, "(searchdoc name ...)", "Returns and shows the documentation of functions containing name(s)."));
         scope.set("htmldoc", CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format."));
+        scope.set("break", CreateFunction(Break, "(break)", "Sets a breakpoint in the code."));
 
 //TODO
         scope.set("import", CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code."));
@@ -336,7 +337,7 @@ class LispEnvironment {
         return DumpDocumentation(scope, function () { /*scope.GlobalScope.DumpBuiltinFunctionsHelpFormated();*/ });
     }
 
-    private static function HtmlDocumentation(scope:LispScope, /*Action*/ dump:Dynamic):LispVariant
+    private static function HtmlDocumentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return DumpDocumentation(scope, function () { return scope.GlobalScope.DumpBuiltinFunctionsHelpHtmlFormated(); });
     }
@@ -350,6 +351,24 @@ class LispEnvironment {
         dump();
         scope.GlobalScope.Output = tempOutputWriter;
         return LispVariant.forValue(text/*.ToString()*/);
+    }
+
+    private static function Break(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("break", 0, args, scope);
+
+        scope.GlobalScope.Output.WriteLine("break -> call stack:");
+        scope.DumpStack(scope.GetCallStackSize());
+        var debugger = scope.GlobalScope.Debugger;
+        if (debugger != null)
+        {
+//TODO            debugger.InteractiveLoop(initialTopScope: scope);
+        }
+        else
+        {
+            scope.GlobalScope.Output.WriteLine("Warning: can not break, because no debugger support availabe!");
+        }
+        return new LispVariant(LispType.Undefined);
     }
 
     private static function CurrentTickCount(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
