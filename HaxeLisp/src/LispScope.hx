@@ -298,6 +298,25 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         return ret;
     }
 
+    public function DumpVars():Void
+    {
+        Dump(function (v:LispVariant) { return !v.IsFunction || (v.IsFunction && !v.FunctionValue.IsBuiltIn); });
+    }
+
+    public function DumpFunctions():Void
+    {
+        Dump(function (v:LispVariant) { return v.IsFunction; }, function (v:LispVariant) { return " : module=" + ExtractModuleName(v.FunctionValue.ModuleName); });
+
+        ProcessMetaScope(LispEnvironment.Modules, function (module)
+        {
+            var mod = cast(module.Value, LispScope);
+            if (mod != null)
+            {
+                mod.DumpFunctions();
+            }
+        });
+    }
+
     public function GetPreviousToken(token:LispToken):LispToken
     {
         var previous:LispToken = null;
@@ -389,6 +408,31 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         return false;
     }
 
+    private static function ExtractModuleName(moduleName:String):String
+    {
+        if (moduleName != null)
+        {
+            var temp = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.substr(LispEnvironment.EvalStrTag.length, moduleName.indexOf(":", LispEnvironment.EvalStrTag.length) - LispEnvironment.EvalStrTag.length) : moduleName;
+            return temp;
+        }
+        return moduleName;
+    }
+
+    private function ProcessMetaScope(metaScope:String, /*Action<KeyValuePair<string, object>>*/ action:Dynamic):Void
+    {
+        if (ContainsKey(metaScope))
+        {
+            var items = cast(get(metaScope), LispScope);
+            if (items != null)
+            {
+                for (/*KeyValuePair<string, object>*/ item in items)
+                {
+                    action(item);
+                }
+            }
+        }
+    }
+
     private function Dump(/*Func<LispVariant, bool>*/ select:Dynamic, /*Func<LispVariant, string>*/ show:Dynamic = null, showHelp:Bool = false, sort:Bool = false, /*Func<LispVariant, string>*/ format:Dynamic = null):Void
     {
         //var keys = keys();  //Keys.ToList();
@@ -402,11 +446,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
             if (!key.StartsWith(LispEnvironment.MetaTag))
             {
                 var value:LispVariant = cast(get(key), LispVariant);  //(LispVariant)this[key];
-                var is_sel = select(value);
-                var ok1 = value.IsFunction;
-                var ok2 = value.FunctionValue.IsBuiltIn;
-                var ok3 = ok1 && ok2;
-                if (is_sel)
+                if (select(value))
                 {
                     if (format != null)
                     {

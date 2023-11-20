@@ -57,7 +57,9 @@ class LispEnvironment {
     private /*const*/static var ReduceFcn = "reduce";
 
     public /*const*/static var Lambda = "lambda";
-
+    private /*const*/static var Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
+    private /*const*/static var Traceon = MetaTag + "traceon" + MetaTag;
+    
     public /*const*/static var ArgsMeta = MetaTag + "args" + MetaTag;
     public /*const*/static var AdditionalArgs = "_additionalArgs";
 
@@ -134,6 +136,11 @@ class LispEnvironment {
     public static function CreateDefaultScope():LispScope {
         var scope = LispScope.forFunction(MainScope);
 
+        scope.set(Modules, LispScope.forFunction(Modules, scope));
+        scope.set(Macros, LispScope.forFunction(Macros, scope));
+        scope.set(Tracebuffer, "");
+        scope.set(Traceon, false);
+
         scope.set("fuel", CreateFunction(Fuel, "(fuel)", "Returns and shows information about the fuel language."));
         scope.set("copyright", CreateFunction(Copyright, "(copyright)", "Returns and shows the copyright of the fuel language."));
         scope.set("help", CreateFunction(Help, "(help)", "Returns and shows the available builtin functions."));
@@ -141,8 +148,11 @@ class LispEnvironment {
         scope.set("searchdoc", CreateFunction(SearchDocumentation, "(searchdoc name ...)", "Returns and shows the documentation of functions containing name(s)."));
         scope.set("htmldoc", CreateFunction(HtmlDocumentation, "(htmldoc)", "Returns and shows the documentation of all builtin functions in html format."));
         scope.set("break", CreateFunction(Break, "(break)", "Sets a breakpoint in the code."));
-
-//TODO
+        scope.set("vars", CreateFunction(Vars, "(vars)", "Returns a dump of all variables."));
+        scope.set("delvar", CreateFunction(DelVar, "(vars)", "(delvar name)", "Deletes a local variable with the given name and returns a success flag."));
+        scope.set("need-l-value", CreateFunction(NeedLValue, "(need-l-value)", "Returns #t if a l-value is needed as return value of the current function."));
+        scope.set("trace", CreateFunction(TracePrint, "(trace value)", "Switches the trace modus on or off."));
+        scope.set("gettrace", CreateFunction(GetTracePrint, "(gettrace)", "Returns the trace output."));
         scope.set("import", CreateFunction(Import, "(import module1 ...)", "Imports modules with fuel code."));
         scope.set("tickcount", CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times."));
         scope.set("sleep", CreateFunction(Sleep, "(sleep time-in-ms)", "Sleeps the given number of milliseconds."));
@@ -371,6 +381,38 @@ class LispEnvironment {
         return new LispVariant(LispType.Undefined);
     }
 
+    private static function Vars(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs("vars", 0, args, scope);
+
+        scope.GlobalScope.Output.WriteLine("variables:");
+        scope.DumpVars();
+        return new LispVariant(LispType.Undefined);
+    }
+
+    private static function DelVar(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, bool>*/(args, scope, "delvar", function (arg1:LispVariant):Bool { return scope.remove(arg1.ToString()); });
+    }
+
+    private static function NeedLValue(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper0/*<bool>*/(args, scope, "need-l-value", function ():Bool { return scope.NeedsLValue; });
+    }
+
+    private static function TracePrint(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var status = cast(args[0], LispVariant);
+        scope.set(Traceon, status.BoolValue);
+        return LispVariant.forValue(status.BoolValue);
+    }
+
+    private static function GetTracePrint(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        var buffer = cast(scope.get(Tracebuffer), String);
+        return LispVariant.forValue(buffer/*.ToString()*/);
+    }
+    
     private static function CurrentTickCount(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return FuelFuncWrapper0/*<int>*/(args, scope, "tickcount",
