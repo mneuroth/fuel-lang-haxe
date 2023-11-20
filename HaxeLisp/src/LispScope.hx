@@ -43,7 +43,7 @@ class TextWriter {
         // if( a1 is null ) {
         //     temp += a1;
         // }
-        Sys.print(text);
+        Sys.println(text);
 #else
         trace(text);
 #end
@@ -51,7 +51,7 @@ class TextWriter {
     public function Write(text:String="", ?a1, ?a2, ?a3) {
 #if sys
         //File.write("stdout").writeString(text);
-        Sys.println(text);
+        Sys.print(text);
 #else
         trace(text);
 #end
