@@ -34,6 +34,49 @@ using LispVariant;
 using LispVariant.OpLispVariant;
 using LispToken.LispTokenType;
 
+/// <summary>
+/// Class to hold informations about macro expansions at compile time.
+/// </summary>
+/*internal*/ class LispMacroCompileTimeExpand //: Tuple<IEnumerable<object>, IEnumerable<object>>
+{
+    public var FormalArguments:Array<Dynamic>;
+    // public IEnumerable<object> FormalArguments
+    // {
+    //     get
+    //     {
+    //         return Item1;
+    //     }
+    // }
+
+    public var Expression:Array<Dynamic>;
+    // public IEnumerable<object> Expression
+    // {
+    //     get
+    //     {
+    //         return Item2;
+    //     }
+    // }
+
+    public function new(/*IEnumerable<object>*/ parameters:Array<Dynamic>, /*IEnumerable<object>*/ expression:Array<Dynamic>)
+        //: base(parameters, expression)
+    {
+        FormalArguments = parameters;
+        Expression = expression;     
+    }
+}
+
+/// <summary>
+/// Class to hold informations about macro expansions at run time.
+/// </summary>
+/*internal*/ class LispMacroRuntimeEvaluate extends LispMacroCompileTimeExpand
+{
+    public function new(/*object*/ parameters:Dynamic, /*object*/ expression:Dynamic)
+        //: base((IEnumerable<object>)parameters, (IEnumerable<object>)expression)
+    {
+        super(parameters, expression);
+    }
+}
+
 class LispEnvironment {
     public /*const*/static var MetaTag = "###";
     public /*const*/static var Builtin = "<builtin>";
@@ -55,6 +98,11 @@ class LispEnvironment {
     private /*const*/static var Gdefn = "gdefn";
     private /*const*/static var MapFcn = "map";
     private /*const*/static var ReduceFcn = "reduce";
+    private /*const*/static var DefineMacro = "define-macro";      // == define-macro-eval
+    private /*const*/static var DefineMacroEval = "define-macro-eval";
+//#if ENABLE_COMPILE_TIME_MACROS 
+    private /*const*/static var DefineMacroExpand = "define-macro-expand";
+//#end
 
     public /*const*/static var Lambda = "lambda";
     private /*const*/static var Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
@@ -243,14 +291,39 @@ class LispEnvironment {
         scope.set("dict-contains-value", CreateFunction(DictContainsValue,  "(dict-contains-value dict key)", "Returns #t if value is contained in dictionary, otherwise #f."));
         // ggf. setf support
 
-        // additional data types
+//TODO -> support file io
+//TODO -> support socket/http io
+//TODO -> support module import
+//TODO -> support redirect stdin / stdout
+//TODO -> support simple registering native objects in java, c++, haxe
+//TODO -> support reflection of host language
+//TODO -> support arrays ?
+//TODO -> support / test C# output
+//TODO -> support debugger
+//TODO -> support visual code debugging
+//TODO -> compare performance haxe -> native C# and C++
+//TODO -> cleanup source code
+//TODO -> compare haxe and C# source code order/layout
+
+        // special forms
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
         scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
         scope.set(Gdef, CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
         scope.set(Setf, CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
 
-//TODO -> support macros !
+        // macros are:
+        // a special form to control evaluation of function parameters inside the macro code
+        // there are two options possible:
+        //  - run time evaluation of macros
+        //  - compile time replacement/expanding of macros
+        scope.set(DefineMacro, CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", true, true));
+        // run time evaluation for macros: 
+        scope.set(DefineMacroEval, CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", true, true));
+//#if ENABLE_COMPILE_TIME_MACROS
+        // compile time expand for macros:
+        scope.set(DefineMacroExpand, CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", true, true));
+//#end       
 
         scope.set(Quote, CreateFunction(quote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
         scope.set(Quasiquote, CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
@@ -382,7 +455,7 @@ class LispEnvironment {
         var debugger = scope.GlobalScope.Debugger;
         if (debugger != null)
         {
-//TODO            debugger.InteractiveLoop(initialTopScope: scope);
+            debugger.InteractiveLoop(/*initialTopScope:*/ scope);
         }
         else
         {
@@ -1617,7 +1690,7 @@ class LispEnvironment {
                     {
                         scope.GlobalScope.Output.WriteLine(Std.string(ex));
 
-//TODO                        debugger.InteractiveLoop(initialTopScope: childScope, currentAst: (IList<object>)(args[1]) /*new List<object> { info.Item2 }*/ );
+                        debugger.InteractiveLoop(/*initialTopScope:*/ childScope, /*currentAst: (IList<object>)*/(args[1]) /*new List<object> { info.Item2 }*/ );
                     }
 
                     throw ex;
@@ -1797,7 +1870,7 @@ class LispEnvironment {
 
     private static function EvalArgIfNeeded(/*object*/ arg:Dynamic, scope:LispScope):LispVariant
     {
-        return (arg is /*IEnumerable<object>*/Array) ? LispInterpreter.EvalAst(arg, scope) : cast(arg, LispVariant);
+        return (arg is /*IEnumerable<object>*/Array || (arg is LispVariant && (cast(arg, LispVariant).IsList))) ? LispInterpreter.EvalAst(arg, scope) : cast(arg, LispVariant);
     }
 
     private static function GetSignatureFromArgs(/*object*/ arg0:Dynamic, name:String):String
@@ -1945,6 +2018,39 @@ class LispEnvironment {
         }
         return value;
     }
+
+    private static function definemacroevaluate_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(DefineMacroEval, 3, args, scope);
+
+        var macros = cast(scope.GlobalScope.get(Macros), LispScope);
+        if (macros != null)
+        {
+            macros.set(args[0].ToString(), new LispMacroRuntimeEvaluate(cast(args[1], LispVariant).ListValue, cast(args[2], LispVariant).ListValue));
+        }
+
+        return null;
+    }
+
+//#if ENABLE_COMPILE_TIME_MACROS 
+
+    // (define-macro-expand name (args) (expression))
+    private static function definemacroexpand_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        CheckArgs(DefineMacroExpand, 3, args, scope);
+
+        var macros = cast(scope.GlobalScope.get(Macros), LispScope);
+        if (macros != null)
+        {
+            // allow macros in macros --> recursive call for ExpandMacros()
+            var result = LispInterpreter.ExpandMacros(GetExpression(args[2]), scope);
+            macros.set(args[0].ToString(), new LispMacroCompileTimeExpand(GetExpression(args[1]), result /*as IEnumerable<object>*/));
+        }
+
+        return null;
+    }
+
+//#endif
 
     private static function GetLispType(/*object*/ obj:Dynamic):String
     {

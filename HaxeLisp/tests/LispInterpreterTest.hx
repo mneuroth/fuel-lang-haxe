@@ -490,4 +490,24 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-value d 42))");
         Assert.equals("#f", res.ToString());
     }
+    public function testInterpreter65() {
+        var res = Lisp.Eval("(do (define-macro-eval blub (x y) (println x y)) (blub 3 4))");
+        Assert.equals("3 4", res.ToString());
+    }
+    public function testInterpreter66() {
+        var res = Lisp.Eval("(define-macro-eval dotimes (counterinfo statements)
+        (do
+          (def (first 'counterinfo) 0)
+          (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))
+            (do
+               (eval 'statements)
+               (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))
+            )
+          )
+          ;;(delvar (first 'counterinfo))
+        )
+    )
+    (dotimes (c 10) (println c))");
+        Assert.equals("10", res.ToString());
+    }
 }

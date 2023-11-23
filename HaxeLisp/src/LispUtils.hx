@@ -265,3 +265,14 @@ function CurrentTickCount():Float
     return -1;
 #end
 }
+
+/// <summary>
+/// Show the version of this FUEL interpreter.
+/// </summary>
+/// <param name="output">The output stream.</param>
+/*public static*/ function ShowVersion(output:LispScope.TextWriter):Void
+{
+    output.WriteLine();
+    output.WriteLine(Lisp.Name + " " + Lisp.Version + " (for " + Lisp.Platform + ") from " + Lisp.Date + ", " + Lisp.Copyright);
+    output.WriteLine();
+}

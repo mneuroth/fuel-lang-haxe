@@ -33,6 +33,7 @@ class LispFunctionWrapper {
     public var ModuleName:String;
     public var IsBuiltIn:Bool;
     public var IsSpecialForm:Bool;
+    public var IsEvalInExpand:Bool;
 
     //public Func<object[], LispScope, LispVariant> Function { get; private set; }
     public var Function:Dynamic;
@@ -43,6 +44,7 @@ class LispFunctionWrapper {
         Documentation = documentation;
         IsBuiltIn = isBuiltin;
         IsSpecialForm = isSpecialForm;
+        IsEvalInExpand = isEvalInExpand;
         ModuleName = moduleName;
     }    
 
@@ -628,10 +630,11 @@ class LispVariant {
         return item.ToString();
     }
 
-    public function SymbolCompare(other:Dynamic) {
+    public function SymbolCompare(other:Dynamic) 
+    {
         if (other is LispVariant)
         {
-            return Value == cast(other, LispVariant);  //Value.Equals(((LispVariant)other).Value);
+            return Value == cast(other, LispVariant).Value;  //Value.Equals(((LispVariant)other).Value);
         }
         return false;
     }

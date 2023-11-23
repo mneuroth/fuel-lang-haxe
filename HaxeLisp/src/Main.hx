@@ -31,7 +31,7 @@ class Main {
         var startDebugger = false;
         var result = new LispVariant(null);
         var startTickCount = CurrentTickCount();
-//TODO        var debugger = TryGetDebugger();
+        var debugger = TryGetDebugger();
 
         if (ContainsOptionAndRemove(allArgs, "-m"))
         {
@@ -100,7 +100,7 @@ class Main {
         {
             showCompileOutput = true;
         }
-/*TODO
+
         // handle options for debugger
         if (debugger != null)
         {
@@ -113,7 +113,7 @@ class Main {
                 startDebugger = true;
             }
         }
-*/
+
         var scriptFiles = LispUtils.GetScriptFilesFromProgramArgs(args);
 
         // check if all command line options could be consumed
@@ -121,40 +121,39 @@ class Main {
         //allArgs = allArgs.Where(x => !scriptFiles.Contains(x)).ToList();    // remove script files from option list
         if (allArgs.length > 0)
         {
-//TODO            output.WriteLine('Error: unknown option(s) ${LispUtils.DumpEnumerable(allArgs, " ")}');
+            output.WriteLine('Error: unknown option(s) ${/*LispUtils.DumpEnumerable(allArgs, " ")*/allArgs}');
             return;
         }
 
-//TODO        
-        // if (debugger != null)
-        // {
-        //     debugger.SetInputOutputStreams(output, input);
-        //     if (interactiveLoop)
-        //     {
-        //         InteractiveLoopHeader(output);
-        //         debugger.InteractiveLoop(/*startedFromMain:*/ true, /*tracing:*/ trace);
-        //         loadFiles = false;
-        //         wasDebugging = true;
-        //     }
-        //     if (startDebugger)
-        //     {
-        //         var fileName = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
-        //         // process -e option if script is given via command line
-        //         if (script == null)
-        //         {
-        //             script = LispUtils.ReadFileOrEmptyString(fileName);
-        //         }
-        //         else
-        //         {
-        //             fileName = "command-line";
-        //         }
+        if (debugger != null)
+        {
+            debugger.SetInputOutputStreams(output, input);
+            if (interactiveLoop)
+            {
+                InteractiveLoopHeader(output);
+                debugger.InteractiveLoop(/*startedFromMain:*/ true, /*tracing:*/ trace);
+                loadFiles = false;
+                wasDebugging = true;
+            }
+            if (startDebugger)
+            {
+                var fileName = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
+                // process -e option if script is given via command line
+                if (script == null)
+                {
+                    script = LispUtils.ReadFileOrEmptyString(fileName);
+                }
+                else
+                {
+                    fileName = "command-line";
+                }
 
-        //         InteractiveLoopHeader(output);
-        //         result = debugger.DebuggerLoop(script, fileName, /*tracing:*/ trace);
-        //         loadFiles = false;
-        //         wasDebugging = true;
-        //     }
-        // }
+                InteractiveLoopHeader(output);
+                result = debugger.DebuggerLoop(script, fileName, /*tracing:*/ trace);
+                loadFiles = false;
+                wasDebugging = true;
+            }
+        }
 
         if (loadFiles)
         {
@@ -183,7 +182,7 @@ class Main {
         {
             // process -e option
             result = Lisp.SaveEval(script, /*onlyMacroExpand:*/ macroExpand);
-            trace("RESULT:", /*result,*/ result.TypeString, result.ToString());
+            trace("RESULT:", /*result,*/ result.TypeString, result.ToString());     //TODO -> remove later
         }
 
         if (macroExpand)
@@ -228,7 +227,6 @@ class Main {
         output.WriteLine("  -m             : measure execution time");
         output.WriteLine("  -t             : enable tracing");
         output.WriteLine("  -x             : exhaustive error output");
-/*TODO
         if (TryGetDebugger() != null)
         {
             output.WriteLine("  -i             : interactive shell");
@@ -249,7 +247,6 @@ class Main {
             output.WriteLine();
             output.WriteLine("Info: no compiler support installed !");
         }
-*/        
         output.WriteLine();
     }
 
@@ -276,6 +273,23 @@ class Main {
       output.WriteLine();
     }
 
+    public static function TryGetDebugger():Dynamic
+    {
+        return null;
+    }
+
+    public static function TryGetCompiler():Dynamic
+    {
+        return null;
+    }
+    
+    private static function InteractiveLoopHeader(output:TextWriter):Void
+    {
+        LispUtils.ShowVersion(output);
+        output.WriteLine("Type \"help\" for informations.");
+        output.WriteLine();
+    }
+    
   static public function main():Void {
       // see: https://haxe.org/manual/lf-target-defines.html
 #if sys
@@ -337,7 +351,26 @@ class Main {
       //var interpRes = Lisp.Eval("(do (def x 1) (def hallo \"asdf\") (vars))");
       //var interpRes = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (print (dict-get d \"b\")))");
       //var interpRes = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-clear d) (len (dict-keys d)))");
-      var interpRes = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-value d \"nix\"))");
+      //var interpRes = Lisp.Eval("(do (def d (make-dict)) (dict-set d \"a\" 7) (dict-set d \"def\" \"nix\") (dict-contains-value d \"nix\"))");
+      //var interpRes = Lisp.Eval("(do (define-macro-expand blub (x y) '(println x y)) (println (quote (1 2 3))) (blub 3 4))");
+      //var interpRes = Lisp.Eval("(do (define-macro-eval blub (x y) '(println x y)) (println (quote (1 2 3))) (blub 3 4) (println \"done.\"))");
+      //var interpRes = Lisp.Eval("(do (define-macro-eval blub (x y) (println x y)) (blub 3 4))");
+      
+      var interpRes = Lisp.Eval("(define-macro-eval dotimes (counterinfo statements)
+        (do
+          (def (first 'counterinfo) 0)
+          (while (eval (list < (first 'counterinfo) (eval (nth 1 'counterinfo))))
+            (do
+               (eval 'statements)
+               (setf (rval (first 'counterinfo)) (eval (list + (first 'counterinfo) 1)))
+            )
+          )
+          ;;(delvar (first 'counterinfo))
+        )
+    )
+
+    (dotimes (c 10) (println c))
+");
 
       trace("RESULT:"/*,interpRes*/, "value=",interpRes.ToString());
       trace("--->",Type.typeof(interpRes.ToString()));

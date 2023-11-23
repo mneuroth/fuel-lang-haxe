@@ -34,9 +34,8 @@ using LispParser;
 using LispEnvironment;
 
 // TODO
-class LispMacroRuntimeEvaluate {
-
-}
+//class LispMacroRuntimeEvaluate {
+//}
 
 class LispBreakpointPosition {
     public function new(start:Int, stop:Int, lineNumber:Int) {
@@ -163,7 +162,7 @@ class LispBreakpointPosition {
                 // Result:
                 // (setf a (+ \"blub\" \"xyz\"))  <-- replace formal arguments (as symbol)
 
-                var anyMacroReplaced = false;
+                var anyMacroReplaced = new Ref<Bool>(false);
                 var runtimeMacro = /*(LispMacroRuntimeEvaluate)*/_macro;
                 var expression = ReplaceFormalArgumentsInExpression(runtimeMacro.FormalArguments, astAsList, runtimeMacro.Expression, scope, /*ref*/ anyMacroReplaced);
 
@@ -247,47 +246,47 @@ class LispBreakpointPosition {
         return functionWrapper.Function(arguments, scope);
     }
 
-#if ENABLE_COMPILE_TIME_MACROS 
+//#if ENABLE_COMPILE_TIME_MACROS 
 
-    public static object ExpandMacros(object ast, LispScope globalScope)
+    public static function ExpandMacros(/*object*/ ast:Dynamic, globalScope:LispScope):Dynamic
     {
-        object result = ast;
-        bool anyMacroReplaced;
+        var result:Dynamic = ast;
+        var anyMacroReplaced = new Ref<Bool>(false);
         do
         {
-            anyMacroReplaced = false;
-            result = ExpandMacros(result, globalScope, ref anyMacroReplaced);
-        } while (anyMacroReplaced);
+            anyMacroReplaced.value = false;
+            result = ExpandMacrosHelper(result, globalScope, /*ref*/ anyMacroReplaced);
+        } while (anyMacroReplaced.value);
         return result;
     }
 
-    private static object ExpandMacros(object ast, LispScope globalScope, ref bool anyMacroReplaced)
+    private static function ExpandMacrosHelper(/*object*/ ast:Dynamic, globalScope:LispScope, /*ref bool*/ anyMacroReplaced:Ref<Bool>):Dynamic
     {
         if (ast == null || ast is LispVariant)
         {
             return ast;
         }
 
-        var astAsList = ((IEnumerable<object>)ast).ToList();
-        if (astAsList.Count == 0)
+        var astAsList = cast(ast, Array<Dynamic>);  //((IEnumerable<object>)ast).ToList();
+        if (astAsList.length == 0)
         {
             return ast;
         }
 
         // compile time macro: process define-macro statements ==> call special form, this will add macro to global scope as side effect
-        var function = astAsList.First();
-        var functionName = function.ToString();
+        var functionVal = astAsList.First();
+        var functionName = functionVal.ToString();
         if (globalScope != null && globalScope.ContainsKey(functionName))
         {
-            var fcn = ((LispVariant)globalScope[functionName]).FunctionValue;
+            var fcn = cast(globalScope.get(functionName), LispVariant).FunctionValue;
             if (fcn.IsEvalInExpand)
             {
-                var args = new List<object>(astAsList);
+                var args = astAsList.copy();  //new Array<Dynamic>(astAsList);  //List<object>(astAsList);
                 args.RemoveAt(0);
 
                 // process compile time macro definition 
                 //   --> side effect: add macro definition to internal macro scope
-                fcn.Function(args.ToArray(), globalScope);
+                fcn.Function(args/*.ToArray()*/, globalScope);
 
                 // compile time macros definitions will be removed from code in expand macro phase
                 // because only the side effect above is needed for further macro replacements
@@ -296,22 +295,22 @@ class LispBreakpointPosition {
         }
 
         // compile time macros: process macro expansion in an expression which calls a macro
-        if (LispEnvironment.IsMacro(function, globalScope))
+        if (LispEnvironment.IsMacro(functionVal, globalScope))
         {
-            var macro = LispEnvironment.GetMacro(function, globalScope);
-            if (macro is LispMacroCompileTimeExpand)
+            var macroVal = LispEnvironment.GetMacro(functionVal, globalScope);
+            if (macroVal is LispMacroCompileTimeExpand)
             {
-                anyMacroReplaced = true;
-                var macroExpand = (LispMacroCompileTimeExpand)macro;
-                var astWithReplacedArguments = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, globalScope, ref anyMacroReplaced).ToList();   // PATCH
+                anyMacroReplaced.value = true;
+                var macroExpand = cast(macroVal, LispMacroCompileTimeExpand);
+                var astWithReplacedArguments = ReplaceFormalArgumentsInExpression(macroExpand.FormalArguments, astAsList, macroExpand.Expression, globalScope, /*ref*/ anyMacroReplaced).ToList();   // PATCH
                 // process recursive macro expands (do not wrap list as LispVariant at this point)
                 return ConvertLispVariantListToListIfNeeded(EvalAst(astWithReplacedArguments, globalScope));
             }
         }
 
-        var expandedAst = new List<object>();
+        var expandedAst = new Array<Dynamic>();  //List<object>();
         // Expand recursively and handle enumarations (make them flat !)
-        foreach (var elem in astAsList)
+        for (elem in astAsList)
         {
             var expandResult = ExpandMacros(elem, globalScope);
             // ignore code which is removed in macro expand phase
@@ -325,7 +324,7 @@ class LispBreakpointPosition {
         return expandedAst;
     }
 
-#end
+//#end
 
     private static function ConvertLispVariantListToListIfNeeded(something:Dynamic):Dynamic
     {
@@ -363,7 +362,7 @@ class LispBreakpointPosition {
         return new LispBreakpointPosition(-1, -1, -1);
     }
 
-    private static function ReplaceSymbolWithValueInExpression(symbol:LispVariant, /*object*/ symbolValue:Dynamic, /*IEnumerable<object>*/ expression:Array<Dynamic>, macroArgsReplace:Bool, /*ref*/ replacedAnything:Bool):Array<Dynamic>  //IEnumerable<object>
+    private static function ReplaceSymbolWithValueInExpression(symbol:LispVariant, /*object*/ symbolValue:Dynamic, /*IEnumerable<object>*/ expression:Array<Dynamic>, macroArgsReplace:Bool, /*ref*/ replacedAnything:Ref<Bool>):Array<Dynamic>  //IEnumerable<object>
     {
         var ret = new Array<Dynamic>();  //List<object>();
         for(elem in expression)
@@ -380,7 +379,7 @@ class LispBreakpointPosition {
                 {
                     ret.Add(symbolValue);
                 }
-                replacedAnything = true;
+                replacedAnything.value = true;
             }
             // is it an expression? --> recursive call
             else if (LispEnvironment.IsExpression(elem))
@@ -397,11 +396,11 @@ class LispBreakpointPosition {
         return ret;
     }
 
-    private static function ReplaceFormalArgumentsInExpression(/*IEnumerable<object>*/ formalArguments:Array<Dynamic>, /*IList<object>*/ astAsList:Array<Dynamic>, /*IEnumerable<object>*/ expression:Array<Dynamic>, scope:LispScope, /*ref*/ anyMacroReplaced:Bool):Array<Dynamic>  //IEnumerable<object>
+    private static function ReplaceFormalArgumentsInExpression(/*IEnumerable<object>*/ formalArguments:Array<Dynamic>, /*IList<object>*/ astAsList:Array<Dynamic>, /*IEnumerable<object>*/ expression:Array<Dynamic>, scope:LispScope, /*ref*/ anyMacroReplaced:Ref<Bool>):Array<Dynamic>  //IEnumerable<object>
     {
         // replace (quoted-macro-args) --> '(<real_args>)
         var i = 1;
-        var replaced = false;
+        var replaced = new Ref<Bool>(false);
         var realArguments:Array<Dynamic> = astAsList.Skip(1).ToList();  //IEnumerable<object>
         var quotedRealArguments:Array<Dynamic> = [new LispVariant(LispType.Symbol, LispEnvironment.Quote), realArguments];  //List<object> 
         expression = ReplaceSymbolWithValueInExpression(new LispVariant(LispType.Symbol, "quoted-macro-args"), quotedRealArguments, expression, true, /*ref*/ replaced);
@@ -411,8 +410,8 @@ class LispBreakpointPosition {
             var value:Dynamic = null;  //object
             if (astAsList[i] is /*IEnumerable<object>*/Array/*<Dynamic>*/)
             {
-#if ENABLE_COMPILE_TIME_MACROS 
-                value = ExpandMacros(astAsList[i], scope, /*ref*/ anyMacroReplaced);
+//#if ENABLE_COMPILE_TIME_MACROS 
+                value = ExpandMacrosHelper(astAsList[i], scope, /*ref*/ anyMacroReplaced);
                 if (value is LispVariant)
                 {
                     var vairantValue = value /*as LispVariant*/;
@@ -421,11 +420,11 @@ class LispBreakpointPosition {
                         value = vairantValue.ListValue;
                     }
                 }
-#end                
+//#end                
             }
             else
             {
-                value = new LispVariant(astAsList[i]);
+                value = LispVariant.forValue(astAsList[i]);
             }
             expression = ReplaceSymbolWithValueInExpression(/*(LispVariant)*/formalArgument, value, expression, false, /*ref*/ anyMacroReplaced);
             i++;
