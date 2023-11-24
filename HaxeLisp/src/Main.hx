@@ -5,6 +5,7 @@
 import LispUtils.CurrentTickCount;
 using LispScope;
 using LispUtils;
+using LispDebugger;
 
 class Main {
 
@@ -275,7 +276,7 @@ class Main {
 
     public static function TryGetDebugger():Dynamic
     {
-        return null;
+        return new LispDebugger();
     }
 
     public static function TryGetCompiler():Dynamic

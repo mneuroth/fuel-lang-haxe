@@ -317,6 +317,31 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         });
     }
 
+    public function DumpMacros():Void
+    {
+        ProcessMetaScope(LispEnvironment.Macros, function (_macro) { Output.WriteLine(_macro.Key); });
+    }
+
+    public function DumpBuiltinFunctions():Void
+    {
+        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; });
+    }
+
+    public function DumpBuiltinFunctionsHelp():Void
+    {
+        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; }, function (v) { return v.FunctionValue.Documentation; }, /*showHelp:*/ true);
+    }
+
+    public function DumpBuiltinFunctionsHelpFormated():Void
+    {
+        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; }, /*sort:*/ true, /*format:*/ function (v) { return v.FunctionValue.FormatedDoc; });
+    }
+
+    public function DumpModules():Void
+    {
+        ProcessMetaScope(LispEnvironment.Modules, function (module) { return Output.WriteLine(module.Key); });
+    }
+
     public function GetPreviousToken(token:LispToken):LispToken
     {
         var previous:LispToken = null;

@@ -637,7 +637,7 @@ class LispEnvironment {
         //         }
         //         else
         //         {
-        //             scope.GlobalScope.Output.WriteLine("WARNING: Library {0} not found! Tried path {1}", orgModuleFileName, fileName);
+        //             scope.GlobalScope.Output.WriteLine('WARNING: Library ${orgModuleFileName} not found! Tried path ${fileName}');
         //         }
         //     }
         //     if (!string.IsNullOrEmpty(code))

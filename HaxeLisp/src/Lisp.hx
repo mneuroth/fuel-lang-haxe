@@ -100,20 +100,18 @@ class Lisp {
         {
             result = Eval(lispCode, /*scope:*/ null, /*moduleName:*/ moduleName, /*tracing:*/ tracing, /*onlyMacroExpand:*/ onlyMacroExpand);
         }
-        catch (exc:haxe.Exception)
+        catch (exc:/*haxe.*/LispException)
         {
-/*TODO            
-            Console.WriteLine("\nError executing script.\n\n{0} --> line={1} start={2} stop={3} module={4}", exc.Message, exc.Data[LispUtils.LineNo], exc.Data[LispUtils.StartPos], exc.Data[LispUtils.StopPos], exc.Data[LispUtils.ModuleName]);
-            var stackInfo = exc.Data[LispUtils.StackInfo];
-            Console.WriteLine("\nCallstack:\n{0}", stackInfo != null ? stackInfo : "<not available>");
+            Console.WriteLine('\nError executing script.\n\n${exc.message} --> line=${exc.Data.get(LispUtils.LineNo)} start=${exc.Data.get(LispUtils.StartPos)} stop=${exc.Data.get(LispUtils.StopPos)} module=${exc.Data.get(LispUtils.ModuleName)}');
+            var stackInfo = exc.Data.get(LispUtils.StackInfo);
+            Console.WriteLine('\nCallstack:\n${stackInfo != null ? stackInfo : "<not available>"}');
             if (verboseErrorOutput)
             {
                 Console.WriteLine("\nNative callstack:");
-                Console.WriteLine("Exception in eval(): {0} \ndata={1}", exc, exc.Data);
+                Console.WriteLine('Exception in eval(): ${exc} \ndata=${exc.Data}');
             }
-*/            
             trace("EXCEPTION", exc);
-            result = LispVariant.CreateErrorValue(Std.string(exc)/*TODO.Message*/);
+            result = LispVariant.CreateErrorValue(exc.message);
         }
         return result;
     }

@@ -23,7 +23,42 @@
  * 
  * */
 
+import LispScope.TextWriter;
+using StringTools;
+
 import LispException.LispException;
+
+/// <summary>
+/// Constant to transport line number info in exception
+/// </summary>
+/*public const string*/var LineNo = "LineNo";
+
+/// <summary>
+/// Constant to transport the start position info of the current statement in exception
+/// </summary>
+/*public const string*/var StartPos = "StartPos";
+
+/// <summary>
+/// Constant to transport the stop position info of the current statement in exception
+/// </summary>
+/*public const string*/var StopPos = "StopPos";
+
+/// <summary>
+/// Constant to transport module name and path info in exception
+/// </summary>
+/*public const string*/var ModuleName = "ModuleName";
+
+/// <summary>
+/// Constant to transport a stack info in exception
+/// </summary>
+/*public const string*/var StackInfo = "StackInfo";
+
+/// <summary>
+/// Constant for the command line module
+/// </summary>
+/*public const string*/var CommandLineModule = "command-line";
+
+var Console:TextWriter = new TextWriter();
 
 class Ref<T> {
     public var value:T;
@@ -43,66 +78,90 @@ class TupleReturn<T1,T2> {
     }
 }
 
+class TripleReturn<T1,T2,T3> {
+    public var value1:T1;
+    public var value2:T2;
+    public var value3:T3;
+
+    public function new(_value1:T1, _value2:T2, _value3:T3) {
+        value1 = _value1;
+        value2 = _value2;
+        value3 = _value3;
+    }
+}
+
 class ArrayExtender {
-    static public function First(arr:Array<Dynamic>):Dynamic {
+    public static function First(arr:Array<Dynamic>):Dynamic {
         if (arr.length == 0) {
             throw new LispException("Array<Dynamic> has no elements!");
         }
         return arr[0];
     }
-    static public function Last(arr:Array<Dynamic>):Dynamic {
+    public static function Last(arr:Array<Dynamic>):Dynamic {
         if (arr.length == 0) {
             throw new LispException("Array<Dynamic> has no elements!");
         }
         return arr[arr.length - 1];
     }
-    static public function FirstOrDefault(arr:Array<Dynamic>):Dynamic {
+    public static function FirstOrDefault(arr:Array<Dynamic>):Dynamic {
         if (arr.length == 0) {
             return null;
         }
         return arr[0];
     }
-    static public function Add(arr:Array<Dynamic>, item:Dynamic) {
+    public static function Add(arr:Array<Dynamic>, item:Dynamic) {
         arr.push(item);
     }
-    static public function Insert(arr:Array<Dynamic>, pos:Int, item:Dynamic) {
+    public static function Insert(arr:Array<Dynamic>, pos:Int, item:Dynamic) {
         arr.insert(pos, item);
     }
-    static public function RemoveAt(arr:Array<Dynamic>, pos:Int) {
+    public static function RemoveAt(arr:Array<Dynamic>, pos:Int) {
         arr.splice(pos, 1);
     }
-    static public function ToList(arr:Array<Dynamic>):Array<Dynamic> {
+    public static function ToList(arr:Array<Dynamic>):Array<Dynamic> {
         return arr;
     }
-    static public function Skip(arr:Array<Dynamic>, count:Int):Array<Dynamic> {
+    public static function Skip(arr:Array<Dynamic>, count:Int):Array<Dynamic> {
         arr = arr.slice(count);
         return arr;
     }
-    static public function AddRange(arr:Array<Dynamic>, other:Array<Dynamic>):Array<Dynamic> {
+    public static function AddRange(arr:Array<Dynamic>, other:Array<Dynamic>):Array<Dynamic> {
         for(elem in other) {
             arr.push(elem);
         }
         return arr;
     }
-    static public function CopyTo(arr:Array<Dynamic>, other:Array<Dynamic>, index:Int):Array<Dynamic> {
+    public static function CopyTo(arr:Array<Dynamic>, other:Array<Dynamic>, index:Int):Array<Dynamic> {
         arr = other.copy();
         return arr;
     }
-    static public function ElementAt(arr:Array<Dynamic>, index:Int):Dynamic {
+    public static function ElementAt(arr:Array<Dynamic>, index:Int):Dynamic {
         return arr[index];
+    }
+    public static function Clear(arr:Array<Dynamic>):Dynamic {
+        arr = [];
+        return arr;
+    }
+    public static function FindIndex(arr:Array<Dynamic>, findFcn:Dynamic):Int {
+        for(i in 0...arr.length) {
+            if (findFcn(arr[i])) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
 
 class StringExtender {
-    static public function reverse(s:String):String {
+    public static function reverse(s:String):String {
         var temp = s.split('');
         temp.reverse();
         return temp.join('');
     }
-    static public function ToUpper(s:String):String {
+    public static function ToUpper(s:String):String {
         return s.toUpperCase();
     }
-    static public function ToLower(s:String):String {
+    public static function ToLower(s:String):String {
         return s.toLowerCase();
     }
     public static function Format(value:String, values:Array<Any>) {
@@ -123,10 +182,19 @@ class StringExtender {
     public static function Contains(s:String, other:String):Bool {
         return s.indexOf(other) > 0;
     }
+    public static function Trim(s:String):String {
+        return s.trim();
+    }
+    public static function Equals(s:String, other:String):Bool {
+        return s == other;
+    }
+    public static function Split(s:String, splitter:String):Array<String> {
+        return s.split(splitter);
+    }
 }
 
 class MapExtender {
-    static public function TryGetValue(map:haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/, name:String, value:Ref<Dynamic>):Bool {
+    public static function TryGetValue(map:haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/, name:String, value:Ref<Dynamic>):Bool {
         if (map.exists(name)) {
             var val = map.get(name);
             value.value = val;
@@ -137,7 +205,7 @@ class MapExtender {
 }
 
 class LispExceptionExtender {
-    static public function AddTokenInfos(exc:LispException, token:LispToken) {
+    public static function AddTokenInfos(exc:LispException, token:LispToken) {
 // TODO        
     }
 }
@@ -274,5 +342,16 @@ function CurrentTickCount():Float
 {
     output.WriteLine();
     output.WriteLine(Lisp.Name + " " + Lisp.Version + " (for " + Lisp.Platform + ") from " + Lisp.Date + ", " + Lisp.Copyright);
+    output.WriteLine();
+}
+
+/// <summary>
+/// Show informations about this FUEL interperter.
+/// </summary>
+/// <param name="output">The output stream.</param>
+/*public static*/ function ShowAbout(output:LispScope.TextWriter):Void
+{
+    ShowVersion(output);
+    output.WriteLine(Lisp.Info);
     output.WriteLine();
 }

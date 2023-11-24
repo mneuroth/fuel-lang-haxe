@@ -25,13 +25,24 @@
 
 package;
 
+import haxe.ds.StringMap;
 import haxe.Exception;
 
 import LispToken.LispToken;
 
 class LispException extends haxe.Exception {
+    
+    public var Token:LispToken;
+    public var ModuleName:String;
+    public var StackInfo:String;
+
+    public var Data:StringMap<Dynamic>;
+
     public function new(text:String, token:LispToken=null, moduleName:String="", stackInfo:String="not available") {
         super(text);
+        Token = token;
+        ModuleName = moduleName;
+        StackInfo = stackInfo;
     }
 
     public static function fromScope(text:String, scope:LispScope):LispException {

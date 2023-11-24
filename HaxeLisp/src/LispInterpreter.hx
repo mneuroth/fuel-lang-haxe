@@ -32,14 +32,21 @@ using LispUtils.MapExtender;
 using LispUtils.Ref;
 using LispParser;
 using LispEnvironment;
+using LispDebugger;
 
 // TODO
 //class LispMacroRuntimeEvaluate {
 //}
 
-class LispBreakpointPosition {
-    public function new(start:Int, stop:Int, lineNumber:Int) {
-    }    
+/// <summary>
+/// Exception used to stop the debugger loop.
+/// </summary>
+/*public*/ class LispStopDebuggerException extends LispException
+{
+    public function new(text:String = "")
+    {
+        super(text);
+    }
 }
 
  /// <summary>
@@ -195,7 +202,7 @@ class LispBreakpointPosition {
         // trace current function (if tracing is enabled)
         if (scope.GlobalScope.Tracing)
         {
-            scope.GlobalScope.Output.WriteLine("--> {0}", astAsList.First());
+            scope.GlobalScope.Output.WriteLine('--> ${astAsList.First()}');
         }
 
         // evaluate arguments, but allow recursive lists
