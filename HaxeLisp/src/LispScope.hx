@@ -33,7 +33,10 @@ using LispToken;
 using LispVariant;
 
 class TextWriter {
-    public function new() {        
+    public var Text:Ref<String>;
+
+    public function new(textBuffer:Ref<String> = null) {
+        Text = textBuffer;
     }
 
     public function WriteLine(text:String="", ?a1, ?a2, ?a3) {
@@ -47,6 +50,9 @@ class TextWriter {
 #else
         trace(text);
 #end
+        if (Text != null) {
+            Text.value += text + "\n";
+        }
     }
     public function Write(text:String="", ?a1, ?a2, ?a3) {
 #if sys
@@ -55,6 +61,9 @@ class TextWriter {
 #else
         trace(text);
 #end
+        if (Text != null) {
+            Text.value += text;
+        }
     }
     public function Flush():Void {
 #if sys

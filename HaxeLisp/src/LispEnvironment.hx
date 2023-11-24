@@ -100,9 +100,9 @@ class LispEnvironment {
     private /*const*/static var ReduceFcn = "reduce";
     private /*const*/static var DefineMacro = "define-macro";      // == define-macro-eval
     private /*const*/static var DefineMacroEval = "define-macro-eval";
-//#if ENABLE_COMPILE_TIME_MACROS 
+#if ENABLE_COMPILE_TIME_MACROS 
     private /*const*/static var DefineMacroExpand = "define-macro-expand";
-//#end
+#end
 
     public /*const*/static var Lambda = "lambda";
     private /*const*/static var Tracebuffer = MetaTag + "tracebuffer" + MetaTag;
@@ -320,10 +320,10 @@ class LispEnvironment {
         scope.set(DefineMacro, CreateFunction(definemacroevaluate_form, "(define-macro name (arguments) statement)", "see: define-macro-eval", true, true));
         // run time evaluation for macros: 
         scope.set(DefineMacroEval, CreateFunction(definemacroevaluate_form, "(define-macro-eval name (arguments) statement)", "Special form: Defines a macro which will be evaluated at run time.", true, true));
-//#if ENABLE_COMPILE_TIME_MACROS
+#if ENABLE_COMPILE_TIME_MACROS
         // compile time expand for macros:
         scope.set(DefineMacroExpand, CreateFunction(definemacroexpand_form, "(define-macro-expand name (arguments) statement)", "Special form: Defines a macro which will be evaluated at compile time.", true, true));
-//#end       
+#end       
 
         scope.set(Quote, CreateFunction(quote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
         scope.set(Quasiquote, CreateFunction(quasiquote_form, "(quasiquote expr)", "Returns expression without evaluating it, but processes evaluation operators , and ,@.", true, true));
@@ -437,13 +437,12 @@ class LispEnvironment {
 
     private static function DumpDocumentation(scope:LispScope, /*Action*/ dump:Dynamic):LispVariant
     {
-        var text = "";  //new StringBuilder();
+        var text = new Ref<String>("");  //new StringBuilder();
         var tempOutputWriter = scope.GlobalScope.Output;
-//TODO        
-        scope.GlobalScope.Output = new LispScope.TextWriter();  //new StringWriter(text);
+        scope.GlobalScope.Output = new LispScope.TextWriter(text);  //new StringWriter(text);
         dump();
         scope.GlobalScope.Output = tempOutputWriter;
-        return LispVariant.forValue(text/*.ToString()*/);
+        return LispVariant.forValue(text.value/*.ToString()*/);
     }
 
     private static function Break(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -2032,7 +2031,7 @@ class LispEnvironment {
         return null;
     }
 
-//#if ENABLE_COMPILE_TIME_MACROS 
+#if ENABLE_COMPILE_TIME_MACROS 
 
     // (define-macro-expand name (args) (expression))
     private static function definemacroexpand_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -2050,7 +2049,7 @@ class LispEnvironment {
         return null;
     }
 
-//#endif
+#end
 
     private static function GetLispType(/*object*/ obj:Dynamic):String
     {

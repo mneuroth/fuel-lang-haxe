@@ -262,7 +262,7 @@ import LispInterpreter;
                 try
                 {
                     var result = Lisp.Eval(cmd, currentScope, currentScope.ModuleName);
-                    debugger.Output.WriteLine('result=${result}');
+                    debugger.Output.WriteLine('result=${result.ToString()}');
                     interactiveScript += cmd + '\n';
                 }
                 catch (ex:haxe.Exception)
@@ -283,10 +283,10 @@ import LispInterpreter;
         if (currentAst != null)
         {
             var lineNumber = initialTopScope != null ? initialTopScope.CurrentLineNo : -1;
-            var startPos = initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
-            var stopPos = initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
+            var startPos = -1; //TODO initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
+            var stopPos = -1; //TODO initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
             var moduleName = initialTopScope != null ? initialTopScope.ModuleName : "?";
-            var tokenTxt = initialTopScope != null ? initialTopScope.CurrentToken.ToString() : "?";
+            var tokenTxt = "?"; //TODO initialTopScope != null ? initialTopScope.CurrentToken.ToString() : "?";
             Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName + " token=" + tokenTxt);
         }
         InteractiveLoopStatic(this, initialTopScope, startedFromMain, tracing);
@@ -332,10 +332,12 @@ import LispInterpreter;
             } 
             catch (exc:LispStopDebuggerException)
             {
+                trace(exc);
                 bRestart = false;
             }
             catch (exc:/*haxe.*/LispException)
             {
+                trace(exc);
                 Output.WriteLine('\nException: ${exc}');
                 var stackInfo = exc.Data.exists(LispUtils.StackInfo) ? cast(exc.Data.get(LispUtils.StackInfo), String) : ""/*string.Empty*/;
                 Output.WriteLine('\nStack:\n${stackInfo}');

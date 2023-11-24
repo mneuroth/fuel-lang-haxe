@@ -38,7 +38,7 @@ class Lisp {
     public /*const*/static var Date = "11.11.2023";
     public /*const*/static var Copyright = "(C) by Michael Neuroth";
 
-    public /*const*/static var Platform = ".NET/C#";
+    public /*const*/static var Platform = "Haxe";  //".NET/C#";
 
     public /*const*/static var License = "MIT-License";
     public /*const*/static var LicenseUrl = "http://opensource.org/licenses/MIT";
@@ -102,6 +102,7 @@ class Lisp {
         }
         catch (exc:/*haxe.*/LispException)
         {
+            trace(exc);
             Console.WriteLine('\nError executing script.\n\n${exc.message} --> line=${exc.Data.get(LispUtils.LineNo)} start=${exc.Data.get(LispUtils.StartPos)} stop=${exc.Data.get(LispUtils.StopPos)} module=${exc.Data.get(LispUtils.ModuleName)}');
             var stackInfo = exc.Data.get(LispUtils.StackInfo);
             Console.WriteLine('\nCallstack:\n${stackInfo != null ? stackInfo : "<not available>"}');

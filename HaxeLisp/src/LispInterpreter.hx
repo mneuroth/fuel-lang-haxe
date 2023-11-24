@@ -253,7 +253,7 @@ using LispDebugger;
         return functionWrapper.Function(arguments, scope);
     }
 
-//#if ENABLE_COMPILE_TIME_MACROS 
+#if ENABLE_COMPILE_TIME_MACROS
 
     public static function ExpandMacros(/*object*/ ast:Dynamic, globalScope:LispScope):Dynamic
     {
@@ -331,7 +331,7 @@ using LispDebugger;
         return expandedAst;
     }
 
-//#end
+#end
 
     private static function ConvertLispVariantListToListIfNeeded(something:Dynamic):Dynamic
     {
@@ -417,7 +417,7 @@ using LispDebugger;
             var value:Dynamic = null;  //object
             if (astAsList[i] is /*IEnumerable<object>*/Array/*<Dynamic>*/)
             {
-//#if ENABLE_COMPILE_TIME_MACROS 
+#if ENABLE_COMPILE_TIME_MACROS 
                 value = ExpandMacrosHelper(astAsList[i], scope, /*ref*/ anyMacroReplaced);
                 if (value is LispVariant)
                 {
@@ -427,7 +427,7 @@ using LispDebugger;
                         value = vairantValue.ListValue;
                     }
                 }
-//#end                
+#end                
             }
             else
             {
