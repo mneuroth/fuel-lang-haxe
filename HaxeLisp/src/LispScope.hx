@@ -333,17 +333,17 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
 
     public function DumpBuiltinFunctions():Void
     {
-        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; });
+        Dump(function (v:LispVariant) { return v.IsFunction && v.FunctionValue.IsBuiltIn; });
     }
 
     public function DumpBuiltinFunctionsHelp():Void
     {
-        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; }, function (v) { return v.FunctionValue.Documentation; }, /*showHelp:*/ true);
+        Dump(function (v:LispVariant) { return v.IsFunction && v.FunctionValue.IsBuiltIn; }, function (v:LispVariant) { return v.FunctionValue.Documentation; }, /*showHelp:*/ true);
     }
 
     public function DumpBuiltinFunctionsHelpFormated():Void
     {
-        Dump(function (v) { return v.IsFunction && v.FunctionValue.IsBuiltin; }, /*sort:*/ true, /*format:*/ function (v) { return v.FunctionValue.FormatedDoc; });
+        Dump(function (v:LispVariant) { return v.IsFunction && v.FunctionValue.IsBuiltIn; }, /*sort:*/ true, /*format:*/ function (v:LispVariant) { return v.FunctionValue.FormatedDoc; });
     }
 
     public function DumpModules():Void
@@ -474,7 +474,14 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         if (sort)
         {
 //TODO            keys.Sort();                
+            // var temp_keys = new Array<String>();
+            // for (key in keys())
+            // {
+            //     temp_keys.push(this.get(key));
+            // }
+            // temp_keys = temp_keys.sort( funtion(x, y) -> x )
         }
+        
         for (key in keys())
         {
             if (!key.StartsWith(LispEnvironment.MetaTag))
@@ -500,7 +507,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
                         else
                         {
                             Output.WriteLine('${key,20} --> ${value.ToStringDebugger(),-40} : ${value.TypeString} ${info}');
-                        }                            
+                        }
                     }
                 }
             }

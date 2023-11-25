@@ -230,7 +230,7 @@ class LispVariant {
     public var Value:Dynamic;
     public var Type:LispType;    
 
-    public var Token:LispToken; //TODO?
+    public var Token:LispToken;
 
     public function new(type:LispType, /*object*/ value:Dynamic = null, unQuoted:LispUnQuoteModus = LispUnQuoteModus.None) {
         this.Type = type;
@@ -255,6 +255,7 @@ class LispVariant {
     }
     public static function forToken(token:LispToken, /*object*/ unQuoted:LispUnQuoteModus=None):LispVariant {
         var newObj = new LispVariant(TypeOf(token.Value), token.Value);
+        newObj.Token = token;
         if (token.Type == LispToken.LispTokenType.Nil)
         {
             newObj.Type = LispType.Nil;

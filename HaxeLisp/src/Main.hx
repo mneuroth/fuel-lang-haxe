@@ -75,13 +75,13 @@ class Main {
             script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
             loadFiles = false;
         }
-/*TODO        
-        var libPath = args.Where(v => v.StartsWith("-l=")).Select(v => v).ToArray();
-        if (libPath.Length > 0)
+        var libPath = args.filter(function (v) { return v.StartsWith("-l="); }); 
+        //var libPath = args.Where(function (v) { return v.StartsWith("-l="); }).Select(function (v) { return v; }).ToArray(); 
+        if (libPath.length > 0)
         {
-            if (libPath.Length == 1)
+            if (libPath.length == 1)
             {
-                var libraryPath = libPath.First().Substring(3);
+                var libraryPath = libPath.First().substr(3);
                 LispUtils.LibraryPath = libraryPath;
                 ContainsOptionAndRemove(allArgs, libPath.First());
             }
@@ -91,7 +91,6 @@ class Main {
                 return;
             }
         }
-*/
         // handle options for compiler
         if (ContainsOptionAndRemove(allArgs, "-c"))
         {
@@ -161,7 +160,7 @@ class Main {
             for (fileName in scriptFiles)
             {
                 script = LispUtils.ReadFileOrEmptyString(fileName);
-                /*
+                /* compiler is not supported yet for haxe environment !
                 ILispCompiler compiler = TryGetCompiler();
                 if (compile && compiler != null)
                 {
@@ -298,7 +297,14 @@ class Main {
 #else
       var args = new Array<String>();
 #end
-      MainExtended(args, new TextWriter(), new TextReader());
+      // haxe --class-path src --main Main --interp
+      //var test_args = new Array<String>();
+      //test_args.push("-h");
+      //test_args.push("-d");
+      //test_args.push("-l=asdf");
+      //test_args.push("test.fuel");
+      var test_args = args;
+      MainExtended(test_args, new TextWriter(), new TextReader());
   }
 
 
@@ -335,6 +341,7 @@ class Main {
 //      var ast = LispParser.Parse("(trim \"  Hallo 2 Welt!\")");
 //      var ast = LispParser.Parse("(do (print 99 \"hallo\"))");
       //var ast = LispParser.Parse("(fuel)");
+      //var ast = LispParser.Parse("(doc)");
       //var ast = LispParser.Parse("(!= 1 2)");
       //var ast = LispParser.Parse("(fuel 1 2 3 4)");
      
@@ -346,6 +353,7 @@ class Main {
 //      var interpRes = Lisp.Eval("(do (defn test (x y) (+ x y 1)) (apply test (list 4 5)))");
       //var interpRes = Lisp.Eval("(+ x y 1)");
       //var interpRes = Lisp.Eval("'(1 2 3)");
+      var interpRes = Lisp.Eval("(doc)");
       //var interpRes = LispParser.LispParser.Parse("(do (print #t 2.54 \"string\"))");
       //var interpRes = Lisp.Eval("(replace \"Hallo Welt\" \"Welt\" \"earth\")");
       //var interpRes = Lisp.Eval("(searchdoc \"doc\")");
@@ -356,7 +364,7 @@ class Main {
       //var interpRes = Lisp.Eval("(do (define-macro-expand blub (x y) '(println x y)) (println (quote (1 2 3))) (blub 3 4))");
       //var interpRes = Lisp.Eval("(do (define-macro-eval blub (x y) '(println x y)) (println (quote (1 2 3))) (blub 3 4) (println \"done.\"))");
       //var interpRes = Lisp.Eval("(do (define-macro-eval blub (x y) (println x y)) (blub 3 4))");
-      
+/*
       var interpRes = Lisp.Eval("(define-macro-eval dotimes (counterinfo statements)
         (do
           (def (first 'counterinfo) 0)
@@ -372,7 +380,7 @@ class Main {
 
     (dotimes (c 10) (println c))
 ");
-
+*/
       trace("RESULT:"/*,interpRes*/, "value=",interpRes.ToString());
       trace("--->",Type.typeof(interpRes.ToString()));
       //trace(Sys.systemName());

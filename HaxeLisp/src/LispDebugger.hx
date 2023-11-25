@@ -283,10 +283,10 @@ import LispInterpreter;
         if (currentAst != null)
         {
             var lineNumber = initialTopScope != null ? initialTopScope.CurrentLineNo : -1;
-            var startPos = -1; //TODO initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
-            var stopPos = -1; //TODO initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
+            var startPos = initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
+            var stopPos = initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
             var moduleName = initialTopScope != null ? initialTopScope.ModuleName : "?";
-            var tokenTxt = "?"; //TODO initialTopScope != null ? initialTopScope.CurrentToken.ToString() : "?";
+            var tokenTxt = initialTopScope != null ? initialTopScope.CurrentToken.ToString() : "?";
             Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName + " token=" + tokenTxt);
         }
         InteractiveLoopStatic(this, initialTopScope, startedFromMain, tracing);
@@ -410,7 +410,7 @@ import LispInterpreter;
     private function AddBreakpoint(lineNo:Int, moduleName:String, condition:String)
     {
         var newItem = new LispBreakpointInfo(lineNo, moduleName, condition);
-        var index = Breakpoints.FindIndex(function (elem) { return (elem.LineNo == lineNo) && (elem.ModuleName == moduleName); });
+        var index = Breakpoints.FindIndex(function (elem:LispBreakpointInfo) { return (elem.LineNo == lineNo) && (elem.ModuleName == moduleName); });
         if (index >= 0)
         {
             // replace existing item for this line

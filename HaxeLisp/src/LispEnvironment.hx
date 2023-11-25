@@ -291,20 +291,6 @@ class LispEnvironment {
         scope.set("dict-contains-value", CreateFunction(DictContainsValue,  "(dict-contains-value dict key)", "Returns #t if value is contained in dictionary, otherwise #f."));
         // ggf. setf support
 
-//TODO -> support file io
-//TODO -> support socket/http io
-//TODO -> support module import
-//TODO -> support redirect stdin / stdout
-//TODO -> support simple registering native objects in java, c++, haxe
-//TODO -> support reflection of host language
-//TODO -> support arrays ?
-//TODO -> support / test C# output
-//TODO -> support debugger
-//TODO -> support visual code debugging
-//TODO -> compare performance haxe -> native C# and C++
-//TODO -> cleanup source code
-//TODO -> compare haxe and C# source code order/layout
-
         // special forms
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
@@ -400,7 +386,7 @@ class LispEnvironment {
 
     private static function SearchDocumentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return DoSearchDocumentation(args, scope, function (k, n) { return k.indexOf(n)>=0; });
+        return DoSearchDocumentation(args, scope, function (k:String, n:String):Bool { return k.indexOf(n)>=0; });
     }
 
     private static function DoSearchDocumentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope, /*Func<string, string, bool>*/ select:Dynamic):LispVariant
@@ -427,7 +413,7 @@ class LispEnvironment {
             }
             return DumpDocumentation(scope, function () { scope.GlobalScope.Output.WriteLine(help); });
         }
-        return DumpDocumentation(scope, function () { /*scope.GlobalScope.DumpBuiltinFunctionsHelpFormated();*/ });
+        return DumpDocumentation(scope, function () { scope.GlobalScope.DumpBuiltinFunctionsHelpFormated(); });
     }
 
     private static function HtmlDocumentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -579,79 +565,93 @@ class LispEnvironment {
         return LispVariant.forValue(value);
     }
 
+    private static function AddFileExtensionIfNeeded(fileName:String):String
+    {
+        /*const string*/var extension = ".fuel";
+
+        if (!fileName.EndsWith(extension))
+        {
+            fileName += extension;
+        }
+        return fileName;
+    }
+
     private static function Import(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         var result = new LispVariant(LispType.Undefined);
 
-//TODO        
-        // foreach (var module in args)
-        // {
-        //     string code = string.Empty;
-        //     string orgModuleFileName = ((LispVariant)module).StringValue;
-        //     string fileName = orgModuleFileName;
-        //     if (!File.Exists(fileName))
-        //     {
-        //         // try the given library path (if available)
-        //         fileName = LispUtils.LibraryPath + Path.DirectorySeparatorChar + orgModuleFileName;
-        //         fileName = AddFileExtensionIfNeeded(fileName);
-        //         if (!File.Exists(fileName)) 
-        //         {
-        //             // try default path .\Library\modulename.fuel
-        //             fileName = "." + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
-        //             fileName = AddFileExtensionIfNeeded(fileName);
-        //             if (!File.Exists(fileName))
-        //             {
-        //                 // try default path for visiscript .\lib\fuel\modulename.fuel
-        //                 fileName = "." + Path.DirectorySeparatorChar + "lib" + Path.DirectorySeparatorChar + "fuel" + Path.DirectorySeparatorChar + orgModuleFileName;
-        //                 fileName = AddFileExtensionIfNeeded(fileName);
-        //                 if (!File.Exists(fileName))
-        //                 {
-        //                     // try default path <fuel.exe-path>\Library\modulename.fuel
-        //                     fileName = AppDomain.CurrentDomain.BaseDirectory + Path.DirectorySeparatorChar + "Library" + Path.DirectorySeparatorChar + orgModuleFileName;
-        //                     fileName = AddFileExtensionIfNeeded(fileName);
-        //                     if (!File.Exists(fileName))
-        //                     {
-        //                         // try environment variable FUELPATH
-        //                         string envPath = Environment.GetEnvironmentVariable("FUELPATH");
-        //                         if (envPath != null)
-        //                         {
-        //                             fileName = envPath + Path.DirectorySeparatorChar + orgModuleFileName;
-        //                             fileName = AddFileExtensionIfNeeded(fileName);
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     if (File.Exists(fileName))
-        //     {
-        //         code = File.ReadAllText(fileName);
-        //     }
-        //     else
-        //     {
-        //         // use std lib of fuel from builtin resources
-        //         if(orgModuleFileName=="fuellib")
-        //         {
-        //             code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
-        //         }
-        //         else
-        //         {
-        //             scope.GlobalScope.Output.WriteLine('WARNING: Library ${orgModuleFileName} not found! Tried path ${fileName}');
-        //         }
-        //     }
-        //     if (!string.IsNullOrEmpty(code))
-        //     {
-        //         var importScope = new LispScope("import "+fileName, scope.GlobalScope, fileName);
-        //         scope.PushNextScope(importScope);
+        for (module in args)
+        {
+#if sys            
+            var code = "";  //string.Empty;
+            var orgModuleFileName = cast(module, LispVariant).StringValue;
+            var fileName = orgModuleFileName;
+            if (!sys.FileSystem.exists(fileName))
+            {
+                // try the given library path (if available)
+                fileName = LispUtils.LibraryPath + LispUtils.DirectorySeparatorChar + orgModuleFileName;
+                fileName = AddFileExtensionIfNeeded(fileName);
+                if (!sys.FileSystem.exists(fileName)) 
+                {
+                    // try default path .\Library\modulename.fuel
+                    fileName = "." + LispUtils.DirectorySeparatorChar + "Library" + LispUtils.DirectorySeparatorChar + orgModuleFileName;
+                    fileName = AddFileExtensionIfNeeded(fileName);
+                    if (!sys.FileSystem.exists(fileName))
+                    {
+                        // try default path for visiscript .\lib\fuel\modulename.fuel
+                        fileName = "." + LispUtils.DirectorySeparatorChar + "lib" + LispUtils.DirectorySeparatorChar + "fuel" + LispUtils.DirectorySeparatorChar + orgModuleFileName;
+                        fileName = AddFileExtensionIfNeeded(fileName);
+                        if (!sys.FileSystem.exists(fileName))
+                        {
+//TODO
+                            // try default path <fuel.exe-path>\Library\modulename.fuel
+                            // fileName = AppDomain.CurrentDomain.BaseDirectory + LispUtils.DirectorySeparatorChar + "Library" + LispUtils.DirectorySeparatorChar + orgModuleFileName;
+                            // fileName = AddFileExtensionIfNeeded(fileName);
+                            // if (!sys.FileSystem.exists(fileName))
+                            {
+                                // try environment variable FUELPATH
+                                var envPath = Sys.environment().get("FUELPATH");
+                                if (envPath != null)
+                                {
+                                    fileName = envPath + LispUtils.DirectorySeparatorChar + orgModuleFileName;
+                                    fileName = AddFileExtensionIfNeeded(fileName);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (sys.FileSystem.exists(fileName))
+            {
+                code = sys.io.File.getContent/*ReadAllText*/(fileName);
+            }
+            else
+            {
+                // use std lib of fuel from builtin resources
+                // resources not supported in haxe environment
+                // if(orgModuleFileName=="fuellib")
+                // {
+                //     code = Encoding.UTF8.GetString(Properties.Resources.fuellib);
+                // }
+                // else
+                // {
+                //     scope.GlobalScope.Output.WriteLine('WARNING: Library ${orgModuleFileName} not found! Tried path ${fileName}');
+                // }
+            }
+            if (!LispUtils.IsNullOrEmpty(code))
+            {
+                var importScope = LispScope.forFunction("import "+fileName, scope.GlobalScope, fileName);
+                scope.PushNextScope(importScope);
 
-        //         result = Lisp.Eval(code, importScope, fileName);
+                result = Lisp.Eval(code, importScope, fileName);
 
-        //         // add new module to modules scope
-        //         ((LispScope)scope.GlobalScope[Modules]).Add(fileName, importScope);
+                // add new module to modules scope
+                (cast(scope, LispScope).GlobalScope.get(Modules)).Add(fileName, importScope);
 
-        //         scope.PopNextScope();
-        //     }
-        // }
+                scope.PopNextScope();
+            }
+#end
+        }
         return result;
     }
 
@@ -891,7 +891,7 @@ class LispEnvironment {
 
     public static function Replace(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper3/*<LispVariant, LispVariant, LispVariant, string>*/(args, scope, "replace", function (arg1, arg2, arg3) { return StringTools.replace(arg1.ToString(), arg2.ToString(), arg3.ToString());});
+        return FuelFuncWrapper3/*<LispVariant, LispVariant, LispVariant, string>*/(args, scope, "replace", function (arg1:LispVariant, arg2:LispVariant, arg3:LispVariant) { return StringTools.replace(arg1.ToString(), arg2.ToString(), arg3.ToString());});
     }
 
     public static function Trim(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -936,7 +936,7 @@ class LispEnvironment {
 
     public static function Not(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<LispVariant, bool>*/(args, scope, "not", function (arg1) { return LispVariant.forValue(!arg1.ToBool()); });
+        return FuelFuncWrapper1/*<LispVariant, bool>*/(args, scope, "not", function (arg1:LispVariant) { return LispVariant.forValue(!arg1.ToBool()); });
     }
 
     public static function Less(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant

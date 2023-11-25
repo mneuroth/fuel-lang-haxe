@@ -58,6 +58,10 @@ import LispException.LispException;
 /// </summary>
 /*public const string*/var CommandLineModule = "command-line";
 
+var LibraryPath:String = "";
+
+var DirectorySeparatorChar:String = "/";
+
 var Console:TextWriter = new TextWriter();
 
 class Ref<T> {
@@ -178,6 +182,9 @@ class StringExtender {
     }
     public static function StartsWith(s:String, other:String):Bool {
         return s.indexOf(other) == 0;
+    }
+    public static function EndsWith(s:String, other:String):Bool {
+        return s.lastIndexOf(other) == s.length - other.length;
     }
     public static function Contains(s:String, other:String):Bool {
         return s.indexOf(other) > 0;
