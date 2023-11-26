@@ -569,7 +569,7 @@ class LispEnvironment {
     {
         /*const string*/var extension = ".fuel";
 
-        if (!fileName.EndsWith(extension))
+        if (!fileName.endsWith(extension))
         {
             fileName += extension;
         }

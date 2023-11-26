@@ -61,7 +61,7 @@ class Lisp {
         // first create global scope, needed for macro expanding
         var currentScope = scope==null ? LispEnvironment.CreateDefaultScope() : scope;
         currentScope.ModuleName = moduleName;
-        currentScope.Tracing = tracing;            
+        currentScope.Tracing = tracing;
         RegisterNativeObjects(nativeItems, currentScope);
         var offset = new Ref<Int>(0);
         var code = LispUtils.DecorateWithBlock(lispCode, /*out*/ offset);
@@ -103,13 +103,13 @@ class Lisp {
         catch (exc:/*haxe.*/LispException)
         {
             trace(exc);
-            Console.WriteLine('\nError executing script.\n\n${exc.message} --> line=${exc.Data.get(LispUtils.LineNo)} start=${exc.Data.get(LispUtils.StartPos)} stop=${exc.Data.get(LispUtils.StopPos)} module=${exc.Data.get(LispUtils.ModuleName)}');
-            var stackInfo = exc.Data.get(LispUtils.StackInfo);
+            Console.WriteLine('\nError executing script.\n\n${exc.message} --> line=${exc.ExcData.get(LispUtils.LineNo)} start=${exc.ExcData.get(LispUtils.StartPos)} stop=${exc.ExcData.get(LispUtils.StopPos)} module=${exc.ExcData.get(LispUtils.ModuleName)}');
+            var stackInfo = exc.ExcData.get(LispUtils.StackInfo);
             Console.WriteLine('\nCallstack:\n${stackInfo != null ? stackInfo : "<not available>"}');
             if (verboseErrorOutput)
             {
                 Console.WriteLine("\nNative callstack:");
-                Console.WriteLine('Exception in eval(): ${exc} \ndata=${exc.Data}');
+                Console.WriteLine('Exception in eval(): ${exc} \ndata=${exc.ExcData}');
             }
             trace("EXCEPTION", exc);
             result = LispVariant.CreateErrorValue(exc.message);

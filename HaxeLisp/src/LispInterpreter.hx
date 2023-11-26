@@ -246,7 +246,7 @@ using LispDebugger;
         var debugger = scope.GlobalScope.Debugger;
         if (debugger != null && debugger.NeedsBreak(scope, GetPosInfo(astAsList[0])))
         {
-            debugger.InteractiveLoop(scope, astAsList);
+            debugger.InteractiveLoop(scope, astAsList, false, false);   // add parameters explicit for neko / hl
         }
 
         // call the function with the arguments

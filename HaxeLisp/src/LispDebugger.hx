@@ -108,7 +108,7 @@ import LispInterpreter;
             // see: http://www.qtcentre.org/threads/62415-QProcess-not-communicating-with-net-framework-gt-3-5
             // ==> CsLisp is now using .NET 3.5 !
             var cmd = debugger.Input.ReadLine();
-            cmd = cmd != null ? cmd.Trim() : null;
+            cmd = cmd != null ? cmd.trim() : null;
 
             if (cmd == null || cmd.Equals("exit") || cmd.Equals("quit") || cmd.Equals("q"))
             {
@@ -139,7 +139,7 @@ import LispInterpreter;
             {
                 globalScope.DumpBuiltinFunctions();
             }
-            else if (cmd.StartsWith("doc"))
+            else if (cmd.startsWith("doc"))
             {
                 var items = cmd.Split(' ');
                 if (items.length > 1)
@@ -153,7 +153,7 @@ import LispInterpreter;
                     globalScope.DumpBuiltinFunctionsHelp();                        
                 }
             }
-            else if (cmd.StartsWith("searchdoc"))
+            else if (cmd.startsWith("searchdoc"))
             {
                 var items = cmd.Split(' ');
                 if (items.length > 1)
@@ -171,15 +171,15 @@ import LispInterpreter;
             {
                 globalScope.DumpModules();
             }
-            else if (cmd.StartsWith("clear"))
+            else if (cmd.startsWith("clear"))
             {
                 ClearBreakpoints(debugger, cmd);
             }
-            else if (cmd.Equals("stack") || cmd.StartsWith("k"))
+            else if (cmd.Equals("stack") || cmd.startsWith("k"))
             {
                 topScope.DumpStack(currentScope.GetCallStackSize());
             }
-            else if (cmd.Equals("code") || cmd.StartsWith("c"))
+            else if (cmd.Equals("code") || cmd.startsWith("c"))
             {
                 var script = "";  //string.Empty;
                 var moduleName = currentScope.ModuleName;
@@ -189,7 +189,7 @@ import LispInterpreter;
                 }
                 else
                 {
-                    script = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.substr(LispEnvironment.EvalStrTag.length + moduleName.indexOf(":", LispEnvironment.EvalStrTag.length)) : LispUtils.ReadFileOrEmptyString(moduleName);
+                    script = moduleName.startsWith(LispEnvironment.EvalStrTag) ? moduleName.substr(LispEnvironment.EvalStrTag.length + moduleName.indexOf(":", LispEnvironment.EvalStrTag.length)) : LispUtils.ReadFileOrEmptyString(moduleName);
                 }
                 // use the script given on command line if no valid module name was set
                 if (LispUtils.IsNullOrEmpty(script))
@@ -198,22 +198,22 @@ import LispInterpreter;
                 }
                 ShowSourceCode(debugger, script, currentScope.ModuleName, currentScope.CurrentLineNo);
             }
-            else if (cmd.StartsWith("list") || cmd.StartsWith("t"))
+            else if (cmd.startsWith("list") || cmd.startsWith("t"))
             {
                 debugger.ShowBreakpoints();
             }
-            else if (cmd.StartsWith("break ") || cmd.StartsWith("b "))
+            else if (cmd.startsWith("break ") || cmd.startsWith("b "))
             {
                 AddBreakpointStatic(debugger, cmd, currentScope.ModuleName);
             }
-            else if (cmd.Equals("up") || cmd.StartsWith("u"))
+            else if (cmd.Equals("up") || cmd.startsWith("u"))
             {
                 if (currentScope.Next != null)
                 {
                     currentScope = currentScope.Next;
                 }
             }
-            else if (cmd.Equals("down") || cmd.StartsWith("d"))
+            else if (cmd.Equals("down") || cmd.startsWith("d"))
             {
                 if (currentScope.Previous != null)
                 {
@@ -240,11 +240,11 @@ import LispInterpreter;
                 debugger.DoRun();
                 bContinueWithNextStatement = true;
             }
-            else if (cmd.Equals("locals") || cmd.StartsWith("l"))
+            else if (cmd.Equals("locals") || cmd.startsWith("l"))
             {
                 currentScope.DumpVars();
             }
-            else if (cmd.Equals("globals") || cmd.StartsWith("g"))
+            else if (cmd.Equals("globals") || cmd.startsWith("g"))
             {
                 globalScope.DumpVars();
             }
@@ -278,7 +278,7 @@ import LispInterpreter;
     /// <summary>
     /// See interface.
     /// </summary>
-    public function InteractiveLoop(initialTopScope:LispScope, /*IList<object>*/ currentAst:Array<Dynamic> = null, startedFromMain:Bool = false, tracing:Bool = false):Void
+    public function InteractiveLoop(initialTopScope:LispScope = null, /*IList<object>*/ currentAst:Array<Dynamic> = null, startedFromMain:Bool = false, tracing:Bool = false):Void
     {
         if (currentAst != null)
         {
@@ -287,7 +287,7 @@ import LispInterpreter;
             var stopPos = initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
             var moduleName = initialTopScope != null ? initialTopScope.ModuleName : "?";
             var tokenTxt = initialTopScope != null ? initialTopScope.CurrentToken.ToString() : "?";
-            Output.WriteLine("--> " + currentAst[0] + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName + " token=" + tokenTxt);
+            Output.WriteLine("--> " + currentAst[0].ToString() + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName + " token=" + tokenTxt);
         }
         InteractiveLoopStatic(this, initialTopScope, startedFromMain, tracing);
     }
@@ -329,17 +329,20 @@ import LispInterpreter;
             {
                 result = Lisp.Eval(script, globalScope, moduleName, /*tracing:*/ tracing);
                 Reset();
-            } 
+            }
+            // catch (exc:haxe.Exception)
+            // {
+            //     trace(":::::::::::::::::::",exc);
+            // }
             catch (exc:LispStopDebuggerException)
             {
-                trace(exc);
                 bRestart = false;
             }
             catch (exc:/*haxe.*/LispException)
             {
-                trace(exc);
+                //trace(exc);
                 Output.WriteLine('\nException: ${exc}');
-                var stackInfo = exc.Data.exists(LispUtils.StackInfo) ? cast(exc.Data.get(LispUtils.StackInfo), String) : ""/*string.Empty*/;
+                var stackInfo = exc.ExcData.exists(LispUtils.StackInfo) ? cast(exc.ExcData.get(LispUtils.StackInfo), String) : ""/*string.Empty*/;
                 Output.WriteLine('\nStack:\n${stackInfo}');
                 bRestart = InteractiveLoopStatic(this, globalScope, /*tartedFromMain:*/ true);
             }
@@ -558,13 +561,13 @@ import LispInterpreter;
             var cmdArgs = new Array<String>();  //string[0];
             var moduleName = currentModuleName;
             var rest = cmd.substr(cmd.indexOf(" "/*, StringComparison.Ordinal*/)).trim();
-            if (rest.StartsWith("\""))
+            if (rest.startsWith("\""))
             {
                 // process: filename:linenumber
                 var iStopPos = new LispUtils.Ref<Int>(0);
                 moduleName = GetStringLiteral(rest.substr(1), /*out*/ iStopPos);
                 rest = rest.substr(iStopPos.value + 2); // adjust for the two "
-                if (rest.StartsWith(":"))
+                if (rest.startsWith(":"))
                 {
                     cmdArgs = rest.substr(1).Split(' ');
                 }

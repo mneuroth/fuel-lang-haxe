@@ -36,7 +36,7 @@ class LispException extends haxe.Exception {
     public var ModuleName:String;
     public var StackInfo:String;
 
-    public var Data:StringMap<Dynamic>;
+    public var ExcData:StringMap<Dynamic>;
 
     public function new(text:String, token:LispToken=null, moduleName:String="", stackInfo:String="not available") {
         super(text);

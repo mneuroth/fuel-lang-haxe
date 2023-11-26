@@ -10,22 +10,35 @@
 --js bin/main.js
 --cmd node bin/main.js
 
---next
+# --next 
 
---neko main.n
---cmd neko main.n -e "(+ 1 2 3)"
+# --hl main.hl
 
---next
+# --next
 
---python bin/main.py
---cmd python3 bin/main.py -e "(+ 1 2 3)"
+# --neko main.n
+# --cmd neko main.n -e "(or #f #t)" 
 
---next
+# --next
 
---java bin/main.java
---cmd java -jar bin/main.java/Main.jar -e "(+ 1 2 3)"
+# --python bin/main.py
+# --cmd python3 bin/main.py -e "(+ 1 2 3)"
 
---next
+# --next
 
---cpp bin/main.cpp
---cmd bin/main.cpp/Main -e "(+ 1 2 3)"
+# --java bin/main.java
+# --cmd java -jar bin/main.java/Main.jar -e "(+ 1 2 3)"
+
+# --next
+
+# --cpp bin/main.cpp
+# --cmd bin/main.cpp/Main -e "(+ 1 2 3)"
+
+# --next
+
+# --cs bin/main.cs
+
+# --next
+
+# --lua bin/main.lua
+# --cmd lua bin/main.lua -e "(+ 1 2 3)"

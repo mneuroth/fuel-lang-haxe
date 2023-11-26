@@ -31,6 +31,7 @@ using LispUtils.Ref;
 using LispEnvironment;
 using LispToken;
 using LispVariant;
+using StringTools;
 
 class TextWriter {
     public var Text:Ref<String>;
@@ -409,7 +410,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
                     result += value.FunctionValue.FormatedDoc;
                 }
             }
-            else if (key.StartsWith(functionName))
+            else if (key.startsWith(functionName))
             {
                 var value = cast(get(key), LispVariant);  //(LispVariant)this[key];
                 result += value.FunctionValue.FormatedDoc;
@@ -446,7 +447,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
     {
         if (moduleName != null)
         {
-            var temp = moduleName.StartsWith(LispEnvironment.EvalStrTag) ? moduleName.substr(LispEnvironment.EvalStrTag.length, moduleName.indexOf(":", LispEnvironment.EvalStrTag.length) - LispEnvironment.EvalStrTag.length) : moduleName;
+            var temp = moduleName.startsWith(LispEnvironment.EvalStrTag) ? moduleName.substr(LispEnvironment.EvalStrTag.length, moduleName.indexOf(":", LispEnvironment.EvalStrTag.length) - LispEnvironment.EvalStrTag.length) : moduleName;
             return temp;
         }
         return moduleName;
@@ -484,7 +485,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         
         for (key in keys())
         {
-            if (!key.StartsWith(LispEnvironment.MetaTag))
+            if (!key.startsWith(LispEnvironment.MetaTag))
             {
                 var value:LispVariant = cast(get(key), LispVariant);  //(LispVariant)this[key];
                 if (select(value))

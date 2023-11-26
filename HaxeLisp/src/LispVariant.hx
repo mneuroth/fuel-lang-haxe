@@ -26,6 +26,7 @@
 package;
 
 using LispUtils;
+using StringTools;
 
 class LispFunctionWrapper {
     public var Signature:String;
@@ -76,7 +77,7 @@ class LispFunctionWrapper {
         }
         var name = "???";
         var signature = (Signature != null ? Signature : ""/*string.Empty*/);
-        if (signature.length > 0 && signature.StartsWith("("))
+        if (signature.length > 0 && signature.startsWith("("))
         {
             var len = signature.indexOf(" "/*, StringComparison.Ordinal*/);
             // process commands like: (doc)

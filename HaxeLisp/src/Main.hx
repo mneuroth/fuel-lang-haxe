@@ -7,6 +7,8 @@ using LispScope;
 using LispUtils;
 using LispDebugger;
 
+using StringTools;
+
 class Main {
 
     public static function MainExtended(/*string[]*/ args:Array<String>, output:TextWriter, input:TextReader)
@@ -75,7 +77,7 @@ class Main {
             script = LispUtils.GetScriptFilesFromProgramArgs(args).FirstOrDefault();
             loadFiles = false;
         }
-        var libPath = args.filter(function (v) { return v.StartsWith("-l="); }); 
+        var libPath = args.filter(function (v) { return v.startsWith("-l="); }); 
         //var libPath = args.Where(function (v) { return v.StartsWith("-l="); }).Select(function (v) { return v; }).ToArray(); 
         if (libPath.length > 0)
         {
@@ -131,7 +133,7 @@ class Main {
             if (interactiveLoop)
             {
                 InteractiveLoopHeader(output);
-                debugger.InteractiveLoop(/*startedFromMain:*/ true, /*tracing:*/ trace);
+                debugger.InteractiveLoop(null, null, /*startedFromMain:*/ true, /*tracing:*/ trace);
                 loadFiles = false;
                 wasDebugging = true;
             }
