@@ -92,7 +92,7 @@ using LispDebugger;
                 {
                     if (!compile)
                     {
-                        throw new LispException("Function \"" + firstElement.ToString() + "\" not found"/* TODO, scope*/);
+                        throw new LispException("Function \"" + firstElement.ToStr() + "\" not found"/* TODO, scope*/);
                     }
                 }
                 isSpecialForm = firstElem.IsSpecialForm;
@@ -282,10 +282,10 @@ using LispDebugger;
 
         // compile time macro: process define-macro statements ==> call special form, this will add macro to global scope as side effect
         var functionVal = astAsList.First();
-        var functionName = functionVal.ToString();
+        var functionName = functionVal.ToStr();
         if (globalScope != null && globalScope.ContainsKey(functionName))
         {
-            var fcn = cast(globalScope.get(functionName), LispVariant).FunctionValue;
+            var fcn = LispUtils.CastDynamicToLispVariant(globalScope.get(functionName)).FunctionValue;  //cast(globalScope.get(functionName), LispVariant).FunctionValue;
             if (fcn.IsEvalInExpand)
             {
                 var args = astAsList.copy();  //new Array<Dynamic>(astAsList);  //List<object>(astAsList);
@@ -417,8 +417,6 @@ using LispDebugger;
             var value:Dynamic = null;  //object
             if (astAsList[i] is /*IEnumerable<object>*/Array/*<Dynamic>*/)
             {
-//#if ENABLE_COMPILE_TIME_MACROS
-//TODO -> this is also needed for eval macros -> why???
                 value = ExpandMacrosHelper(astAsList[i], scope, /*ref*/ anyMacroReplaced);
                 if (value is LispVariant)
                 {
@@ -428,7 +426,6 @@ using LispDebugger;
                         value = vairantValue.ListValue;
                     }
                 }
-//#end
             }
             else
             {

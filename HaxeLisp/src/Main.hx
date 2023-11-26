@@ -184,7 +184,7 @@ class Main {
         {
             // process -e option
             result = Lisp.SaveEval(script, /*onlyMacroExpand:*/ macroExpand);
-            trace("RESULT:", /*result,*/ result.TypeString, result.ToString());     //TODO -> remove later
+            trace("RESULT:", /*result,*/ result.TypeString, result.ToStr());     //TODO -> remove later
         }
 
         if (macroExpand)
@@ -383,8 +383,8 @@ class Main {
     (dotimes (c 10) (println c))
 ");
 */
-      trace("RESULT:"/*,interpRes*/, "value=",interpRes.ToString());
-      trace("--->",Type.typeof(interpRes.ToString()));
+      trace("RESULT:"/*,interpRes*/, "value=",interpRes.ToStr());
+      trace("--->",Type.typeof(interpRes.ToStr()));
       //trace(Sys.systemName());
     }
 }

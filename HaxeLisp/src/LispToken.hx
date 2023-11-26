@@ -282,13 +282,13 @@ function TryParseFloat(val:String):TupleReturn<Bool,Float> {
     /// <returns>
     /// A <see cref="System.String" /> that represents this instance.
     /// </returns>   
-    public /*override*/ function ToString():String
+    public /*override*/ function ToStr():String
     {
         if (Type == LispTokenType.Nil)
         {
             return Nil;
         }
-        return Value/*.ToString()*/;
+        return Value/*.ToStr()*/;
     }
 }
 

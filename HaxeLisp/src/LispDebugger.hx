@@ -262,7 +262,7 @@ import LispInterpreter;
                 try
                 {
                     var result = Lisp.Eval(cmd, currentScope, currentScope.ModuleName);
-                    debugger.Output.WriteLine('result=${result.ToString()}');
+                    debugger.Output.WriteLine('result=${result.ToStr()}');
                     interactiveScript += cmd + '\n';
                 }
                 catch (ex:haxe.Exception)
@@ -286,8 +286,8 @@ import LispInterpreter;
             var startPos = initialTopScope != null ? initialTopScope.CurrentToken.StartPos : -1;
             var stopPos = initialTopScope != null ? initialTopScope.CurrentToken.StopPos : -1;
             var moduleName = initialTopScope != null ? initialTopScope.ModuleName : "?";
-            var tokenTxt = initialTopScope != null ? initialTopScope.CurrentToken.ToString() : "?";
-            Output.WriteLine("--> " + currentAst[0].ToString() + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName + " token=" + tokenTxt);
+            var tokenTxt = initialTopScope != null ? initialTopScope.CurrentToken.ToStr() : "?";
+            Output.WriteLine("--> " + currentAst[0].ToStr() + " line=" + lineNumber + " start=" + startPos + " stop=" + stopPos + " module=" + moduleName + " token=" + tokenTxt);
         }
         InteractiveLoopStatic(this, initialTopScope, startedFromMain, tracing);
     }
@@ -473,7 +473,7 @@ import LispInterpreter;
         var no = 1;
         for (breakpoint in Breakpoints)
         {
-            Output.WriteLine('#${no,-3} line=${breakpoint.LineNo,-5} module=${breakpoint.ModuleName,-25} condition=${breakpoint.Condition}');
+            Output.WriteLine('#${no} line=${breakpoint.LineNo} module=${breakpoint.ModuleName} condition=${breakpoint.Condition}');  //TODO ,-3 ,-5 ,-25
             no++;
         }
     }
@@ -503,7 +503,7 @@ import LispInterpreter;
             {
                 var breakMark = debugger.HasBreakpointAt(i + 1, moduleName) ? "B " : "  ";
                 var mark = currentLineNo != null && currentLineNo/*.Value*/ == i + 1 ? "-->" : ""/*string.Empty*/;
-                debugger.Output.WriteLine('${i+1,3} ${breakMark,2} ${mark,3} ${sourceCodeLines[i]}');
+                debugger.Output.WriteLine('${i+1} ${breakMark} ${mark} ${sourceCodeLines[i]}');     //TODO ,3 ,2 ,3
             }
         }
     }

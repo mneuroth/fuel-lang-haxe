@@ -375,8 +375,8 @@ class LispEnvironment {
             helpText += s;
             //helpText.Append(s);
         }
-        scope.GlobalScope.Output.WriteLine(helpText/*.ToString()*/);
-        return LispVariant.forValue(helpText/*.ToString()*/);
+        scope.GlobalScope.Output.WriteLine(helpText/*.ToStr()*/);
+        return LispVariant.forValue(helpText/*.ToStr()*/);
     }
     
     private static function Documentation(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -396,18 +396,18 @@ class LispEnvironment {
             var help = "";  //string.Empty;
             for (item in args)
             {
-                help += scope.GetFunctionsHelpFormated(item.ToString(), select);
+                help += scope.GetFunctionsHelpFormated(item.ToStr(), select);
                 // search for functions in all loaded modules
                 // for (KeyValuePair<string, object> module in (LispScope)(scope.GlobalScope[Modules]))
                 // {
-                //     help += ((LispScope)module.Value).GetFunctionsHelpFormated(item.ToString(), select);
+                //     help += ((LispScope)module.Value).GetFunctionsHelpFormated(item.ToStr(), select);
                 // }
-                var modules = cast(scope.GlobalScope.get(Modules), LispVariant);
+                var modules = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get(Modules));  //cast(scope.GlobalScope.get(Modules), LispVariant);
                 if (modules!=null) 
                 {
                     for (module in modules.ListValue)
                     {
-                        help += cast(module.Value, LispScope).GetFunctionsHelpFormated(item.ToString(), select);
+                        help += cast(module.Value, LispScope).GetFunctionsHelpFormated(item.ToStr(), select);
                     }
                 }
             }
@@ -428,7 +428,7 @@ class LispEnvironment {
         scope.GlobalScope.Output = new LispScope.TextWriter(text);  //new StringWriter(text);
         dump();
         scope.GlobalScope.Output = tempOutputWriter;
-        return LispVariant.forValue(text.value/*.ToString()*/);
+        return LispVariant.forValue(text.value/*.ToStr()*/);
     }
 
     private static function Break(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -460,7 +460,7 @@ class LispEnvironment {
 
     private static function DelVar(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<LispVariant, bool>*/(args, scope, "delvar", function (arg1:LispVariant):Bool { return scope.remove(arg1.ToString()); });
+        return FuelFuncWrapper1/*<LispVariant, bool>*/(args, scope, "delvar", function (arg1:LispVariant):Bool { return scope.remove(arg1.ToStr()); });
     }
 
     private static function NeedLValue(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -478,7 +478,7 @@ class LispEnvironment {
     private static function GetTracePrint(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         var buffer = cast(scope.get(Tracebuffer), String);
-        return LispVariant.forValue(buffer/*.ToString()*/);
+        return LispVariant.forValue(buffer/*.ToStr()*/);
     }
     
     private static function CurrentTickCount(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -561,7 +561,7 @@ class LispEnvironment {
         var value = new Array<Dynamic>();
         value.push(LispVariant.forValue(osString));
         value.push(LispVariant.forValue("haxe"));  //".NET"
-        value.push(LispVariant.forValue("unknown"));  // /* is64Bit ? "64bit" : "32bit"*//*, Environment.Is64BitProcess*/ /*, Environment.OSVersion.ToString(), Environment.Version.ToString()*/ };
+        value.push(LispVariant.forValue("unknown"));  // /* is64Bit ? "64bit" : "32bit"*//*, Environment.Is64BitProcess*/ /*, Environment.OSVersion.ToStr(), Environment.Version.ToStr()*/ };
         return LispVariant.forValue(value);
     }
 
@@ -695,12 +695,12 @@ class LispEnvironment {
         CheckOptionalArgs("format", 1, 6, args, scope);
 
         var formatedResult = "";  //string.Empty;
-        var formatStr = cast(args[0], LispVariant).ToString();
+        var formatStr = cast(args[0], LispVariant).ToStr();
         var /*object[]*/ valueArgs = new Array<Dynamic>();  //object[args.Count() - 1];
         valueArgs.resize(args.length - 1);
         //Array.Copy(args, 1, valueArgs, 0, args.Count()-1);
         for(i in 1...args.length) {
-            valueArgs[i-1] = args[i].ToString();
+            valueArgs[i-1] = args[i].ToStr();
             //trace(i);
         }
         try
@@ -743,8 +743,8 @@ class LispEnvironment {
         var value:Int;
         try
         {
-            //value = Convert.ToInt32(((LispVariant)args[0]).ToString(), CultureInfo.InvariantCulture);
-            value = Std.parseInt(cast(args[0], LispVariant).ToString());
+            //value = Convert.ToInt32(((LispVariant)args[0]).ToStr(), CultureInfo.InvariantCulture);
+            value = Std.parseInt(cast(args[0], LispVariant).ToStr());
         }
         catch (Exception)
         {
@@ -760,8 +760,8 @@ class LispEnvironment {
         var value:Float;
         try
         {
-            //value = Convert.ToDouble(((LispVariant)args[0]).ToString(), CultureInfo.InvariantCulture);
-            value = Std.parseFloat(cast(args[0], LispVariant).ToString());
+            //value = Convert.ToDouble(((LispVariant)args[0]).ToStr(), CultureInfo.InvariantCulture);
+            value = Std.parseFloat(cast(args[0], LispVariant).ToStr());
         }
         catch (Exception)
         {
@@ -832,8 +832,8 @@ class LispEnvironment {
         var foundPos = -1;
         if (arg1.IsString)
         {
-            var searchText = arg0.ToString();
-            var source = arg1.ToString();
+            var searchText = arg0.ToStr();
+            var source = arg1.ToStr();
             if (pos >= 0)
             {
                 if (len >= 0)
@@ -875,7 +875,7 @@ class LispEnvironment {
     {
         CheckArgs("slice", 3, args, scope);
 
-        var value = cast(args[0], LispVariant).ToString();
+        var value = cast(args[0], LispVariant).ToStr();
         var startPos = cast(args[1], LispVariant).ToInt();
         var len = cast(args[2], LispVariant).ToInt();
         if (len >= 0)
@@ -891,22 +891,22 @@ class LispEnvironment {
 
     public static function Replace(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper3/*<LispVariant, LispVariant, LispVariant, string>*/(args, scope, "replace", function (arg1:LispVariant, arg2:LispVariant, arg3:LispVariant) { return StringTools.replace(arg1.ToString(), arg2.ToString(), arg3.ToString());});
+        return FuelFuncWrapper3/*<LispVariant, LispVariant, LispVariant, string>*/(args, scope, "replace", function (arg1:LispVariant, arg2:LispVariant, arg3:LispVariant) { return StringTools.replace(arg1.ToStr(), arg2.ToStr(), arg3.ToStr());});
     }
 
     public static function Trim(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<object, string>*/(args, scope, "trim", function (arg1):String { return StringTools.trim(arg1.ToString()); });
+        return FuelFuncWrapper1/*<object, string>*/(args, scope, "trim", function (arg1):String { return StringTools.trim(arg1.ToStr()); });
     }
 
     public static function LowerCase(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<object, string>*/(args, scope, "lower-case", function (arg1):String { return arg1.ToString().toLowerCase(); });
+        return FuelFuncWrapper1/*<object, string>*/(args, scope, "lower-case", function (arg1):String { return arg1.ToStr().toLowerCase(); });
     }
 
     public static function UpperCase(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<object, string>*/(args, scope, "upper-case", function (arg1):String { return arg1.ToString().toUpperCase(); });
+        return FuelFuncWrapper1/*<object, string>*/(args, scope, "upper-case", function (arg1):String { return arg1.ToStr().toUpperCase(); });
     }
 
     public static function Addition(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -1233,14 +1233,14 @@ class LispEnvironment {
 
     public static function Symbol(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, Sym, function (arg1) { new LispVariant(LispType.Symbol, arg1.ToString()); } );
+        return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, Sym, function (arg1) { new LispVariant(LispType.Symbol, arg1.ToStr()); } );
     }
 
     public static function ConvertToString(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         CheckArgs(Str, 1, args, scope);
 
-        var value = cast(args[0], LispVariant).ToString();
+        var value = cast(args[0], LispVariant).ToStr();
         // convert native object into a readable form
         // used for: (println (str nativeLst))
         if (args[0] is LispVariant)
@@ -1257,12 +1257,14 @@ class LispEnvironment {
 
     public static function ArgsCountFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue.length; });
+        //return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue.length; });
+        return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (LispUtils.CastDynamicToLispVariant(scope.get(ArgsMeta))).ListValue.length; });
     }
 
     public static function ArgsFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper0(args, scope, "args", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue/*.ToArray()*/; });
+//        return FuelFuncWrapper0(args, scope, "args", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue/*.ToArray()*/; });
+        return FuelFuncWrapper0(args, scope, "args", function () { return (LispUtils.CastDynamicToLispVariant(scope.get(ArgsMeta)).ListValue/*.ToArray()*/); });
     }
 
     public static function ArgFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -1270,7 +1272,7 @@ class LispEnvironment {
         CheckArgs("arg", 1, args, scope);
 
         var index = cast(args[0], LispVariant).IntValue;
-        var array = cast(scope.get(ArgsMeta), LispVariant).ListValue/*.ToArray()*/;
+        var array = LispUtils.CastDynamicToLispVariant(scope.get(ArgsMeta)).ListValue;  //cast(scope.get(ArgsMeta), LispVariant).ListValue/*.ToArray()*/;
         if (index >= 0 && index < array.length)
         {
             return LispVariant.forValue(array[index]);
@@ -1322,7 +1324,7 @@ class LispEnvironment {
         var variant = cast(args[0], LispVariant);
         var tempModuleName = scope.ModuleName;
         scope.IsInEval = true;
-        var result = Lisp.Eval(variant.ToString(), scope, EvalStrTag + Std.string(scope.ModuleName) + ":" + variant.ToString());
+        var result = Lisp.Eval(variant.ToStr(), scope, EvalStrTag + Std.string(scope.ModuleName) + ":" + variant.ToStr());
         scope.IsInEval = false;
         scope.ModuleName = tempModuleName;
         return result;
@@ -1484,10 +1486,10 @@ class LispEnvironment {
             if (item1 is LispVariant)
             {
                 var variant = cast(item1, LispVariant);
-                if (variant.IsSymbol && (variant.ToString() == UnQuote || variant.ToString() == UnQuoteSplicing))
+                if (variant.IsSymbol && (variant.ToStr() == UnQuote || variant.ToStr() == UnQuoteSplicing))
                 {
                     var evalResult = LispInterpreter.EvalAst(item2, scope);
-                    splicing.value = variant.ToString() == UnQuoteSplicing;
+                    splicing.value = variant.ToStr() == UnQuoteSplicing;
                     evalResult.IsUnQuoted = splicing.value ? LispUnQuoteModus.UnQuoteSplicing : LispUnQuoteModus.UnQuote;
                     return evalResult;
                 }
@@ -1644,7 +1646,7 @@ class LispEnvironment {
 
                 for (arg in formalArgs)
                 {
-                    childScope.set(arg.ToString(), localArgs[i]);
+                    childScope.set(arg.ToStr(), localArgs[i]);
                     i++;
                 }
 
@@ -1744,7 +1746,7 @@ class LispEnvironment {
             {
                 text += separator;
             }
-            text += item.ToString();
+            text += item.ToStr();
         }
         /*TODO
         if (scope.ContainsKey(Traceon) && (bool)scope[Traceon])
@@ -1804,7 +1806,7 @@ class LispEnvironment {
         var val2:Ref<Dynamic> = new Ref<Dynamic>(null);
         if (scope != null &&
             scope.TryGetValue(key, /*out*/ val) &&
-            (cast(val.value, LispScope)).TryGetValue(funcName.ToString(), /*out*/ val2))
+            (cast(val.value, LispScope)).TryGetValue(funcName.ToStr(), /*out*/ val2))
         {
             return val2.value;
         }
@@ -1817,7 +1819,7 @@ class LispEnvironment {
         if (scope != null &&
             scope.TryGetValue(key, /*out*/ val))
         {
-            return (/*(LispScope)*/cast(val.value, LispScope)).ContainsKey(funcName.ToString());
+            return (/*(LispScope)*/cast(val.value, LispScope)).ContainsKey(funcName.ToStr());
         }
         return false;
     }
@@ -1825,7 +1827,7 @@ class LispEnvironment {
     private static function FindFunctionInModules(funcName:String, scope:LispScope, /*out object*/ foundValue:Ref<Dynamic>):Bool
     {
         foundValue.value = null;
-        var importedModules = /*(LispScope)*/cast(scope.GlobalScope.get(Modules), LispScope);
+        var importedModules = LispUtils.CastDynamicToLispScope(scope.GlobalScope.get(Modules));  ///*(LispScope)*/cast(scope.GlobalScope.get(Modules), LispScope);
         if (importedModules != null)
         {
             for (/*KeyValuePair<string, object>*/ kv in importedModules)
@@ -1858,12 +1860,12 @@ class LispEnvironment {
 
         UpdateDocumentationInformationAtScope(args, scope);
 
-        var fn = (cast(scope.GlobalScope.get(Fn), LispVariant)).FunctionValue;
-        scope.UserData = EvalArgIfNeeded(args[0], scope).ToString();
+        var fn = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get(Fn)).FunctionValue;  //(cast(scope.GlobalScope.get(Fn), LispVariant)).FunctionValue;
+        scope.UserData = EvalArgIfNeeded(args[0], scope).ToStr();
         var resultingFcn = fn.Function([args[1], args[2]], scope);  //(new[] { args[1], args[2] }, scope);
         scope.UserData = null;
 
-        var defFcn = (cast(scope.GlobalScope.get(name), LispVariant)).FunctionValue;
+        var defFcn = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get(name)).FunctionValue;  //(cast(scope.GlobalScope.get(name), LispVariant)).FunctionValue;
         return defFcn.Function([args[0], resultingFcn], scope);  //(new[] { args[0], resultingFcn }, scope);
     }
 
@@ -1914,9 +1916,9 @@ class LispEnvironment {
         var token = GetTokenBeforeDefn(args[0], scope);
         if ((token != null) && (token.Type == LispTokenType.Comment))
         {
-            documentation = token.Value.ToString();
+            documentation = token.Value.ToStr();
         }
-        var signature = GetSignatureFromArgs(args[1], args[0].ToString());
+        var signature = GetSignatureFromArgs(args[1], args[0].ToStr());
         scope.UserDoc = new LispUtils.TupleReturn<String, String>(signature, documentation);
     }
 
@@ -1992,7 +1994,7 @@ class LispEnvironment {
             throw LispException.fromScope("Symbol expected", scope);
         }
         var value = LispInterpreter.EvalAst(args[1], scope);
-        scopeToSet.set(symbol.ToString(), value);
+        scopeToSet.set(symbol.ToStr(), value);
         return LispVariant.forValue(value);
     }
 
@@ -2004,7 +2006,7 @@ class LispEnvironment {
         scope.NeedsLValue = true;
         var symbol = EvalArgIfNeeded(args[0], scope);
         scope.NeedsLValue = originalNeedsLValue;  
-        var symbolName = symbol != null ? symbol.ToString() : null;
+        var symbolName = symbol != null ? symbol.ToStr() : null;
         var value = LispInterpreter.EvalAst(args[1], scope);
         if(symbol.IsLValue)
         {
@@ -2022,10 +2024,10 @@ class LispEnvironment {
     {
         CheckArgs(DefineMacroEval, 3, args, scope);
 
-        var macros = cast(scope.GlobalScope.get(Macros), LispScope);
+        var macros = LispUtils.CastDynamicToLispScope(scope.GlobalScope.get(Macros));  //cast(scope.GlobalScope.get(Macros), LispScope);
         if (macros != null)
         {
-            macros.set(args[0].ToString(), new LispMacroRuntimeEvaluate(cast(args[1], LispVariant).ListValue, cast(args[2], LispVariant).ListValue));
+            macros.set(args[0].ToStr(), new LispMacroRuntimeEvaluate(cast(args[1], LispVariant).ListValue, cast(args[2], LispVariant).ListValue));
         }
 
         return null;
@@ -2043,7 +2045,7 @@ class LispEnvironment {
         {
             // allow macros in macros --> recursive call for ExpandMacros()
             var result = LispInterpreter.ExpandMacros(GetExpression(args[2]), scope);
-            macros.set(args[0].ToString(), new LispMacroCompileTimeExpand(GetExpression(args[1]), result /*as IEnumerable<object>*/));
+            macros.set(args[0].ToStr(), new LispMacroCompileTimeExpand(GetExpression(args[1]), result /*as IEnumerable<object>*/));
         }
 
         return null;
@@ -2058,6 +2060,6 @@ class LispEnvironment {
         {
             return lispVariant.TypeString;
         }
-        return obj.GetType().ToString();
+        return obj.GetType().ToStr();
     }
 }

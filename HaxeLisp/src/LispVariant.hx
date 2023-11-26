@@ -530,11 +530,11 @@ class LispVariant {
         return Std.string(Value);
     }
 
-    public function ToString():String
+    public function ToStr():String
     {
         if (IsSymbol)
         {
-            return Std.string(Value);  //.ToString();
+            return Std.string(Value);  //.ToStr();
         }
         if (IsString)
         {
@@ -542,11 +542,11 @@ class LispVariant {
         }
         if (IsInt)
         {
-            return Std.string(IntValue);  //.ToString(CultureInfo.InvariantCulture);
+            return Std.string(IntValue);  //.ToStr(CultureInfo.InvariantCulture);
         }
         if (IsDouble)
         {
-            return Std.string(DoubleValue);  //.ToString(CultureInfo.InvariantCulture);
+            return Std.string(DoubleValue);  //.ToStr(CultureInfo.InvariantCulture);
         }
         if (IsBool)
         {
@@ -591,7 +591,7 @@ class LispVariant {
         {
             return "\"" + StringValue + "\"";
         }
-        return ToString();
+        return ToStr();
     }
 
     private static function ExpandContainerToString(/*object*/ maybeContainer:Dynamic):String
@@ -629,7 +629,7 @@ class LispVariant {
                 return variant.ToStringDebugger();
             }
         }
-        return item.ToString();
+        return item.ToStr();
     }
 
     public function SymbolCompare(other:Dynamic) 
@@ -756,7 +756,7 @@ class LispVariant {
         }
         if (l.IsString || r.IsString)
         {
-            return LispVariant.forValue(LispUtils.StringCompare(l.ToString(), r.ToString()) < 0);
+            return LispVariant.forValue(LispUtils.StringCompare(l.ToStr(), r.ToStr()) < 0);
         }
         throw CreateInvalidOperationException("< or >", l, r);
     }
@@ -778,7 +778,7 @@ class LispVariant {
         }
         if (l.IsString || r.IsString)
         {
-            return LispVariant.forValue(LispUtils.StringCompare(l.ToString(), r.ToString()) <= 0);
+            return LispVariant.forValue(LispUtils.StringCompare(l.ToStr(), r.ToStr()) <= 0);
         }
         throw CreateInvalidOperationException("<= or >=", l, r);
     }
@@ -806,7 +806,7 @@ class LispVariant {
         }
         if (l.IsSymbol || r.IsSymbol)
         {
-            return l.IsSymbol && r.IsSymbol && (l.ToString() == r.ToString());
+            return l.IsSymbol && r.IsSymbol && (l.ToStr() == r.ToStr());
         }
         if (l.IsBool && r.IsBool)
         {
@@ -826,7 +826,7 @@ class LispVariant {
         }
         if (l.IsString || r.IsString)
         {
-            return l.ToString() == r.ToString();
+            return l.ToStr() == r.ToStr();
         }
         if (l.IsDouble || r.IsDouble)
         {

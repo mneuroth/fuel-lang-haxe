@@ -38,8 +38,8 @@ class LispTokenizerTest extends utest.Test {
         Assert.equals(2, tokens.length);
         var tokens = LispTokenizer.LispTokenizer.Tokenize("  (  \n    )  ");
         Assert.equals(2, tokens.length);
-        Assert.equals("(", tokens[0].ToString());
-        Assert.equals(")", tokens[tokens.length-1].ToString());
+        Assert.equals("(", tokens[0].ToStr());
+        Assert.equals(")", tokens[tokens.length-1].ToStr());
     }
     public function testTokenizer3() {
         var tokens = LispTokenizer.LispTokenizer.Tokenize("(+ 1 #t 3.1415 \"asdf blub\" #f )");
@@ -48,9 +48,9 @@ class LispTokenizerTest extends utest.Test {
             arrTokens.push(tok);
         }
         Assert.equals(8, tokens.length);
-        Assert.equals("(", tokens[0].ToString());
-        Assert.equals(")", tokens[tokens.length-1].ToString());
-        Assert.equals("+", arrTokens[1].ToString());
+        Assert.equals("(", tokens[0].ToStr());
+        Assert.equals(")", tokens[tokens.length-1].ToStr());
+        Assert.equals("+", arrTokens[1].ToStr());
         Assert.equals(1, arrTokens[2].Value);
         Assert.equals(true, arrTokens[3].Value);
         Assert.equals(3.1415, arrTokens[4].Value);
@@ -64,17 +64,17 @@ class LispTokenizerTest extends utest.Test {
             arrTokens.push(tok);
         }
         Assert.equals(11, tokens.length);
-        Assert.equals("(", tokens[0].ToString());
-        Assert.equals(")", tokens[tokens.length-1].ToString());
-        Assert.equals("do", arrTokens[1].ToString());
-        Assert.equals("(", arrTokens[2].ToString());
-        Assert.equals("print", arrTokens[3].ToString());
-        Assert.equals("(", arrTokens[4].ToString());
-        Assert.equals("*", arrTokens[5].ToString());
+        Assert.equals("(", tokens[0].ToStr());
+        Assert.equals(")", tokens[tokens.length-1].ToStr());
+        Assert.equals("do", arrTokens[1].ToStr());
+        Assert.equals("(", arrTokens[2].ToStr());
+        Assert.equals("print", arrTokens[3].ToStr());
+        Assert.equals("(", arrTokens[4].ToStr());
+        Assert.equals("*", arrTokens[5].ToStr());
         Assert.equals(9, arrTokens[6].Value);
         Assert.equals(9, arrTokens[7].Value);
-        Assert.equals(")", arrTokens[8].ToString());
-        Assert.equals(")", arrTokens[9].ToString());
-        Assert.equals(")", arrTokens[10].ToString());
+        Assert.equals(")", arrTokens[8].ToStr());
+        Assert.equals(")", arrTokens[9].ToStr());
+        Assert.equals(")", arrTokens[10].ToStr());
     }
 }

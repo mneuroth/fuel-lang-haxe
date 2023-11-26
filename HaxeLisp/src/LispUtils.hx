@@ -362,3 +362,16 @@ function CurrentTickCount():Float
     output.WriteLine(Lisp.Info);
     output.WriteLine();
 }
+
+function CastDynamicToLispVariant(value:Dynamic):LispVariant
+{
+    var variant:LispVariant = value;
+    return variant;
+}
+
+function CastDynamicToLispScope(value:Dynamic):LispScope
+{
+    var scope:LispScope = value;
+    return scope;
+}
+    

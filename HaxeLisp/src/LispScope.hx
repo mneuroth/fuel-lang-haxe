@@ -204,7 +204,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
             return elemAsVariant.CachedFunction;
         }            
 
-        var name = elem.ToString();
+        var name = elem.ToStr();
         var foundClosureScope = new Ref<LispScope>(new LispScope());
         // first try to resolve in this scope
         if (this.TryGetValue(name, /*out*/ result))
@@ -301,7 +301,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         {
             var currentItem = currentLevel == i ? "-->" : "   ";
 
-            ret = '${currentItem,3}${i,5} name=${current.Name,-35} lineno=${current.CurrentLineNo,-4} module=${current.ModuleName}\n' + ret;
+            ret = '${currentItem}${i} name=${current.Name} lineno=${current.CurrentLineNo} module=${current.ModuleName}\n' + ret;  //TODO ,3 ,5 ,-35 ,-4
             current = current.Previous;
             i--;
         } while (current != null);
@@ -406,13 +406,13 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
             {
                 if (select(key, functionName))
                 {
-                    var value = cast(get(key), LispVariant);  //(LispVariant)this[key];
+                    var value = LispUtils.CastDynamicToLispVariant(get(key));  // cast(get(key), LispVariant)  //(LispVariant)this[key];
                     result += value.FunctionValue.FormatedDoc;
                 }
             }
             else if (key.startsWith(functionName))
             {
-                var value = cast(get(key), LispVariant);  //(LispVariant)this[key];
+                var value = LispUtils.CastDynamicToLispVariant(get(key));  //cast(get(key), LispVariant);  //(LispVariant)this[key];
                 result += value.FunctionValue.FormatedDoc;
             }
         }
@@ -457,7 +457,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
     {
         if (ContainsKey(metaScope))
         {
-            var items = cast(get(metaScope), LispScope);
+            var items = LispUtils.CastDynamicToLispScope(get(metaScope));  //cast(get(metaScope), LispScope);
             if (items != null)
             {
                 for (/*KeyValuePair<string, object>*/ item in items)
@@ -487,7 +487,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         {
             if (!key.startsWith(LispEnvironment.MetaTag))
             {
-                var value:LispVariant = cast(get(key), LispVariant);  //(LispVariant)this[key];
+                var value:LispVariant = LispUtils.CastDynamicToLispVariant(get(key));  //cast(get(key), LispVariant);  //(LispVariant)this[key];
                 if (select(value))
                 {
                     if (format != null)
@@ -499,15 +499,15 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
                         var info:String = show != null ? show(value) : "" /*string.Empty*/;
                         if (showHelp)
                         {
-                            Output.WriteLine('${key,20} --> ${value.FunctionValue.Signature}');
+                            Output.WriteLine('${key} --> ${value.FunctionValue.Signature}');  //TODO ,20
                             if (!/*string*/LispUtils.IsNullOrEmpty(info))
                             {
-                                Output.WriteLine('${"",20}     ${info}');
+                                Output.WriteLine('${""}     ${info}');  //TODO ,20
                             }
                         }
                         else
                         {
-                            Output.WriteLine('${key,20} --> ${value.ToStringDebugger(),-40} : ${value.TypeString} ${info}');
+                            Output.WriteLine('${key} --> ${value.ToStringDebugger()} : ${value.TypeString} ${info}');   //TODO ,20  ,-40
                         }
                     }
                 }
