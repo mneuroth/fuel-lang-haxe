@@ -12,12 +12,13 @@
 
 # --next 
 
-# --hl main.hl
+# --hl bin/main.hl
+# --cmd hl bin/main.hl -e "(+ 1 2 3)" 
 
 # --next
 
-# --neko main.n
-# --cmd neko main.n -e "(or #f #t)" 
+# --neko bin/main.n
+# --cmd neko bin/main.n -e "(+ 1 2 3)" 
 
 # --next
 
@@ -37,6 +38,7 @@
 # --next
 
 # --cs bin/main.cs
+# --cmd bin/main.cs/bin/Main.exe -e "(+ 1 2 3)"
 
 # --next
 
