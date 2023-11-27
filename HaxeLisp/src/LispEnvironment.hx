@@ -402,7 +402,7 @@ class LispEnvironment {
                 // {
                 //     help += ((LispScope)module.Value).GetFunctionsHelpFormated(item.ToStr(), select);
                 // }
-                var modules = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get(Modules));  //cast(scope.GlobalScope.get(Modules), LispVariant);
+                var modules = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get_scope(Modules));  //cast(scope.GlobalScope.get_scope(Modules), LispVariant);
                 if (modules!=null) 
                 {
                     for (module in modules.ListValue)
@@ -477,7 +477,7 @@ class LispEnvironment {
 
     private static function GetTracePrint(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        var buffer = cast(scope.get(Tracebuffer), String);
+        var buffer = cast(scope.get_value(Tracebuffer), String);
         return LispVariant.forValue(buffer/*.ToStr()*/);
     }
     
@@ -646,7 +646,7 @@ class LispEnvironment {
                 result = Lisp.Eval(code, importScope, fileName);
 
                 // add new module to modules scope
-                (cast(scope, LispScope).GlobalScope.get(Modules)).Add(fileName, importScope);
+                (cast(scope, LispScope).GlobalScope.get_scope(Modules)).set(fileName, importScope);
 
                 scope.PopNextScope();
             }
@@ -1257,14 +1257,14 @@ class LispEnvironment {
 
     public static function ArgsCountFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        //return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue.length; });
-        return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (LispUtils.CastDynamicToLispVariant(scope.get(ArgsMeta))).ListValue.length; });
+        //return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (cast(scope.get_value(ArgsMeta), LispVariant)).ListValue.length; });
+        return FuelFuncWrapper0/*<int>*/(args, scope, "argscount", function () { return (LispUtils.CastDynamicToLispVariant(scope.get_value(ArgsMeta))).ListValue.length; });
     }
 
     public static function ArgsFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-//        return FuelFuncWrapper0(args, scope, "args", function () { return (cast(scope.get(ArgsMeta), LispVariant)).ListValue/*.ToArray()*/; });
-        return FuelFuncWrapper0(args, scope, "args", function () { return (LispUtils.CastDynamicToLispVariant(scope.get(ArgsMeta)).ListValue/*.ToArray()*/); });
+//        return FuelFuncWrapper0(args, scope, "args", function () { return (cast(scope.get_value(ArgsMeta), LispVariant)).ListValue/*.ToArray()*/; });
+        return FuelFuncWrapper0(args, scope, "args", function () { return (LispUtils.CastDynamicToLispVariant(scope.get_value(ArgsMeta)).ListValue/*.ToArray()*/); });
     }
 
     public static function ArgFcn(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -1272,7 +1272,7 @@ class LispEnvironment {
         CheckArgs("arg", 1, args, scope);
 
         var index = cast(args[0], LispVariant).IntValue;
-        var array = LispUtils.CastDynamicToLispVariant(scope.get(ArgsMeta)).ListValue;  //cast(scope.get(ArgsMeta), LispVariant).ListValue/*.ToArray()*/;
+        var array = LispUtils.CastDynamicToLispVariant(scope.get_value(ArgsMeta)).ListValue;  //cast(scope.get_value(_valueArgsMeta), LispVariant).ListValue/*.ToArray()*/;
         if (index >= 0 && index < array.length)
         {
             return LispVariant.forValue(array[index]);
@@ -1827,7 +1827,7 @@ class LispEnvironment {
     private static function FindFunctionInModules(funcName:String, scope:LispScope, /*out object*/ foundValue:Ref<Dynamic>):Bool
     {
         foundValue.value = null;
-        var importedModules = LispUtils.CastDynamicToLispScope(scope.GlobalScope.get(Modules));  ///*(LispScope)*/cast(scope.GlobalScope.get(Modules), LispScope);
+        var importedModules = LispUtils.CastDynamicToLispScope(scope.GlobalScope.get_scope(Modules));  ///*(LispScope)*/cast(scope.GlobalScope.get_scope(Modules), LispScope);
         if (importedModules != null)
         {
             for (/*KeyValuePair<string, object>*/ kv in importedModules)
@@ -1860,12 +1860,12 @@ class LispEnvironment {
 
         UpdateDocumentationInformationAtScope(args, scope);
 
-        var fn = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get(Fn)).FunctionValue;  //(cast(scope.GlobalScope.get(Fn), LispVariant)).FunctionValue;
+        var fn = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get_value(Fn)).FunctionValue;  //(cast(scope.GlobalScope.get_value(Fn), LispVariant)).FunctionValue;
         scope.UserData = EvalArgIfNeeded(args[0], scope).ToStr();
         var resultingFcn = fn.Function([args[1], args[2]], scope);  //(new[] { args[1], args[2] }, scope);
         scope.UserData = null;
 
-        var defFcn = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get(name)).FunctionValue;  //(cast(scope.GlobalScope.get(name), LispVariant)).FunctionValue;
+        var defFcn = LispUtils.CastDynamicToLispVariant(scope.GlobalScope.get_value(name)).FunctionValue;  //(cast(scope.GlobalScope.get_value(name), LispVariant)).FunctionValue;
         return defFcn.Function([args[0], resultingFcn], scope);  //(new[] { args[0], resultingFcn }, scope);
     }
 
@@ -2024,7 +2024,7 @@ class LispEnvironment {
     {
         CheckArgs(DefineMacroEval, 3, args, scope);
 
-        var macros = LispUtils.CastDynamicToLispScope(scope.GlobalScope.get(Macros));  //cast(scope.GlobalScope.get(Macros), LispScope);
+        var macros = LispUtils.CastDynamicToLispScope(scope.GlobalScope.get_scope(Macros));  //cast(scope.GlobalScope.get_value(Macros), LispScope);
         if (macros != null)
         {
             macros.set(args[0].ToStr(), new LispMacroRuntimeEvaluate(cast(args[1], LispVariant).ListValue, cast(args[2], LispVariant).ListValue));
@@ -2040,7 +2040,7 @@ class LispEnvironment {
     {
         CheckArgs(DefineMacroExpand, 3, args, scope);
 
-        var macros = cast(scope.GlobalScope.get(Macros), LispScope);
+        var macros = cast(scope.GlobalScope.get_scope(Macros), LispScope);
         if (macros != null)
         {
             // allow macros in macros --> recursive call for ExpandMacros()

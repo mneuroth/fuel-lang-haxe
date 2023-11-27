@@ -175,7 +175,7 @@ using LispDebugger;
 
                 return EvalAst(expression, scope);
             }
-            
+
             // expand macro at compile time: --> nothing to do at run time !
             // code not needed, because code for compile time macros will be removed in ExpandMacro phase
             //if (macro is LispMacroCompileTimeExpand)
@@ -285,7 +285,7 @@ using LispDebugger;
         var functionName = functionVal.ToStr();
         if (globalScope != null && globalScope.ContainsKey(functionName))
         {
-            var fcn = LispUtils.CastDynamicToLispVariant(globalScope.get(functionName)).FunctionValue;  //cast(globalScope.get(functionName), LispVariant).FunctionValue;
+            var fcn = LispUtils.CastDynamicToLispVariant(globalScope.get_value(functionName)).FunctionValue;  //cast(globalScope.get_value(functionName), LispVariant).FunctionValue;
             if (fcn.IsEvalInExpand)
             {
                 var args = astAsList.copy();  //new Array<Dynamic>(astAsList);  //List<object>(astAsList);
@@ -377,7 +377,7 @@ using LispDebugger;
             // is the current element the symbol which should be replaced? --> Yes
             if (symbol.SymbolCompare(elem))
             {
-                var l:Array<Dynamic> = symbolValue /*as IEnumerable<object>*/;  //IEnumerable<object>
+                var l:Array<Dynamic> = symbolValue.IsList ? symbolValue : null/*as IEnumerable<object>*/;  //IEnumerable<object>
                 if (l != null && macroArgsReplace)
                 {
                     ret.AddRange(l);

@@ -148,6 +148,28 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         return CurrentToken != null ? CurrentToken.LineNo : -1;
     }
     
+    public function get_value(name:String):LispVariant
+    {
+        #if cs
+        var mm:haxe.ds.StringMap<Dynamic> = this;
+        var ret:LispVariant = mm.get(name);
+        #else
+        var ret = get(name);
+        #end
+        return ret;        
+    }
+
+    public function get_scope(name:String):LispScope
+    {
+        #if cs
+        var mm:haxe.ds.StringMap<Dynamic> = this;
+        var ret:LispScope = mm.get(name);
+        #else
+        var ret = get(name);
+        #end
+        return ret;        
+    }
+    
     public function new() {
         super();
     }
