@@ -36,3 +36,9 @@
 # --cpp bin/maintest.cpp
 # --library utest
 # --cmd bin/maintest.cpp/Maintest
+
+# --next
+
+# --cs bin/maintest.cs
+# --library utest
+# --cmd bin/maintest.cs/bin/MainTest.exe
