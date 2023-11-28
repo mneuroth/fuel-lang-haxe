@@ -377,7 +377,7 @@ using LispDebugger;
             // is the current element the symbol which should be replaced? --> Yes
             if (symbol.SymbolCompare(elem))
             {
-                var l:Array<Dynamic> = symbolValue.IsList ? symbolValue : null/*as IEnumerable<object>*/;  //IEnumerable<object>
+                var l:Array<Dynamic> = symbolValue is Array? symbolValue : (symbolValue.IsList ? symbolValue : null)/*as IEnumerable<object>*/;  //IEnumerable<object>
                 if (l != null && macroArgsReplace)
                 {
                     ret.AddRange(l);
