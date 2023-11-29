@@ -202,7 +202,7 @@ using LispDebugger;
         // trace current function (if tracing is enabled)
         if (scope.GlobalScope.Tracing)
         {
-            scope.GlobalScope.Output.WriteLine('--> ${astAsList.First()}');
+            scope.GlobalScope.Output.WriteLine('--> ${astAsList.First().ToStr()}');
         }
 
         // evaluate arguments, but allow recursive lists

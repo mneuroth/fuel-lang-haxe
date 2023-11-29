@@ -41,30 +41,44 @@ class TextWriter {
     }
 
     public function WriteLine(text:String="", ?a1, ?a2, ?a3) {
-#if sys
-        //File.write(text);
-        // var temp = text;
-        // if( a1 is null ) {
-        //     temp += a1;
-        // }
-        Sys.println(text);
-#else
-        trace(text);
-#end
-        if (Text != null) {
+        if (Text != null) 
+        {
             Text.value += text + "\n";
         }
+#if sys
+        else 
+        {
+            //File.write(text);
+            // var temp = text;
+            // if( a1 is null ) {
+            //     temp += a1;
+            // }
+            Sys.println(text);
+        }
+#else
+        else 
+        {
+            trace(text);
+        }
+#end
     }
     public function Write(text:String="", ?a1, ?a2, ?a3) {
-#if sys
-        //File.write("stdout").writeString(text);
-        Sys.print(text);
-#else
-        trace(text);
-#end
-        if (Text != null) {
+        if (Text != null) 
+        {
             Text.value += text;
         }
+#if sys
+        else
+        {
+            //File.write("stdout").writeString(text);
+            Sys.print(text);
+        }
+#else
+        else
+        {
+            trace(text);
+        }
+#end
     }
     public function Flush():Void {
 #if sys
@@ -414,7 +428,7 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
         Output.WriteLine("</head>");
         Output.WriteLine("<h2>Documentation of builtin functions of the fuel language:</h2>");
         Output.WriteLine("<body>");
-        Dump(function (v:LispVariant):Bool { return v.IsFunction && v.FunctionValue.IsBuiltIn; }, /*sort:*/ true, /*format:*/function (v:LispVariant) { return v.FunctionValue.HtmlFormatedDoc; });
+        Dump(function (v:LispVariant):Bool { return v.IsFunction && v.FunctionValue.IsBuiltIn; }, null, /*sort:*/ true, false, /*format:*/function (v:LispVariant) { return v.FunctionValue.HtmlFormatedDoc; });
         Output.WriteLine("</body>");
         Output.WriteLine("</html>");
     }
@@ -504,12 +518,11 @@ class LispScope extends haxe.ds.StringMap<Dynamic>/*Map<String,Dynamic>*/ {
             // }
             // temp_keys = temp_keys.sort( funtion(x, y) -> x )
         }
-        
         for (key in keys())
         {
             if (!key.startsWith(LispEnvironment.MetaTag))
             {
-                var value:LispVariant = LispUtils.CastDynamicToLispVariant(get(key));  //cast(get(key), LispVariant);  //(LispVariant)this[key];
+                var value:LispVariant = LispUtils.CastDynamicToLispVariant(get_value(key));  //cast(get(key), LispVariant);  //(LispVariant)this[key];
                 if (select(value))
                 {
                     if (format != null)
