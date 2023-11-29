@@ -5,20 +5,20 @@
 
 --interp
 
---next
+# --next
 
---js bin/fuel.js
---cmd node bin/fuel.js
+# --js bin/fuel.js
+# --cmd node bin/fuel.js
 
---next 
+# --next 
 
---hl bin/fuel.hl
---cmd hl bin/fuel.hl -e "(+ 1 2 3)" 
+# --hl bin/fuel.hl
+# --cmd hl bin/fuel.hl -e "(+ 1 2 3)" 
 
---next
+# --next
 
---neko bin/fuel.n
---cmd neko bin/fuel.n -e "(+ 1 2 3)" 
+# --neko bin/fuel.n
+# --cmd neko bin/fuel.n -e "(+ 1 2 3)" 
 
 --next
 
