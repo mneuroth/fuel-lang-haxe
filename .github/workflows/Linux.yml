@@ -48,6 +48,7 @@ jobs:
           ls -lrt bin/fuel.java
           ls -lrt bin/fuel.cpp
           ls -lrt bin/fuel.cs
+          ls -lrt bin/fuel.cs/bin
 
       # Test the project
       - name: Test the project
