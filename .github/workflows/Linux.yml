@@ -44,7 +44,7 @@ jobs:
           haxe build.hxml
           ls -lrt
           ls -lrt src
-          ls -lrt src/bin
+          ls -lrt bin
 
       # Test the project
       - name: Test the project
