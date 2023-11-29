@@ -1,6 +1,6 @@
 --class-path src
 --class-path tests
---main MainTest
+--main FuelTest
 
 --each
 
@@ -9,36 +9,36 @@
 
 # --next
 
-# --js bin/maintest.js
+# --js bin/fueltest.js
 # --library utest
-# --cmd node bin/maintest.js
+# --cmd node bin/fueltest.js
 
 # --next
 
-# --neko bin/maintest.n
+# --neko bin/fueltest.n
 # --library utest
-# --cmd neko bin/maintest.n 
+# --cmd neko bin/fueltest.n 
 
 # --next
 
-# --python bin/maintest.py
+# --python bin/fueltest.py
 # --library utest
-# --cmd python3 bin/maintest.py
+# --cmd python3 bin/fueltest.py
 
 # --next
 
-# --java bin/maintest.java
+# --java bin/fueltest.java
 # --library utest
-# --cmd java -jar bin/maintest.java/Maintest.jar
+# --cmd java -jar bin/fueltest.java/fueltest.jar
 
 # --next
 
-# --cpp bin/maintest.cpp
+# --cpp bin/fueltest.cpp
 # --library utest
-# --cmd bin/maintest.cpp/Maintest
+# --cmd bin/fueltest.cpp/fueltest
 
 # --next
 
-# --cs bin/maintest.cs
+# --cs bin/fueltest.cs
 # --library utest
-# --cmd bin/maintest.cs/bin/MainTest.exe
+# --cmd bin/fueltest.cs/bin/fueltest.exe

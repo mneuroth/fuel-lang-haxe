@@ -33,6 +33,7 @@ jobs:
           haxelib install utest
           haxelib install hxjava
           haxelib install hxcpp
+          haxelib install hxcs
           haxe
           haxe --version
 
@@ -41,6 +42,8 @@ jobs:
         run: |
           cd HaxeLisp
           haxe build.hxml
+          ls -lrt
+          ls -lrt bin
 
       # Test the project
       - name: Test the project
@@ -49,6 +52,6 @@ jobs:
           # haxe unittest.hxml
           # or this:
           cd HaxeLisp/src
-          haxe --interp --main Main
+          haxe --interp --main Fuel
           echo "====="
-          haxe --interp --class-path ../tests --library utest --main MainTest
+          haxe --interp --class-path ../tests --library utest --main FuelTest
