@@ -43,7 +43,7 @@ jobs:
           cd HaxeLisp
           haxe build.hxml
           ls -lrt
-          ls -lrt bin
+          ls -lrt src/bin
 
       # Test the project
       - name: Test the project
