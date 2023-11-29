@@ -1,46 +1,47 @@
 --class-path src
---main Main
+--main Fuel
 
 --each
 
 --interp
 
---next
+# --next
 
---js bin/main.js
---cmd node bin/main.js
+# --js bin/fuel.js
+# --cmd node bin/fuel.js
 
 # --next 
 
-# --hl bin/main.hl
-# --cmd hl bin/main.hl -e "(+ 1 2 3)" 
+# --hl bin/fuel.hl
+# --cmd hl bin/fuel.hl -e "(+ 1 2 3)" 
 
 # --next
 
-# --neko bin/main.n
-# --cmd neko bin/main.n -e "(+ 1 2 3)" 
+# --neko bin/fuel.n
+# --cmd neko bin/fuel.n -e "(+ 1 2 3)" 
 
 # --next
 
-# --python bin/main.py
-# --cmd python3 bin/main.py -e "(+ 1 2 3)"
+# --python bin/fuel.py
+# --cmd python3 bin/fuel.py -e "(+ 1 2 3)"
 
 # --next
 
-# --java bin/main.java
-# --cmd java -jar bin/main.java/Main.jar -e "(+ 1 2 3)"
+# --java bin/fuel.java
+# --cmd java -jar bin/fuel.java/fuel.jar -e "(+ 1 2 3)"
 
 # --next
 
-# --cpp bin/main.cpp
-# --cmd bin/main.cpp/Main -e "(+ 1 2 3)"
+# --cpp bin/fuel.cpp
+# --cmd bin/fuel.cpp/fuel -e "(+ 1 2 3)"
 
 # --next
 
-# --cs bin/main.cs
-# --cmd bin/main.cs/bin/Main.exe -e "(+ 1 2 3)"
+# --cs bin/fuel.cs
+# #--cmd bin/fuel.cs/bin/fuel.exe -e "(+ 1 2 3)"
+# --cmd bin/fuel.cs/bin/fuel.exe -e "(do (defn f (x) (+ x x)) (println (+ 42 5 (* 5 6) (f 7))) (println \"done.\"))"
 
 # --next
 
-# --lua bin/main.lua
-# --cmd lua bin/main.lua -e "(+ 1 2 3)"
+# --lua bin/fuel.lua
+# --cmd lua bin/fuel.lua -e "(+ 1 2 3)"

@@ -25,8 +25,6 @@
 
 package;
 
-import haxe.Exception;
-
 import LispUtils;
 import LispVariant;
 
@@ -34,8 +32,8 @@ class Lisp {
     public /*const*/static var ProgramName = "fuel";
 
     public /*const*/static var Name = "FUEL(isp)";
-    public /*const*/static var Version = "v0.99.4";
-    public /*const*/static var Date = "11.11.2023";
+    public /*const*/static var Version = "v0.99.5";
+    public /*const*/static var Date = "29.11.2023";
     public /*const*/static var Copyright = "(C) by Michael Neuroth";
 
     public /*const*/static var Platform = "Haxe";  //".NET/C#";
