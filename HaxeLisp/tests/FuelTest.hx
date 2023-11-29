@@ -26,7 +26,7 @@
 import utest.Runner;
 import utest.ui.Report;
 
-class MainTest {
+class FuelTest {
     static function main() {
       var runner = new Runner();
       runner.addCase(new LispTokenTest());
