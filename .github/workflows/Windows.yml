@@ -52,6 +52,8 @@ jobs:
           dir bin\fuel.cpp
           dir bin\fuel.cs
           dir bin\fuel.cs\bin
+          ./bin/fuel.cpp/Fuel -e "(+ 1 2 3)" -t
+          ./bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)" -t
 
       # Test the project
       - name: Test the project
