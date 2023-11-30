@@ -23,22 +23,22 @@
 --next
 
 --python bin/fuel.py
---cmd python3 bin/fuel.py -e "(+ 1 2 3)"
+#--cmd python3 bin/fuel.py -e "(+ 1 2 3)" -t
 
 --next
 
 --java bin/fuel.java
---cmd java -jar bin/fuel.java/Fuel.jar -e "(+ 1 2 3)"
+# --cmd java -jar bin/fuel.java/Fuel.jar -e "(+ 1 2 3)"
 
 --next
 
 --cpp bin/fuel.cpp
---cmd bin/fuel.cpp/Fuel -e "(+ 1 2 3)"
+# --cmd bin/fuel.cpp/Fuel -e "(+ 1 2 3)"
 
 --next
 
 --cs bin/fuel.cs
---cmd bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)"
+# --cmd bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)"
 
 # --next
 
