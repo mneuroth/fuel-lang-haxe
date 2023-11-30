@@ -335,13 +335,15 @@ using LispDebugger;
 
     private static function ConvertLispVariantListToListIfNeeded(something:Dynamic):Dynamic
     {
-        var variant:LispVariant = something/* as LispVariant*/;
-        
-        if (variant != null && variant.IsList)
+        if (something is LispVariant)
         {
-            return variant.ListRef;
+            var variant:LispVariant = something/* as LispVariant*/;
+            
+            if (variant != null && variant.IsList)
+            {
+                return variant.ListRef;
+            }
         }
-
         return something;
     }
 
