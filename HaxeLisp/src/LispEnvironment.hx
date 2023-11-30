@@ -1832,8 +1832,9 @@ class LispEnvironment {
         {
             for (/*KeyValuePair<string, object>*/ kv in importedModules)
             {
-                var module = /*(LispScope)*/kv.Value;
-                var val:Dynamic = new Ref<Dynamic>(null);  //object
+                //var module = /*(LispScope)*/kv.Value;
+                var module:LispScope = kv;
+                var val = new Ref<Dynamic>(null);  //object
                 if (module.TryGetValue(funcName, /*out*/ val))
                 {
                     foundValue.value = val.value;
