@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.3.1
+          haxe-version: 4.3.3
 
       # Install Haxe
       - name: Install Haxe compiler
@@ -45,13 +45,13 @@ jobs:
         run: |
           cd HaxeLisp
           haxe build.hxml
-          ls -lrt
-          ls -lrt src
-          ls -lrt bin
-          ls -lrt bin/fuel.java
-          ls -lrt bin/fuel.cpp
-          ls -lrt bin/fuel.cs
-          ls -lrt bin/fuel.cs/bin
+          dir
+          dir src
+          dir bin
+          dir bin\fuel.java
+          dir bin\fuel.cpp
+          dir bin\fuel.cs
+          dir bin\fuel.cs\bin
 
       # Test the project
       - name: Test the project
@@ -59,7 +59,8 @@ jobs:
           # use this command:
           # haxe unittest.hxml
           # or this:
-          cd HaxeLisp/src
+          cd HaxeLisp
+          cd src
           haxe --interp --main Fuel
           echo "====="
-          haxe --interp --class-path ../tests --library utest --main FuelTest
+          haxe --interp --class-path ..\tests --library utest --main FuelTest
