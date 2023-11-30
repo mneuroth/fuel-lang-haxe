@@ -50,7 +50,7 @@ jobs:
           ls -lrt bin/fuel.cpp
           ls -lrt bin/fuel.cs
           ls -lrt bin/fuel.cs/bin
-          ./bin/fuel.java/java -jar Fuel.jar -e "(+ 1 2 3)" -t
+          java -jar ./bin/fuel.java/java/Fuel.jar -e "(+ 1 2 3)" -t
           ./bin/fuel.cpp/Fuel -e "(+ 1 2 3)" -t
           ./bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)" -t
           python3 ./bin/fuel.py -e "(+ 1 2 3)" -t
