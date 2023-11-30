@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: CI_Windows
 
 # Controls when the workflow will run
 on:
@@ -25,15 +25,14 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-      - uses: haxeui/haxeui-core/.github/actions/haxe@master
+      - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.3.3
+          haxe-version: 4.3.1
 
       # Install Haxe
       - name: Install Haxe compiler
         run: |          
           haxe --version
-          haxelib setup ./haxe-libs
           haxelib install utest
           haxelib install hxjava
           haxelib install hxcpp
