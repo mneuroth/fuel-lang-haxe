@@ -63,9 +63,11 @@ function TryParseFloatOld(val:String):NumParserReturn<Float> {
 
 function TryParseInt(val:String):TupleReturn<Bool,Int> {
     try {
-        var result = haxe.Json.parse(val);
-        if(result is Int) {  // Type.typeof(result) == TInt
-            return new TupleReturn<Bool,Int>(true, result);
+        if (val.indexOf(".")<0) {
+            var result = haxe.Json.parse(val);
+            if(result is Int) {  // Type.typeof(result) == TInt
+                return new TupleReturn<Bool,Int>(true, result);
+            }
         }
     } catch(e:Exception) {
         //trace(e);

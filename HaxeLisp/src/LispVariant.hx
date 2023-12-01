@@ -183,7 +183,7 @@ function ToStringT(Type:LispType):String {
 
 function TypeOf(obj:Dynamic):LispType
 {
-    if (obj is Int)
+    if ((obj is Int) && Type.typeof(obj)==TInt/*&& !(obj is Float)*/)     // Remark: on some (compiler) platforms a float is also an int !
     {
         return LispType.Int;
     }
@@ -222,6 +222,31 @@ function TypeOf(obj:Dynamic):LispType
     return LispType.Undefined;
 }
 
+function TypeOfToken(token:LispToken):LispType
+{
+    if (token.Type==LispToken.LispTokenType.Int)
+    {
+        return LispType.Int;
+    }
+    else if (token.Type==LispToken.LispTokenType.Double)
+    {
+        return LispType.Double;
+    }
+    else if (token.Type==LispToken.LispTokenType.String)
+    {
+        return LispType.String;
+    }
+    else if (token.Type==LispToken.LispTokenType.True || token.Type==LispToken.LispTokenType.False)
+    {
+        return LispType.Bool;
+    }
+    else 
+    {
+        return TypeOf(token.Value);
+    }
+    return LispType.Undefined;
+}
+
 class LispVariant {
     public static var Tolerance:Float = 1e-8;
 
@@ -255,7 +280,7 @@ class LispVariant {
         return newObj;
     }
     public static function forToken(token:LispToken, /*object*/ unQuoted:LispUnQuoteModus=None):LispVariant {
-        var newObj = new LispVariant(TypeOf(token.Value), token.Value);
+        var newObj = new LispVariant(/*TypeOf(token.Value)*/TypeOfToken(token), token.Value);
         newObj.Token = token;
         if (token.Type == LispToken.LispTokenType.Nil)
         {
