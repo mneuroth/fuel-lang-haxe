@@ -510,7 +510,6 @@ class LispInterpreterTest extends utest.Test {
     (dotimes (c 10) (println c))");
         Assert.equals("10", res.ToStr());
     }
-
     public function testInterpreter67() {
         var res = Lisp.Eval("(do (def x 0.01) (typestr x))");
         Assert.equals("Double", res.ToStr());
@@ -519,6 +518,18 @@ class LispInterpreterTest extends utest.Test {
         var res = Lisp.Eval("(do (def x 0) (typestr x))");
         Assert.equals("Int", res.ToStr());
         var res = Lisp.Eval("(do (def x 0.0) (typestr x))");
+        Assert.equals("Double", res.ToStr());
+    }
+    public function testInterpreter68() {
+        var res = Lisp.Eval("(do (typestr (+ 1.0 1)))");
+        Assert.equals("Double", res.ToStr());
+        var res = Lisp.Eval("(do (typestr (- 1.0 1)))");
+        Assert.equals("Double", res.ToStr());
+        var res = Lisp.Eval("(do (typestr (* 1.0 1)))");
+        Assert.equals("Double", res.ToStr());
+        var res = Lisp.Eval("(do (typestr (/ 1.0 1)))");
+        Assert.equals("Double", res.ToStr());
+        var res = Lisp.Eval("(do (typestr (% 1.0 1)))");
         Assert.equals("Double", res.ToStr());
     }
 }

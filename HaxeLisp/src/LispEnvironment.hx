@@ -668,7 +668,7 @@ class LispEnvironment {
 
     public static function GetType(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-        return FuelFuncWrapper1/*<LispVariant, int>*/(args, scope, "type", function (arg1:LispVariant):Int { return /*(int)*/LispVariant.ToTypeId(arg1.Type); });
+        return FuelFuncWrapper1/*<LispVariant, int>*/(args, scope, "type", function (arg1:LispVariant):Int { return /*(int)*/LispVariant.ToTypeId(arg1.ValueType); });
     }
 
     public static function GetTypeString(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -701,7 +701,6 @@ class LispEnvironment {
         //Array.Copy(args, 1, valueArgs, 0, args.Count()-1);
         for(i in 1...args.length) {
             valueArgs[i-1] = args[i].ToStr();
-            //trace(i);
         }
         try
         {
@@ -1457,14 +1456,14 @@ class LispEnvironment {
         {
             if (result == null)
             {
-                result = LispVariant.forValue(elem.Value);
+                result = LispVariant.forValue(elem/*.Value*/);
             }
             else
             {
                 result = op(result, elem);
             }
         }
-        return LispVariant.forValue(result.Value);
+        return LispVariant.forValue(result/*.Value*/);
     }
 
     public static function quote_form(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
@@ -1917,7 +1916,7 @@ class LispEnvironment {
         var token = GetTokenBeforeDefn(args[0], scope);
         if ((token != null) && (token.Type == LispTokenType.Comment))
         {
-            documentation = token.Value.ToStr();
+            documentation = token/*.Value*/.ToStr();
         }
         var signature = GetSignatureFromArgs(args[1], args[0].ToStr());
         scope.UserDoc = new LispUtils.TupleReturn<String, String>(signature, documentation);
