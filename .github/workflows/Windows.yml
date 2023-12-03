@@ -99,7 +99,7 @@ jobs:
           powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip
           dir
           powershell Compress-7Zip ".\bin\fuel.cpp\Fuel" -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip
-          dor
+          dir
           powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip
           dir
           powershell Compress-7Zip "\bin\fuel.py" -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip          
