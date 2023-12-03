@@ -7,6 +7,8 @@ on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
   pull_request:
     branches: [ "main" ]
 
@@ -16,10 +18,43 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
+  create_release:
+
+    name: Prepare release
+    runs-on: windows-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+    - name: Checkout code
+      if: contains(github.ref, 'release')
+      uses: actions/checkout@v3
+    - name: Create Release
+      if: contains(github.ref, 'release')
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Output Release URL File
+      if: contains(github.ref, 'release')
+      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+    - name: Save Release URL File for publish
+      if: contains(github.ref, 'release')
+      uses: actions/upload-artifact@v1
+      with:
+        name: release_url
+        path: release_url.txt
+
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
     runs-on: windows-latest
+    needs: create_release
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -56,6 +91,8 @@ jobs:
           ./bin/fuel.cpp/Fuel -e "(+ 1 2 3)" -t
           ./bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)" -t
           python3 ./bin/fuel.py -e "(+ 1 2 3)" -t
+          zip fuel_binaries.zip ./bin/fuel.java/Fuel.jar ./bin/fuel.cpp/Fuel ./bin/fuel.cs/bin/Fuel.exe ./bin/fuel.py
+          unzip -v fuel_binaries.zip
 
       # Test the project
       - name: Test the project
@@ -68,3 +105,15 @@ jobs:
           haxe --interp --main Fuel
           echo "====="
           haxe --interp --class-path ..\tests --library utest --main FuelTest
+
+      - name: Upload Release Asset
+        if: contains(github.ref, 'release')
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: HaxeLisp/fuel_binaries.zip
+          asset_name: fuel_binaries.zip
+          asset_content_type: application/zip
