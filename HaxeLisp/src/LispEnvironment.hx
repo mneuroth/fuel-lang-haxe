@@ -205,7 +205,7 @@ class LispEnvironment {
         scope.set("tickcount", CreateFunction(CurrentTickCount, "(tickcount)", "Returns the current tick count in milliseconds, can be used to measure times."));
         scope.set("sleep", CreateFunction(Sleep, "(sleep time-in-ms)", "Sleeps the given number of milliseconds."));
         scope.set("date-time", CreateFunction(Datetime, "(date-time)", "Returns a list with informations about the current date and time: (year month day hours minutes seconds)."));
-        scope.set("platform", CreateFunction(Platform, "(platform)", "Returns a list with informations about the current platform: (operating_system runtime_environment)."));
+        scope.set("platform", CreateFunction(Platform, "(platform)", "Returns a list with informations about the current platform: (operating_system runtime_environment register_size)."));
 
         // interpreter functions
         scope.set("type", CreateFunction(GetType, "(type expr)", "Returns the type id of the value of the expression."));
@@ -560,8 +560,8 @@ class LispEnvironment {
         //var is64Bit = IntPtr.Size == 8;
         var value = new Array<Dynamic>();
         value.push(LispVariant.forValue(osString));
-        value.push(LispVariant.forValue("haxe"));  //".NET"
-        value.push(LispVariant.forValue("unknown"));  // /* is64Bit ? "64bit" : "32bit"*//*, Environment.Is64BitProcess*/ /*, Environment.OSVersion.ToStr(), Environment.Version.ToStr()*/ };
+        value.push(LispVariant.forValue('haxe-${LispUtils.GetTargetLanguage()}'));  //".NET"
+        value.push(LispVariant.forValue("unknown-register-length"));  // /* is64Bit ? "64bit" : "32bit"*//*, Environment.Is64BitProcess*/ /*, Environment.OSVersion.ToStr(), Environment.Version.ToStr()*/ };
         return LispVariant.forValue(value);
     }
 

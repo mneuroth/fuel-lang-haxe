@@ -374,4 +374,42 @@ function CastDynamicToLispScope(value:Dynamic):LispScope
     var scope:LispScope = value;
     return scope;
 }
-    
+
+function GetTargetLanguage():String
+{
+    var value = "unknown";
+#if cpp
+    value = "C++";
+#end
+#if cs
+    value = "C#";
+#end
+#if eval
+    value = "Interpreter";
+#end
+#if hl
+    value = "HashLink";
+#end
+#if java
+    value = "Hava";
+#end
+#if js
+    value = "JavaScript";
+#end
+#if lua
+    value = "Lua";
+#end
+#if neko
+    value = "Neko";
+#end
+#if pip
+    value = "PHP";
+#end
+#if python
+    value = "Python";
+#end
+#if swf
+    value = "SWF";
+#end
+    return value;
+}
