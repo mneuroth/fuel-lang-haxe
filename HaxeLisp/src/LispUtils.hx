@@ -391,7 +391,7 @@ function GetTargetLanguage():String
     value = "HashLink";
 #end
 #if java
-    value = "Hava";
+    value = "Java";
 #end
 #if js
     value = "JavaScript";
