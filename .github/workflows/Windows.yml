@@ -97,16 +97,16 @@ jobs:
           python3 ./bin/fuel.py -e "(+ 1 2 3)" -t
           dir
           powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_binaries_java_0.99.4.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.java\Fuel.jar" -ArchiveFileName "fuel_all_binaries_0.99.4.zip" -Format Zip
           dir
           powershell Compress-7Zip ".\bin\fuel.cpp\Fuel.exe" -ArchiveFileName "fuel_binaries_cpp_0.99.4.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.cpp\Fuel.exe" -Append -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.cpp\Fuel.exe" -Append -ArchiveFileName "fuel_all_binaries_0.99.4.zip" -Format Zip
           dir
           powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -ArchiveFileName "fuel_binaries_cs_0.99.4.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -Append -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.cs\bin\Fuel.exe" -Append -ArchiveFileName "fuel_all_binaries_0.99.4.zip" -Format Zip
           dir
           powershell Compress-7Zip ".\bin\fuel.py" -ArchiveFileName "fuel_binaries_py_0.99.4.zip" -Format Zip
-          powershell Compress-7Zip ".\bin\fuel.py" -Append -ArchiveFileName "fuel_binaries_0.99.4.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.py" -Append -ArchiveFileName "fuel_all_binaries_0.99.4.zip" -Format Zip
           #zip fuel_binaries.zip ./bin/fuel.java/Fuel.jar ./bin/fuel.cpp/Fuel ./bin/fuel.cs/bin/Fuel.exe ./bin/fuel.py
           #unzip -v fuel_binaries.zip
           dir
@@ -131,6 +131,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: HaxeLisp/fuel_binaries.zip
-          asset_name: fuel_binaries.zip
+          asset_path: HaxeLisp/fuel_all_binaries_0.99.4.zip
+          asset_name: fuel_all_binaries_0.99.4.zip
           asset_content_type: application/zip
