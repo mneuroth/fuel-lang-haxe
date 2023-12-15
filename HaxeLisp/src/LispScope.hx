@@ -45,7 +45,7 @@ class TextWriter {
         {
             Text.value += text + "\n";
         }
-#if sys
+#if (node || sys)
         else 
         {
             //File.write(text);
@@ -67,7 +67,7 @@ class TextWriter {
         {
             Text.value += text;
         }
-#if sys
+#if (node || sys)
         else
         {
             //File.write("stdout").writeString(text);
@@ -81,7 +81,7 @@ class TextWriter {
 #end
     }
     public function Flush():Void {
-#if sys
+#if (node || sys)
         Sys.stdout().flush();
 #else
         trace("Flush() is not supported!");
@@ -94,7 +94,7 @@ class TextReader {
     }
 
     public function ReadLine():String {
-#if sys
+#if (node || sys)
         return Sys.stdin().readLine();
 #else
         trace("ReadLine() is not supported!");

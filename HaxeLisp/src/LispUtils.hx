@@ -303,7 +303,7 @@ function ReadFileOrEmptyString(fileName:String):String
     var exists:Bool = false;
     try
     {
-#if sys        
+#if (node || sys)        
         exists = sys.FileSystem.exists(fileName);
 #end        
     }
@@ -311,7 +311,7 @@ function ReadFileOrEmptyString(fileName:String):String
     {
         exists = false;
     }
-#if sys    
+#if (node || sys)
     var content = exists ? sys.io.File.getContent(fileName) : /*string.Empty*/"";
 #else
     var content = "(println \"WARNING: this platform does not support reading files!\")";
@@ -334,7 +334,7 @@ function DecorateWithBlock(code:String, /*out*/ offset:Ref<Int>):String
 
 function CurrentTickCount():Float
 {
-#if sys
+#if (node || sys)
     return Sys.cpuTime();
 #else
     return -1;
@@ -395,6 +395,9 @@ function GetTargetLanguage():String
 #end
 #if js
     value = "JavaScript";
+#if node
+    value += "-Node";
+#end
 #end
 #if lua
     value = "Lua";

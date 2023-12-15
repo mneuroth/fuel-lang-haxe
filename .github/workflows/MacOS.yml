@@ -35,6 +35,7 @@ jobs:
           haxelib install hxjava
           haxelib install hxcpp
           haxelib install hxcs
+          haxelib install hxnodejs
           haxe
           haxe --version
 

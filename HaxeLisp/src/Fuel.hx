@@ -305,11 +305,13 @@ class Fuel {
       //test_args.push("-l=asdf");
       //test_args.push("test.fuel");
       test_args.push("-e");
-      test_args.push("(+ 1 2 3)");
+      //test_args.push("(import fuellib) (defn isMyHaxe () (return -2)) (isMyHaxe) (isHaxe)");  //(+ 1 2 3)
+      //(def x 1.0) (setf x (+ x 1)) (typestr x)
+      test_args.push("(def x 1) (typestr x)");
       test_args.push("-t");
       args = test_args;
 #else      
-#if sys
+#if (node || sys)
       var org_args = Sys.args();
       args = org_args;
 #else

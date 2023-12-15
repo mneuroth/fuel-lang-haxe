@@ -486,7 +486,7 @@ class LispEnvironment {
         return FuelFuncWrapper0/*<int>*/(args, scope, "tickcount",
                     function ():Float
                         {
-#if sys
+#if (node || sys)
                             return Sys.cpuTime();
 #else
                             return -1;
@@ -498,7 +498,7 @@ class LispEnvironment {
     {
         return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, "sleep", function (arg1:LispVariant):LispVariant
         {
-#if sys
+#if (node || sys)
             Sys.sleep(arg1.ToDouble()*0.001);
 #end
             return new LispVariant(LispType.Undefined);
@@ -528,7 +528,7 @@ class LispEnvironment {
 
     private static function Platform(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
-#if sys
+#if (node || sys)
         var osString = Sys.systemName();
 #else
         var osString = "???";
@@ -582,7 +582,7 @@ class LispEnvironment {
 
         for (module in args)
         {
-#if sys            
+#if (node || sys)            
             var code = "";  //string.Empty;
             var orgModuleFileName = cast(module, LispVariant).StringValue;
             var fileName = orgModuleFileName;

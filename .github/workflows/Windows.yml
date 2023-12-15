@@ -72,6 +72,7 @@ jobs:
           haxelib install hxjava
           haxelib install hxcpp
           haxelib install hxcs
+          haxelib install hxnodejs
           haxe
           haxe --version
 
@@ -108,9 +109,16 @@ jobs:
           dir
           powershell Compress-7Zip ".\bin\fuel.py" -ArchiveFileName "fuel_binaries_py_0.99.6.zip" -Format Zip
           powershell Compress-7Zip ".\bin\fuel.py" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          powershell Compress-7Zip ".\bin\fuel.js" -ArchiveFileName "fuel_binaries_js_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel.js" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
+          powershell Compress-7Zip ".\bin\fuel_node.js" -ArchiveFileName "fuel_binaries_js_node_0.99.6.zip" -Format Zip
+          powershell Compress-7Zip ".\bin\fuel_node.js" -Append -ArchiveFileName "fuel_all_binaries_0.99.6.zip" -Format Zip
+          dir
           #zip fuel_binaries.zip ./bin/fuel.java/Fuel.jar ./bin/fuel.cpp/Fuel ./bin/fuel.cs/bin/Fuel.exe ./bin/fuel.py
           #unzip -v fuel_binaries.zip
-          dir
+          #dir
 
       # Test the project
       - name: Test the project
