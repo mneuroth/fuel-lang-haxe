@@ -314,7 +314,7 @@ function ReadFileOrEmptyString(fileName:String):String
 #if sys    
     var content = exists ? sys.io.File.getContent(fileName) : /*string.Empty*/"";
 #else
-    var content = "";
+    var content = "(println \"WARNING: this platform does not support reading files!\")";
 #end    
     return content;
 }
