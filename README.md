@@ -15,17 +15,17 @@ Benchmark results on Windows 11 Dell XPS 17 with i7-11800H CPU:
 |                    |                     |                    |
 | Fuel.exe           | Windows Haxe_C#     |  5.6               |
 | FuelCpp.exe        | Windows Haxe_C++    |  0.7               |
-| java -jar fuel.jar | Windows Haxe_java   |  3.6               |
-| python fuel.py     | Windows Haxe_py     | 95.4               |
-| neko fuel.n        | Windows Haxe_neko   | 30.0               |
+| java -jar fuel.jar | Windows Haxe_Java   |  3.6               |
+| python fuel.py     | Windows Haxe_Python | 95.4               |
+| neko fuel.n        | Windows Haxe_Neko   | 30.0               |
 |                    |                     |                    |
 | Fuel.exe           | WSL Haxe_C#         |  5.7               |
 | FuelCpp.exe        | WSL Haxe_C++        |  1.3               |
-| java -jar fuel.jar | WSL Haxe_java       |  5.1               |
-| node fuel.js       | WSL Haxe_javascript |  1.6               |
-| python fuel.py     | WSL Haxe_py         | 87.5               |
-| neko fuel.n        | WSL Haxe_neko       | 41.7               |
-| HashLink           | WSL Haxe_hl         |  6.4               |
+| java -jar fuel.jar | WSL Haxe_Java       |  5.1               |
+| node fuel.js       | WSL Haxe_JavaScript |  1.6               |
+| python fuel.py     | WSL Haxe_Python     | 87.5               |
+| neko fuel.n        | WSL Haxe_Neko       | 41.7               |
+| hl fuel.hl         | WSL Haxe_HashLink   |  6.4               |
 
 
 License

@@ -49,7 +49,7 @@
 
 --cs bin/fuel.cs
 # --cmd bin/fuel.cs/bin/Fuel.exe -e "(float 1.234)" -t
---cmd bin/fuel.cs/bin/Fuel.exe -e "(def x 1.0) (typestr x)" -t
+# --cmd bin/fuel.cs/bin/Fuel.exe -e "(def x 1.0) (typestr x)" -t
 # --cmd bin/fuel.cs/bin/Fuel.exe -e "(+ 1 2 3)"
 
 # --next
