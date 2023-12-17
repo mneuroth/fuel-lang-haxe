@@ -241,6 +241,13 @@ class LispEnvironment {
         scope.set("mod", CreateFunction(Modulo, "(mod expr1 expr2)", "Returns value of modulo operation between expr1 and expr2"));
         scope.set("%", CreateFunction(Modulo, "(% expr1 expr2)", "see: mod"));
 
+        scope.set("<<", CreateFunction(LeftShift, "(<< expr1 expr2)", "Integer left shift. Returns integer expression1 left shifted for expression2 binary digits."));
+        scope.set(">>", CreateFunction(RightShift, "(>> expr1 expr2)", "Integer right shift. Returns integer expression1 right shifted for expression2 binary digits."));
+        scope.set("|", CreateFunction(BinaryOr, "(| expr1 expr2)", "Binary or for integer numbers (bitwise or)."));
+        scope.set("&", CreateFunction(BinaryAnd, "(& expr1 expr2)", "Binary and for integer numbers (bitwise and)."));
+        scope.set("^", CreateFunction(BinaryXOr, "(^ expr1 expr2)", "Binary xor for integer numbers (bitwise xor)."));
+        scope.set("~", CreateFunction(BinaryNot, "(~ expr1)", "Binary not for integer numbers (bitwise not)."));
+
         scope.set("<", CreateFunction(Less, "(< expr1 expr2)", "Returns #t if value of expression1 is smaller than value of expression2 and returns #f otherwiese."));
         scope.set(">", CreateFunction(Greater, "(> expr1 expr2)", "Returns #t if value of expression1 is larger than value of expression2 and returns #f otherwiese."));
         scope.set("<=", CreateFunction(LessEqual, "(<= expr1 expr2)", "Returns #t if value of expression1 is equal or smaller than value of expression2 and returns #f otherwiese."));
@@ -293,7 +300,9 @@ class LispEnvironment {
 
         // special forms
         scope.set(And, CreateFunction(and_form, "(and expr1 expr2 ...)", "And operator with short cut.", true, true));
+        scope.set("&&", CreateFunction(and_form, "(&& expr1 expr2 ...)", "See: and", true, true));
         scope.set(Or, CreateFunction(or_form, "(or expr1 expr2 ...)", "Or operator with short cut.", true, true));
+        scope.set("||", CreateFunction(or_form, "(|| expr1 expr2 ...)", "See: or", true, true));
         scope.set(Def, CreateFunction(def_form, "(def symbol expression)", "Creates a new variable with name of symbol in current scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
         scope.set(Gdef, CreateFunction(gdef_form, "(gdef symbol expression)", "Creates a new variable with name of symbol in global scope. Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
         scope.set(Setf, CreateFunction(setf_form, "(setf symbol expression)", "Evaluates expression and sets the value of the expression as the value of the symbol.", true, true));
@@ -936,6 +945,54 @@ class LispEnvironment {
     public static function Not(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
     {
         return FuelFuncWrapper1/*<LispVariant, bool>*/(args, scope, "not", function (arg1:LispVariant) { return LispVariant.forValue(!arg1.ToBool()); });
+    }
+
+    public static function LeftShift(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, "left-shift", function (arg1:LispVariant, arg2:LispVariant)
+        {
+            return new LispVariant(LispType.Int, arg1.ToInt() << arg2.ToInt());
+        });
+    }
+
+    public static function RightShift(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, "right-shift", function (arg1:LispVariant, arg2:LispVariant)
+        {
+            return new LispVariant(LispType.Int, arg1.IntValue >> arg2.IntValue);
+        });
+    }
+
+    public static function BinaryOr(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, "binary-or", function (arg1:LispVariant, arg2:LispVariant)
+        {
+            return new LispVariant(LispType.Int, arg1.IntValue | arg2.IntValue);
+        });
+    }
+
+    public static function BinaryAnd(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, "binary-and", function (arg1:LispVariant, arg2:LispVariant)
+        {
+            return new LispVariant(LispType.Int, arg1.IntValue & arg2.IntValue);
+        });
+    }
+
+    public static function BinaryXOr(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper2/*<LispVariant, LispVariant, LispVariant>*/(args, scope, "binary-xor", function (arg1:LispVariant, arg2:LispVariant)
+        {
+            return new LispVariant(LispType.Int, arg1.IntValue ^ arg2.IntValue);
+        });
+    }
+
+    public static function BinaryNot(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant
+    {
+        return FuelFuncWrapper1/*<LispVariant, LispVariant>*/(args, scope, "binary-not", function (arg1:LispVariant)
+        {
+            return new LispVariant(LispType.Int, ~arg1.IntValue);
+        });
     }
 
     public static function Less(/*object[]*/ args:Array<Dynamic>, scope:LispScope):LispVariant

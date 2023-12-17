@@ -179,6 +179,12 @@ class LispInterpreterTest extends utest.Test {
         ast = LispParser.Parse("(do (or #t #t))");
         result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(true, result.Value);
+        ast = LispParser.Parse("(do (|| #t #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        ast = LispParser.Parse("(do (|| #f #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
     }
     public function testInterpreter19() {
         var scope = LispEnvironment.CreateDefaultScope();
@@ -194,6 +200,12 @@ class LispInterpreterTest extends utest.Test {
         ast = LispParser.Parse("(do (and #t #t))");
         result = LispInterpreter.EvalAst(ast, scope);
         Assert.equals(true, result.Value);
+        ast = LispParser.Parse("(do (&& #t #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(true, result.Value);
+        ast = LispParser.Parse("(do (&& #f #t))");
+        result = LispInterpreter.EvalAst(ast, scope);
+        Assert.equals(false, result.Value);
     }
     public function testInterpreter20() {
         var scope = LispEnvironment.CreateDefaultScope();
@@ -531,5 +543,19 @@ class LispInterpreterTest extends utest.Test {
         Assert.equals("Double", res.ToStr());
         var res = Lisp.Eval("(do (typestr (% 1.0 1)))");
         Assert.equals("Double", res.ToStr());
+    }
+    public function testInterpreter69() {
+        var res = Lisp.Eval("(do (<< 4 2))");
+        Assert.equals("16", res.ToStr());
+        var res = Lisp.Eval("(do (>> 33 1))");
+        Assert.equals("16", res.ToStr());
+        var res = Lisp.Eval("(do (| 18 7))");
+        Assert.equals("23", res.ToStr());
+        var res = Lisp.Eval("(do (& 18 7))");
+        Assert.equals("2", res.ToStr());
+        var res = Lisp.Eval("(do (^ 13 6))");
+        Assert.equals("11", res.ToStr());
+        var res = Lisp.Eval("(do (~ 256))");
+        Assert.equals("-257", res.ToStr());
     }
 }
